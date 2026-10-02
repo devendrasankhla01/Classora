@@ -13,7 +13,7 @@ import { LoadingSteps } from '@/components/ui/feedback';
 import { SubjectGlyph } from '@/components/ui/SubjectGlyph';
 import { nowInstant } from '@/lib/date';
 import { createId } from '@/lib/id';
-import { findConflictFor, normalizeSignature } from '@/lib/schedule';
+import { diffWeeklyGrid, findConflictFor, normalizeSignature, type WeeklyGridChange } from '@/lib/schedule';
 import { extractTimetable, isAiProviderConfigured } from '@/services/timetable-ai/extractTimetable';
 import { formatBytes, validateUpload } from '@/services/timetable-ai/validation';
 import { ExtractionError } from '@/services/timetable-ai/types';
@@ -122,6 +122,8 @@ export function TimetableImportScreen() {
   const [timetable, setTimetable] = useState<ExtractedTimetable | null>(null);
   const [subjectsDraft, setSubjectsDraft] = useState<DraftSubject[]>([]);
   const [rowsDraft, setRowsDraft] = useState<DraftRow[]>([]);
+  /** Per-change decisions for the diff review: accept (default) or ignore. */
+  const [decisions, setDecisions] = useState<Record<string, 'accept' | 'ignore'>>({});
 
   const aiConfigured = isAiProviderConfigured();
   const signature = useMemo(
@@ -142,6 +144,40 @@ export function TimetableImportScreen() {
   );
 
   const activeRows = rowsDraft.filter((row) => row.include && !row.isBreak);
+
+  /**
+   * How the import changes the *weekly grid*. Computed from real slots, so the
+   * student can accept or ignore each change before anything is written.
+   */
+  const gridChanges = useMemo<WeeklyGridChange[]>(() => {
+    if (!timetable) return [];
+    const current = slots
+      .filter((slot) => slot.kind === 'class')
+      .map((slot) => ({
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        room: slot.room,
+        label: slot.subjectId,
+      }));
+    const incoming = fromDraftRows(rowsDraft.filter((row) => row.include))
+      .filter((row) => !row.isBreak && row.dayOfWeek !== null)
+      .map((row) => ({
+        dayOfWeek: row.dayOfWeek!,
+        startTime: row.startTime,
+        endTime: row.endTime,
+        room: row.room,
+        label: row.subjectKey,
+      }));
+    return diffWeeklyGrid(current, incoming);
+  }, [timetable, slots, rowsDraft]);
+
+  const acceptedChanges = gridChanges.filter(
+    (change) => (decisions[`${change.kind}:${change.key}`] ?? 'accept') === 'accept',
+  ).length;
+  const ignoredChanges = gridChanges.length - acceptedChanges;
+  const decide = (change: WeeklyGridChange, value: 'accept' | 'ignore') =>
+    setDecisions((current) => ({ ...current, [`${change.kind}:${change.key}`]: value }));
 
   const handleFile = async (selected: File) => {
     setError(null);
@@ -239,17 +275,50 @@ export function TimetableImportScreen() {
       };
     });
 
-    const builtSlots = buildSlots(fromDraftRows(rowsDraft.filter((row) => row.include)), createId('imp'), semesterId)
+    /* Apply the student's diff decisions to the incoming rows ---------- */
+    const ignored = (kind: WeeklyGridChange['kind'], key: string) =>
+      (decisions[`${kind}:${key}`] ?? 'accept') === 'ignore';
+
+    const finalRows = rowsDraft.filter((row) => {
+      if (!row.include) return false;
+      if (row.isBreak) return true;
+      const key = `${row.dayOfWeek}|${row.startTime}`;
+
+      // A dropped "new slot" simply does not get scheduled.
+      if (ignored('added', key)) return false;
+
+      // Ignoring a time change keeps the original end time.
+      const original = slots.find(
+        (slot) => slot.dayOfWeek === row.dayOfWeek && slot.startTime === row.startTime,
+      );
+      if (original && ignored('time_changed', key)) row.endTime = original.endTime;
+      if (original && ignored('room_changed', key)) row.room = original.room;
+      return true;
+    });
+
+    const builtSlots = buildSlots(fromDraftRows(finalRows), createId('imp'), semesterId)
       .filter((slot) => slot.kind === 'break' || subjectIdByDraft.has(slot.subjectId))
       .map((slot) => ({
         ...slot,
         subjectId: slot.kind === 'break' ? 'break' : subjectIdByDraft.get(slot.subjectId)!,
       }));
 
+    // Ignoring a removal keeps the existing slot in the new version.
+    const versionId = builtSlots[0]?.timetableVersionId ?? createId('imp');
+    const kept = slots
+      .filter(
+        (slot) =>
+          slot.kind === 'class' &&
+          ignored('removed', `${slot.dayOfWeek}|${slot.startTime}`),
+      )
+      .map((slot) => ({ ...slot, timetableVersionId: versionId }));
+
+    const allSlots = [...builtSlots, ...kept];
+
     void userId;
     await applyImportedTimetable({
       subjects: builtSubjects,
-      slots: builtSlots,
+      slots: allSlots,
       notes: `Imported from ${file?.name ?? 'timetable'} — ${source === 'ai' ? provider : 'demo fixture'}`,
     });
     setStep('applied');
@@ -394,6 +463,114 @@ export function TimetableImportScreen() {
                     </p>
                   </div>
                 </div>
+              </Card>
+            ) : null}
+
+            {gridChanges.length > 0 ? (
+              <Card>
+                <SectionHeader
+                  title="Changes vs your current timetable"
+                  subtitle={
+                    ignoredChanges > 0
+                      ? `${acceptedChanges} accepted · ${ignoredChanges} ignored`
+                      : `${gridChanges.length} ${gridChanges.length === 1 ? 'change' : 'changes'} detected`
+                  }
+                  action={
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDecisions(
+                            Object.fromEntries(
+                              gridChanges.map((change) => [`${change.kind}:${change.key}`, 'accept']),
+                            ) as Record<string, 'accept'>,
+                          )
+                        }
+                        className="text-[12px] font-bold text-brand-700"
+                      >
+                        Accept all
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDecisions(
+                            Object.fromEntries(
+                              gridChanges.map((change) => [`${change.kind}:${change.key}`, 'ignore']),
+                            ) as Record<string, 'ignore'>,
+                          )
+                        }
+                        className="text-[12px] font-semibold text-ink-secondary"
+                      >
+                        Ignore all
+                      </button>
+                    </div>
+                  }
+                />
+
+                <ul className="space-y-2">
+                  {gridChanges.map((change) => {
+                    const decision = decisions[`${change.kind}:${change.key}`] ?? 'accept';
+                    const accepted = decision === 'accept';
+                    return (
+                      <li
+                        key={`${change.kind}:${change.key}`}
+                        className={cn(
+                          'rounded-block border p-3',
+                          accepted ? 'border-black/[0.06] bg-surface' : 'border-black/[0.06] bg-surface-muted',
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={cn(
+                              'mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full',
+                              change.kind === 'added' && 'bg-safe-50 text-safe-700',
+                              change.kind === 'removed' && 'bg-critical-50 text-critical-600',
+                              change.kind === 'time_changed' && 'bg-warning-50 text-warning-600',
+                              change.kind === 'room_changed' && 'bg-brand-50 text-brand-700',
+                            )}
+                          >
+                            <Icon name={CHANGE_ICON[change.kind]} size={15} />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[12.5px] font-semibold leading-snug">{change.summary}</p>
+                            <p className="mt-0.5 text-[11px] text-ink-muted">
+                              {CHANGE_LABEL[change.kind]}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-2.5 flex gap-2">
+                          <button
+                            type="button"
+                            aria-pressed={accepted}
+                            onClick={() => decide(change, 'accept')}
+                            className={cn(
+                              'flex-1 rounded-pill py-2 text-[12px] font-bold transition',
+                              accepted ? 'bg-brand-600 text-white' : 'bg-surface-sunken text-ink-secondary',
+                            )}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            aria-pressed={!accepted}
+                            onClick={() => decide(change, 'ignore')}
+                            className={cn(
+                              'flex-1 rounded-pill py-2 text-[12px] font-bold transition',
+                              !accepted ? 'bg-ink text-white' : 'bg-surface-sunken text-ink-secondary',
+                            )}
+                          >
+                            Ignore
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                <p className="mt-3 text-[11.5px] leading-relaxed text-ink-muted">
+                  Ignoring a change keeps what you already have for that slot. Nothing is written until you
+                  accept the import.
+                </p>
               </Card>
             ) : null}
 
@@ -651,6 +828,20 @@ export function TimetableImportScreen() {
 /* ------------------------------------------------------------------ *
  * Helpers                                                             *
  * ------------------------------------------------------------------ */
+
+const CHANGE_ICON: Record<WeeklyGridChange['kind'], string> = {
+  added: 'add_circle',
+  removed: 'remove_circle',
+  time_changed: 'schedule',
+  room_changed: 'meeting_room',
+};
+
+const CHANGE_LABEL: Record<WeeklyGridChange['kind'], string> = {
+  added: 'New slot in the week',
+  removed: 'Slot no longer taught',
+  time_changed: 'Timing changed',
+  room_changed: 'Room changed',
+};
 
 function abbreviate(name: string): string {
   const words = name.split(/\s+/).filter((word) => /^[A-Za-z]/.test(word));

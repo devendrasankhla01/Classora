@@ -28,6 +28,8 @@ if (typeof globalThis.matchMedia === 'undefined') {
   });
 }
 
-if (typeof Element.prototype.scrollIntoView === 'undefined') {
+// Guarded: the server test project also runs this setup under Node, where
+// there is no DOM at all.
+if (typeof Element !== 'undefined' && typeof Element.prototype.scrollIntoView === 'undefined') {
   Element.prototype.scrollIntoView = () => {};
 }

@@ -314,6 +314,97 @@ export function diffTemplates(
 }
 
 /* ------------------------------------------------------------------ *
+ * Weekly-grid diffing (import review: accept / ignore per change)     *
+ * ------------------------------------------------------------------ */
+
+/** A row of the weekly grid, independent of which subject occupies it. */
+export interface WeeklyBlock {
+  dayOfWeek: DayOfWeek;
+  startTime: TimeKey;
+  endTime: TimeKey;
+  room: string | null;
+  label: string;
+}
+
+export type WeeklyGridChangeKind = 'added' | 'removed' | 'time_changed' | 'room_changed';
+
+export interface WeeklyGridChange {
+  kind: WeeklyGridChangeKind;
+  /** Stable identity of the slot: weekday + start time. */
+  key: string;
+  before: WeeklyBlock | null;
+  after: WeeklyBlock | null;
+  /** Human-readable summary for the review screen. */
+  summary: string;
+}
+
+const gridKey = (block: Pick<WeeklyBlock, 'dayOfWeek' | 'startTime'>): string =>
+  `${block.dayOfWeek}|${block.startTime}`;
+
+/**
+ * Compare the current weekly grid with an incoming import.
+ *
+ * Only the grid is compared — weekday, time and room — never the subject, since
+ * subject identity is resolved during the review step itself. That keeps the
+ * diff honest: it describes what the week will look like, not who teaches it.
+ */
+export function diffWeeklyGrid(
+  current: readonly WeeklyBlock[],
+  incoming: readonly WeeklyBlock[],
+): WeeklyGridChange[] {
+  const currentByKey = new Map(current.map((block) => [gridKey(block), block]));
+  const incomingByKey = new Map(incoming.map((block) => [gridKey(block), block]));
+  const changes: WeeklyGridChange[] = [];
+
+  for (const [key, after] of incomingByKey) {
+    const before = currentByKey.get(key);
+    if (!before) {
+      changes.push({
+        kind: 'added',
+        key,
+        before: null,
+        after,
+        summary: `${DAY_LABELS[after.dayOfWeek]} ${after.startTime}–${after.endTime}: new slot`,
+      });
+      continue;
+    }
+    if (before.endTime !== after.endTime) {
+      changes.push({
+        kind: 'time_changed',
+        key,
+        before,
+        after,
+        summary: `${DAY_LABELS[after.dayOfWeek]} ${after.startTime}: ends ${before.endTime} → ${after.endTime}`,
+      });
+    }
+    if ((before.room ?? '') !== (after.room ?? '')) {
+      changes.push({
+        kind: 'room_changed',
+        key,
+        before,
+        after,
+        summary: `${DAY_LABELS[after.dayOfWeek]} ${after.startTime}: room ${before.room ?? 'TBA'} → ${after.room ?? 'TBA'}`,
+      });
+    }
+  }
+
+  for (const [key, before] of currentByKey) {
+    if (incomingByKey.has(key)) continue;
+    changes.push({
+      kind: 'removed',
+      key,
+      before,
+      after: null,
+      summary: `${DAY_LABELS[before.dayOfWeek]} ${before.startTime}–${before.endTime}: no longer in the timetable`,
+    });
+  }
+
+  return changes.sort((a, b) => a.key.localeCompare(b.key) || a.kind.localeCompare(b.kind));
+}
+
+const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/* ------------------------------------------------------------------ *
  * Occurrence change helpers                                           *
  * ------------------------------------------------------------------ */
 

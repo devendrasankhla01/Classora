@@ -10,6 +10,7 @@ import {
   buildOccurrenceOverride,
   buildReplacement,
   detectConflicts,
+  diffWeeklyGrid,
   diffTemplates,
   findConflictFor,
   futureGenerationRange,
@@ -430,5 +431,66 @@ describe('futureGenerationRange', () => {
   it('clamps to the semester end', () => {
     const range = futureGenerationRange(SEMESTER, new Date('2026-09-15T10:00:00'), 365);
     expect(range.to).toBe('2026-09-30');
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Weekly-grid diff (import review)                                    *
+ * ------------------------------------------------------------------ */
+
+describe('diffWeeklyGrid', () => {
+  const block = (over: Partial<Parameters<typeof diffWeeklyGrid>[0][number]> = {}) => ({
+    dayOfWeek: 1 as const,
+    startTime: '09:00',
+    endTime: '10:00',
+    room: 'C-203',
+    label: 'DSA',
+    ...over,
+  });
+
+  it('reports a brand-new slot', () => {
+    const changes = diffWeeklyGrid([], [block()]);
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!.kind).toBe('added');
+    expect(changes[0]!.summary).toContain('new slot');
+  });
+
+  it('reports a slot that disappeared', () => {
+    const changes = diffWeeklyGrid([block({ dayOfWeek: 4 })], []);
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!.kind).toBe('removed');
+    expect(changes[0]!.summary).toContain('Thursday');
+  });
+
+  it('keeps the same weekday and start time as the identity', () => {
+    const changes = diffWeeklyGrid([block()], [block()]);
+    expect(changes).toHaveLength(0);
+  });
+
+  it('detects a changed end time', () => {
+    const changes = diffWeeklyGrid([block()], [block({ endTime: '11:00' })]);
+    expect(changes.map((change) => change.kind)).toEqual(['time_changed']);
+    expect(changes[0]!.summary).toContain('10:00 → 11:00');
+  });
+
+  it('detects a changed room', () => {
+    const changes = diffWeeklyGrid([block()], [block({ room: 'Lab 3' })]);
+    expect(changes.map((change) => change.kind)).toEqual(['room_changed']);
+    expect(changes[0]!.summary).toContain('Lab 3');
+  });
+
+  it('treats a moved slot as a removal plus an addition', () => {
+    const changes = diffWeeklyGrid([block()], [block({ startTime: '11:00', endTime: '12:00' })]);
+    expect(changes.map((change) => change.kind).sort()).toEqual(['added', 'removed']);
+  });
+
+  it('handles a whole-week swap in one pass', () => {
+    const current = [block(), block({ dayOfWeek: 2, startTime: '11:00', endTime: '12:00' })];
+    const incoming = [
+      block({ room: 'C-999' }),
+      block({ dayOfWeek: 3, startTime: '14:00', endTime: '15:00' }),
+    ];
+    const kinds = diffWeeklyGrid(current, incoming).map((change) => change.kind).sort();
+    expect(kinds).toEqual(['added', 'removed', 'room_changed']);
   });
 });
