@@ -278,14 +278,13 @@ export function projectWithNextClass(
     conducted,
     percentage,
     delta: roundPercent((percentage ?? 0) - (context.summary.percentage ?? 0), 1),
-    safeMisses: safeMissesAfter(context, { attended, conducted }, weight, status),
+    safeMisses: safeMissesAfter(context, { attended, conducted }, status),
   };
 }
 
 function safeMissesAfter(
   context: SimulationContext,
   base: { attended: number; conducted: number },
-  consumedWeight: number,
   consumedStatus: 'present' | 'absent',
 ): number {
   const remaining = consumedStatus === 'absent' ? context.upcomingWeights.slice(1) : context.upcomingWeights;
