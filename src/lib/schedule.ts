@@ -61,8 +61,15 @@ export function slotsForDate(
   const override = overrides.find((item) => item.date === date);
 
   if (override) {
-    if (override.kind === 'holiday' || override.kind === 'no_class') {
-      return { slots: [], status: override.kind === 'holiday' ? 'holiday' : 'no_class' };
+    if (override.kind === 'holiday') {
+      // The day's classes still exist as records — they are simply marked as a
+      // holiday so history and the timetable stay complete, and the attendance
+      // engine excludes them.
+      const dayOfWeek = dayOfWeekOf(date);
+      return { slots: slots.filter((slot) => slot.dayOfWeek === dayOfWeek), status: 'holiday' };
+    }
+    if (override.kind === 'no_class') {
+      return { slots: [], status: 'no_class' };
     }
     if (override.followDayOfWeek !== null && override.followDayOfWeek !== undefined) {
       return {

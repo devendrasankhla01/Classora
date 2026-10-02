@@ -128,18 +128,20 @@ describe('recurring slot generation', () => {
  * ------------------------------------------------------------------ */
 
 describe('calendar overrides', () => {
-  it('marks a college holiday instead of scheduling classes', () => {
+  it('keeps the day visible but marks classes as holiday so they never count', () => {
     const holiday = makeOverride({ date: '2026-09-14', kind: 'holiday', label: 'Founder’s Day' });
-    const { occurrences, skippedDates } = generate({ overrides: [holiday] });
+    const { occurrences } = generate({ overrides: [holiday] });
 
-    expect(occurrences.some((o) => o.date === '2026-09-14')).toBe(false);
-    expect(skippedDates).toContain('2026-09-14');
+    const holidayClasses = occurrences.filter((o) => o.date === '2026-09-14');
+    expect(holidayClasses).toHaveLength(1);
+    expect(holidayClasses[0]?.scheduleStatus).toBe('holiday');
   });
 
   it('skips a no-class day entirely', () => {
     const noClass = makeOverride({ date: '2026-09-21', kind: 'no_class' });
-    const { occurrences } = generate({ overrides: [noClass] });
+    const { occurrences, skippedDates } = generate({ overrides: [noClass] });
     expect(occurrences.some((o) => o.date === '2026-09-21')).toBe(false);
+    expect(skippedDates).toContain('2026-09-21');
   });
 
   it('follows another day for a single date without changing the template', () => {
