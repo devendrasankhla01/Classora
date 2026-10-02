@@ -20,6 +20,7 @@
  *   replaced      → nothing (the replacement occurrence carries the weight)
  *   unmarked      → nothing to P/C; lowers Data Confidence instead
  */
+import { todayKey } from '@/lib/date';
 import type {
   AttendanceRecord,
   AttendanceStatus,
@@ -543,44 +544,43 @@ export function simulateLeave(
  * How complete historical attendance marking is:
  * resolved past countable classes / all past possibly-countable classes.
  */
+/**
+ * Data Confidence: how much of the historical timetable has actually been
+ * resolved. Past classes that were explicitly cancelled/not conducted/holiday
+ * count as resolved (they needed a decision and got one); unmarked countable
+ * classes count against certainty. Returns 0–100 and never divides by zero.
+ */
 export function dataConfidence(
   occurrences: readonly ClassOccurrence[],
   records: readonly AttendanceRecord[],
-  today: DateKey,
+  today: DateKey = todayKey(),
 ): { percent: number; missingClasses: number } {
   const marked = new Set(records.map((record) => record.occurrenceId));
-
-  /** Past classes that required a decision: countable + explicitly not held. */
-  let decisionsRequired = 0;
-  /** Past classes the student has already resolved (marked or marked not-held). */
-  let decisionsMade = 0;
-  /** Past countable classes with no attendance status yet. */
+  let required = 0;
+  let resolved = 0;
   let missingClasses = 0;
 
   for (const occurrence of occurrences) {
     if (occurrence.date >= today) continue;
-    // Replaced originals are superseded by the replacement occurrence.
     if (occurrence.scheduleStatus === 'replaced') continue;
 
     if (!isCountable(occurrence)) {
-      // Cancelled / not conducted / holiday — explicitly resolved, no marking.
-      decisionsRequired += 1;
-      decisionsMade += 1;
+      // Cancelled / not conducted / holiday — resolved by definition.
+      required += 1;
+      resolved += 1;
       continue;
     }
 
-    decisionsRequired += 1;
+    required += 1;
     if (marked.has(occurrence.id)) {
-      decisionsMade += 1;
+      resolved += 1;
     } else {
       missingClasses += 1;
     }
   }
 
-  const percent = decisionsRequired > 0 ? (decisionsMade / decisionsRequired) * 100 : 100;
-
   return {
-    percent: roundPercent(Math.min(100, Math.max(0, percent)), 0),
+    percent: required === 0 ? 100 : Math.round((resolved / required) * 100),
     missingClasses,
   };
 }
