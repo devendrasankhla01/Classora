@@ -6,6 +6,7 @@ import { useClassora } from '@/app/store';
 import { FloatingNav } from './FloatingNav';
 import { ToastHost } from './ToastHost';
 import { SyncIndicator } from './SyncIndicator';
+import { InstallPrompt } from './InstallPrompt';
 import { ClassCardSkeleton, MetricCardSkeleton } from '@/components/ui/feedback';
 
 /**
@@ -32,6 +33,7 @@ export function AppShell() {
         )}
       >
         {ready ? <Outlet /> : <BootSkeleton />}
+        <InstallPrompt />
       </div>
       <FloatingNav />
       <ToastHost />
