@@ -11,7 +11,6 @@
  * Subject cards stay within ~1.5 points of the reference, and every number is
  * derived from real attendance records rather than being written into the UI.
  */
-import { createId } from '@/lib/id';
 import { toInstant, todayKey } from '@/lib/date';
 import { generateOccurrences } from '@/lib/schedule';
 import type {
@@ -233,7 +232,7 @@ function buildStatusPlan(
   const statuses: (AttendanceStatus | 'cancelled')[] = [
     ...Array<AttendanceStatus>(presentCount).fill('present'),
     ...Array<AttendanceStatus>(absentCount).fill('absent'),
-    ...Array<AttendanceStatus>(cancelledCount).fill('cancelled'),
+    ...Array<'cancelled'>(cancelledCount).fill('cancelled'),
   ];
 
   for (let i = statuses.length - 1; i > 0; i -= 1) {
