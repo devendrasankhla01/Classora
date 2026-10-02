@@ -1,0 +1,2 @@
+PLACEHOLDER icons generated 2026-10-02T16:14:26.088Z.
+Replace by adding public/branding/logo.png and running `npm run icons`.

@@ -1,0 +1,211 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { cn } from '@/lib/cn';
+import { useClassora } from '@/app/store';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { Card, SectionHeader } from '@/components/ui/Card';
+import { Button } from '@/components/ui/controls';
+import { Icon } from '@/components/ui/Icon';
+import { Pill } from '@/components/ui/chips';
+import { useActiveSubjects } from '@/hooks/useClassoraData';
+import { notifications, storage } from '@/platform';
+
+/**
+ * Device & data settings: appearance, offline storage, sync and export.
+ */
+export function SettingsScreen() {
+  const settings = useClassora((state) => state.settings);
+  const saveSettings = useClassora((state) => state.saveSettings);
+  const syncState = useClassora((state) => state.syncState);
+  const mode = useClassora((state) => state.mode);
+  const confidence = useClassora((state) => state.confidence);
+  const subjects = useActiveSubjects();
+  const occurrences = useClassora((state) => state.occurrences);
+  const attendance = useClassora((state) => state.attendance);
+  const announce = useClassora((state) => state.announce);
+
+  const [note, setNote] = useState<string | null>(null);
+
+  const records = subjects.length + occurrences.length + attendance.length;
+
+  return (
+    <>
+      <AppHeader title="Settings" subtitle="Device & data" />
+
+      <div className="space-y-4 px-5">
+        <Card>
+          <SectionHeader title="Appearance" subtitle="Porcelain theme follows your device" />
+          <div className="flex gap-2">
+            {(['light', 'system'] as const).map((theme) => (
+              <button
+                key={theme}
+                type="button"
+                aria-pressed={settings?.theme === theme}
+                onClick={() => void saveSettings({ theme })}
+                className={cn(
+                  'flex-1 rounded-block border p-3 text-left transition',
+                  settings?.theme === theme
+                    ? 'border-brand-500 bg-brand-50/60'
+                    : 'border-black/[0.07] bg-surface',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <Icon
+                    name={theme === 'light' ? 'light_mode' : 'contrast'}
+                    size={17}
+                    className={settings?.theme === theme ? 'text-brand-600' : 'text-ink-muted'}
+                  />
+                  <span
+                    className={cn(
+                      'text-[13px] font-bold capitalize',
+                      settings?.theme === theme ? 'text-brand-700' : 'text-ink',
+                    )}
+                  >
+                    {theme === 'light' ? 'Porcelain light' : 'Follow system'}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-3.5 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[13.5px] font-bold">Working Saturdays</p>
+              <p className="text-[12px] text-ink-secondary">Show the Saturday column in weekly view</p>
+            </div>
+            <Pill tone="muted">Set in Academic Calendar</Pill>
+          </div>
+        </Card>
+
+        <Card>
+          <SectionHeader
+            title="Offline storage"
+            subtitle={`${records} records on this device`}
+            action={<Pill tone={mode === 'local' ? 'muted' : 'brand'}>{mode === 'local' ? 'Local' : 'Cloud'}</Pill>}
+          />
+          <p className="text-[13px] leading-relaxed text-ink-secondary">
+            Classora keeps your timetable and attendance in an on-device database so it works with no signal.
+            {mode === 'local'
+              ? ' In Local mode nothing leaves this device unless you export it.'
+              : ' In Cloud mode changes are mirrored to your account when you are online.'}
+          </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="rounded-block bg-surface-muted p-3.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">Sync</p>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-[13.5px] font-bold capitalize">
+                <span
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    syncState === 'offline' || syncState === 'pending' ? 'bg-warning-500' : 'bg-safe-500',
+                  )}
+                />
+                {syncState === 'synced' ? 'Up to date' : syncState}
+              </p>
+            </div>
+            <div className="rounded-block bg-surface-muted p-3.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">Confidence</p>
+              <p className="mt-1 text-[13.5px] font-bold tabular-nums">{confidence()}%</p>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              icon="analytics"
+              onClick={async () => {
+                const estimate = await storage.estimate();
+                setNote(
+                  estimate
+                    ? `${Math.round(estimate.usage / 1024)} KB used of ${Math.round(
+                        estimate.quota / (1024 * 1024),
+                      )} MB available to this app`
+                    : 'This browser does not expose a storage estimate.',
+                );
+              }}
+            >
+              Check storage
+            </Button>
+            <Button
+              variant="secondary"
+              icon="verified_user"
+              onClick={async () => {
+                const persisted = await storage.requestPersistence();
+                setNote(
+                  persisted
+                    ? 'This device will keep Classora data even under storage pressure.'
+                    : 'The browser did not grant persistent storage; data may be evicted if space runs low.',
+                );
+              }}
+            >
+              Protect data
+            </Button>
+            <Button
+              variant="ghost"
+              icon="cleaning_services"
+              onClick={async () => {
+                const cleared = await storage.clearCaches();
+                setNote(cleared ? 'Cached app assets cleared.' : 'There was nothing cached to clear.');
+              }}
+            >
+              Clear caches
+            </Button>
+          </div>
+          {note ? <p className="mt-2.5 text-[12px] text-ink-secondary">{note}</p> : null}
+        </Card>
+
+        <Card>
+          <SectionHeader title="Notifications" subtitle="Reminder preferences and device permission" />
+          <div className="flex items-center justify-between rounded-block bg-surface-muted px-3.5 py-3.5">
+            <span className="inline-flex items-center gap-2.5 text-[13.5px] font-semibold">
+              <Icon name="notifications" size={18} className="text-ink-muted" />
+              Browser permission
+            </span>
+            <Pill tone={notifications.permissionStatus() === 'granted' ? 'brand' : 'muted'}>
+              {notifications.permissionStatus()}
+            </Pill>
+          </div>
+          <Link
+            to="/profile/notifications"
+            className="mt-3 flex items-center gap-3 text-[13.5px] font-bold text-brand-700"
+          >
+            Reminder settings
+            <Icon name="arrow_forward" size={16} />
+          </Link>
+        </Card>
+
+        <Card>
+          <SectionHeader title="Data ownership" subtitle="Take your records with you" />
+          <Link
+            to="/settings/export"
+            className="flex items-center gap-3 rounded-block bg-surface-muted px-3.5 py-3.5 transition active:scale-[0.995]"
+          >
+            <Icon name="ios_share" size={19} className="text-ink-muted" />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-bold">Export data</span>
+              <span className="block text-[12px] text-ink-secondary">CSV statement or full JSON backup</span>
+            </span>
+            <Icon name="chevron_right" size={19} className="text-ink-muted" />
+          </Link>
+          <p className="mt-3 text-[11.5px] text-ink-muted">
+            Deleting the app removes on-device data. Export first if you want to keep it.
+          </p>
+        </Card>
+
+        <button
+          type="button"
+          onClick={() =>
+            announce({ tone: 'info', message: 'Classora is up to date — build 1.0.0' })
+          }
+          className="w-full rounded-pill py-3 text-[12.5px] font-semibold text-ink-muted"
+        >
+          Check for updates
+        </button>
+
+        <p className="pb-2 text-center text-[11px] text-ink-muted">
+          Classora • Build 1.0.0 • Offline first, built for students
+        </p>
+      </div>
+    </>
+  );
+}
