@@ -280,6 +280,8 @@ export class LocalStore implements DataStore {
   }
 
   async importBackup(bundle: BackupBundle): Promise<void> {
+    // An explicit table list (Dexie's array overload) keeps the whole import
+    // atomic — a partial restore would be worse than none.
     await this.db.transaction(
       'rw',
       [

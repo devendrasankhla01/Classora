@@ -59,6 +59,12 @@ export class ClassoraDatabase extends Dexie {
       settings: 'id',
       outbox: 'id, entity, entityId',
     });
+    // v2 adds the calendar-override table (holidays, no-class days, working
+    // Saturdays). Declared incrementally so existing local databases migrate
+    // without losing attendance.
+    this.version(2).stores({
+      overrides: 'id, semesterId, date, kind',
+    });
   }
 }
 
