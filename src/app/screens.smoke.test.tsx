@@ -50,6 +50,16 @@ describe('seeded store', () => {
     expect(state.attendance.length).toBeGreaterThan(80);
   });
 
+  it('derives real alerts for the inbox on load', () => {
+    const notifications = useClassora.getState().notifications;
+    expect(notifications.length).toBeGreaterThan(0);
+    // Every alert must point at something real.
+    for (const notification of notifications) {
+      expect(notification.title.length).toBeGreaterThan(0);
+      expect(notification.body.length).toBeGreaterThan(0);
+    }
+  });
+
   it('reports a believable overall attendance figure', () => {
     const target = useClassora.getState().profile!.attendanceTarget;
     const stats = aggregate(

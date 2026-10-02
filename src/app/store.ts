@@ -20,6 +20,7 @@ import {
   type AttendanceSummary,
 } from '@/lib/attendance';
 import { addDaysToKey, nowInstant, toInstant, todayKey } from '@/lib/date';
+import { buildNotifications, newNotificationsOnly } from '@/lib/notifications';
 import { createId } from '@/lib/id';
 import {
   buildCancellation,
@@ -146,6 +147,8 @@ interface ClassoraState {
   applyImportedTimetable: (input: { subjects: Subject[]; slots: RecurringSlot[]; notes: string }) => Promise<void>;
 
   /* notifications */
+  /** Derive alerts from real state and persist anything new. */
+  syncNotifications: () => Promise<number>;
   savePreferences: (patch: Partial<NotificationPreference>) => Promise<void>;
   markNotificationRead: (id: string) => Promise<void>;
 
@@ -289,6 +292,8 @@ export const useClassora = create<ClassoraState>((set, get) => {
 
       // Materialise any missing future occurrences (idempotent).
       await materializeFuture();
+      // Then derive today's alerts from the state we just loaded.
+      await get().syncNotifications();
     },
 
     resetDemoData: async () => {
@@ -396,6 +401,8 @@ export const useClassora = create<ClassoraState>((set, get) => {
         await store.saveAttendanceRecord(record);
         await store.updateOccurrence(occurrenceId, { scheduleStatus: 'completed' });
         set({ syncState: 'synced', toast: toast(`Marked ${action}`, 'success') });
+        // A marked class may have resolved an alert (or created a risk one).
+        void get().syncNotifications();
       } catch {
         set({ syncState: 'pending', toast: toast('Saved locally — will sync when online', 'warning') });
       }
@@ -802,6 +809,41 @@ export const useClassora = create<ClassoraState>((set, get) => {
     /* ---------------------------------------------------------------- *
      * Notifications & settings                                          *
      * ---------------------------------------------------------------- */
+    syncNotifications: async () => {
+      const { occurrences, attendance, subjects, overrides, profile, notifications } = get();
+      const drafts = buildNotifications({
+        occurrences,
+        attendance,
+        subjects,
+        overrides,
+        profile,
+        today: todayKey(),
+        now: new Date(),
+      });
+
+      const fresh = newNotificationsOnly(drafts, notifications);
+      if (fresh.length === 0) return 0;
+
+      const created: AppNotification[] = fresh.map((draft) => ({
+        ...draft,
+        userId: profile?.id ?? 'local',
+        createdAt: nowInstant(),
+      }));
+
+      // Newest first, so the inbox reads chronologically.
+      set((state) => ({
+        notifications: [...created, ...state.notifications].sort((a, b) =>
+          b.createdAt.localeCompare(a.createdAt),
+        ),
+      }));
+
+      for (const notification of created) {
+        await store.saveNotification(notification);
+      }
+
+      return created.length;
+    },
+
     savePreferences: async (patch) => {
       const { preferences, profile } = get();
       if (!profile) return;
