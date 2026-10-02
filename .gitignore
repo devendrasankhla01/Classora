@@ -1,0 +1,49 @@
+# --- dependencies ---
+node_modules/
+.pnp/
+.pnp.js
+
+# --- build output ---
+dist/
+build/
+dist-ssr/
+*.local
+
+# --- env / secrets (NEVER COMMIT) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- tests / coverage ---
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# --- editor / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# --- logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+
+# --- local data / caches ---
+.cache/
+.temp/
+tmp/
+*.tsbuildinfo
+
+# --- dev-dist for PWA (generated) ---
+dev-dist/

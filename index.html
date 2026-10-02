@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0"
+    />
+    <title>Classora</title>
+    <meta
+      name="description"
+      content="Classora — a smart personal attendance and timetable assistant for college students."
+    />
+
+    <!-- PWA / installable app identity -->
+    <meta name="theme-color" content="#F5F5F7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Classora" />
+    <meta name="application-name" content="Classora" />
+
+    <!--
+      Branding + PWA assets are wired in the branding phase, once the approved
+      Classora master logo file is available in the workspace:
+        /public/branding/classora-logo.png   (symbol + wordmark)
+        /public/branding/classora-mark.png   (symbol only)
+        /public/icons/icon-192.png, icon-512.png, apple-touch-icon.png
+      The service-worker generated manifest (vite-plugin-pwa) is linked at that
+      point so no asset reference here can 404.
+    -->
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Classora" />
+    <meta
+      property="og:description"
+      content="Smart personal attendance and timetable assistant for college students."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/branding/classora-logo.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
