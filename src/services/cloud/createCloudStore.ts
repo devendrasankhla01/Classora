@@ -7,7 +7,7 @@
  * the dependency.
  */
 import type { DataStore } from '@/services/types';
-import { isCloudModeEnabled, readCloudConfig } from './client';
+import { readCloudConfig } from './client';
 import { SupabaseStore } from './supabaseStore';
 
 export { isCloudModeEnabled, readCloudConfig, type CloudConfig } from './client';
