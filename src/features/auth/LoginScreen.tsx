@@ -166,7 +166,9 @@ export function LoginScreen() {
     studentId?: string;
     greeting: string;
   }) {
-    if (opts.email || opts.name || opts.studentId) {
+    // A guest continuing on a fresh install still needs a local profile and
+    // semester so the import wizard can persist the first timetable.
+    if (!profile || opts.email || opts.name || opts.studentId) {
       await updateProfile({
         email: opts.email ?? profile?.email ?? null,
         name: opts.name && opts.name.trim().length > 0 ? opts.name.trim() : profile?.name ?? 'Student',

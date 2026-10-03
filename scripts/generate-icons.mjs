@@ -162,6 +162,61 @@ function placeholderPixels(size, maskable) {
 }
 
 
+/**
+ * Remove only the exterior white canvas from the small favicon. A perimeter
+ * flood fill preserves enclosed white artwork (such as the calendar page).
+ */
+async function removeFaviconCanvas(sharp, png) {
+  const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width, height, channels } = info;
+  const pixelCount = width * height;
+  const visited = new Uint8Array(pixelCount);
+  const queue = new Int32Array(pixelCount);
+  let head = 0;
+  let tail = 0;
+
+  const isCanvas = (pixel) => {
+    const offset = pixel * channels;
+    const red = data[offset];
+    const green = data[offset + 1];
+    const blue = data[offset + 2];
+    return red >= 245 && green >= 245 && blue >= 245 && Math.max(red, green, blue) - Math.min(red, green, blue) <= 40;
+  };
+
+  const visit = (pixel) => {
+    if (visited[pixel] || !isCanvas(pixel)) return;
+    visited[pixel] = 1;
+    queue[tail] = pixel;
+    tail += 1;
+  };
+
+  for (let x = 0; x < width; x += 1) {
+    visit(x);
+    visit((height - 1) * width + x);
+  }
+  for (let y = 0; y < height; y += 1) {
+    visit(y * width);
+    visit(y * width + width - 1);
+  }
+
+  while (head < tail) {
+    const pixel = queue[head];
+    head += 1;
+    const x = pixel % width;
+    const y = Math.floor(pixel / width);
+    if (x > 0) visit(pixel - 1);
+    if (x + 1 < width) visit(pixel + 1);
+    if (y > 0) visit(pixel - width);
+    if (y + 1 < height) visit(pixel + width);
+  }
+
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    if (visited[pixel]) data[pixel * channels + 3] = 0;
+  }
+
+  return sharp(data, { raw: { width, height, channels } }).png().toBuffer();
+}
+
 /* ------------------------------------------------------------------ *
  * Wordmark extraction                                                  *
  * ------------------------------------------------------------------ */
@@ -318,19 +373,21 @@ async function main() {
           .png()
           .toBuffer();
 
-        await sharp({
+        let output = await sharp({
           create: {
             width: size,
             height: size,
             channels: 4,
-            background: maskable
+            background: maskable || file === 'favicon-32.png'
               ? { r: 0, g: 0, b: 0, alpha: 0 }
               : { ...PORCELAIN, alpha: 1 },
           },
         })
           .composite([{ input: resized, left: inset, top: inset }])
           .png()
-          .toFile(resolve(outDir, file));
+          .toBuffer();
+        if (file === 'favicon-32.png') output = await removeFaviconCanvas(sharp, output);
+        await sharp(output).png().toFile(resolve(outDir, file));
       } else {
         await sharp(source)
           .resize(size, size, { fit: 'cover', background: { ...PORCELAIN, alpha: 1 } })
