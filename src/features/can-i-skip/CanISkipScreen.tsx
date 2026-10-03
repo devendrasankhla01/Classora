@@ -126,8 +126,8 @@ export function CanISkipScreen() {
         {/* Upcoming slot ------------------------------------------------ */}
         <Card>
           <div className="flex items-center justify-between">
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">Upcoming class</p>
-            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-ink-secondary">
+            <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Upcoming class</p>
+            <span className="inline-flex items-center gap-1.5 text-label-md text-ink-secondary">
               <Icon name="schedule" size={15} />
               {countdownLabel(occurrence, now)}
             </span>
@@ -135,10 +135,10 @@ export function CanISkipScreen() {
 
           <div className="mt-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-[21px] font-extrabold leading-tight tracking-[-0.02em]">
+              <h2 className="text-headline-md">
                 {insight.subject.name}
               </h2>
-              <p className="mt-1 inline-flex items-center gap-1.5 text-[13px] text-ink-secondary">
+              <p className="mt-1 inline-flex items-center gap-1.5 text-body-sm text-ink-secondary">
                 <Icon name="calendar_today" size={15} />
                 {occurrence.date === todayKey() ? 'Today' : formatLongDate(occurrence.date)} •{' '}
                 {formatTimeRange(occurrence.startTime, occurrence.endTime)}
@@ -149,23 +149,23 @@ export function CanISkipScreen() {
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="flex items-center gap-3 rounded-block bg-surface-muted p-3">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-[12px] font-bold text-brand-700 shadow-ambient">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-label-md text-brand-700 shadow-ambient">
                 {initialsOf(insight.subject.faculty ?? insight.subject.shortName)}
               </span>
               <span className="min-w-0">
-                <span className="block truncate text-[13px] font-bold">
+                <span className="block truncate text-label-lg">
                   {insight.subject.faculty ?? 'Faculty TBA'}
                 </span>
-                <span className="block text-[11.5px] text-ink-secondary">Faculty • Dept of CS</span>
+                <span className="block text-label-sm text-ink-secondary">Faculty • Dept of CS</span>
               </span>
             </div>
             <div className="flex items-center gap-3 rounded-block bg-surface-muted p-3">
               <Icon name="meeting_room" size={18} className="text-ink-muted" />
               <span className="min-w-0">
-                <span className="block text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+                <span className="block text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                   Room
                 </span>
-                <span className="block truncate text-[13px] font-bold">{occurrence.room ?? 'TBA'}</span>
+                <span className="block truncate text-label-lg">{occurrence.room ?? 'TBA'}</span>
               </span>
             </div>
           </div>
@@ -183,7 +183,7 @@ export function CanISkipScreen() {
           <div className="flex items-center justify-between gap-3">
             <span
               className={cn(
-                'inline-flex items-center gap-2 rounded-pill px-3.5 py-2 text-[12.5px] font-bold',
+                'inline-flex items-center gap-2 rounded-pill px-3.5 py-2 text-label-md',
                 verdict.tone === 'safe' && 'bg-safe-600 text-white',
                 verdict.tone === 'warning' && 'bg-warning-500 text-white',
                 verdict.tone === 'critical' && 'bg-critical-500 text-white',
@@ -192,14 +192,14 @@ export function CanISkipScreen() {
               <Icon name={verdict.icon} size={16} filled />
               {verdict.label}
             </span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+            <span className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
               Reliability {confidence}%
             </span>
           </div>
 
           <h3
             className={cn(
-              'mt-3.5 text-[19px] font-extrabold leading-snug tracking-[-0.02em]',
+              'mt-3.5 text-headline-sm',
               verdict.tone === 'safe' && 'text-safe-700',
               verdict.tone === 'warning' && 'text-warning-700',
               verdict.tone === 'critical' && 'text-critical-700',
@@ -207,42 +207,42 @@ export function CanISkipScreen() {
           >
             {verdict.headline(absentPercentage, insight.target)}
           </h3>
-          <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-secondary">{verdict.body}</p>
+          <p className="mt-1.5 text-body-md text-ink-secondary">{verdict.body}</p>
 
-          <div className="mt-4 grid grid-cols-2 divide-x divide-black/[0.06] rounded-block bg-white/70 py-3.5">
+          <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block bg-white/70 py-3.5">
             <div className="px-3.5">
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 Buffer runway
               </p>
-              <p className="mt-1 text-[16px] font-extrabold">
+              <p className="mt-1 text-body-lg font-bold">
                 {scenario.absent.safeMisses} {scenario.absent.safeMisses === 1 ? 'Class' : 'Classes'}
               </p>
-              <p className="text-[11.5px] text-ink-secondary">Safe misses remaining</p>
+              <p className="text-label-sm text-ink-secondary">Safe misses remaining</p>
             </div>
             <div className="px-3.5">
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 Projected score
               </p>
-              <p className="mt-1 text-[16px] font-extrabold tabular-nums">{formatPercent(absentPercentage)}</p>
-              <p className="text-[11.5px] text-ink-secondary">Min required: {insight.target}%</p>
+              <p className="mt-1 text-body-lg font-bold tabular-nums">{formatPercent(absentPercentage)}</p>
+              <p className="text-label-sm text-ink-secondary">Min required: {insight.target}%</p>
             </div>
           </div>
         </section>
 
         {/* Current attendance + both projections ------------------------ */}
         <Card>
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+          <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
             Current attendance
           </p>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
-            <span className="text-[34px] font-extrabold leading-none tracking-[-0.03em] tabular-nums">
+            <span className="text-metric-xl tabular-nums">
               {formatPercent(current)}
             </span>
             <span className="pb-1 text-right">
-              <span className="block text-[12.5px] font-bold text-ink-secondary">
+              <span className="block text-label-md text-ink-secondary">
                 {standingLabel(current, insight.target)}
               </span>
-              <span className="block text-[12px] text-ink-muted">
+              <span className="block text-label-md text-ink-muted">
                 Attended {insight.summary.attended} / {insight.summary.conducted}
               </span>
             </span>
@@ -279,7 +279,7 @@ export function CanISkipScreen() {
             />
           </div>
 
-          <div className="mt-3.5 flex items-center justify-between text-[11.5px]">
+          <div className="mt-3.5 flex items-center justify-between text-label-sm">
             <span className="inline-flex items-center gap-1.5 font-semibold text-ink-secondary">
               <span className="h-1.5 w-1.5 rounded-full bg-critical-500" />
               Min. target: {insight.target.toFixed(1)}%
@@ -294,7 +294,7 @@ export function CanISkipScreen() {
         {alternate ? (
           <Card>
             <div className="flex items-center justify-between">
-              <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 Other scenarios
               </p>
               <StatusChip
@@ -310,10 +310,10 @@ export function CanISkipScreen() {
                 <Icon name="warning" size={19} />
               </span>
               <div className="min-w-0">
-                <p className="text-[16px] font-extrabold leading-snug">
+                <p className="text-body-lg font-bold">
                   What if you skip {alternate.insight.subject.shortName}?
                 </p>
-                <p className="mt-0.5 text-[12.5px] text-ink-secondary">
+                <p className="mt-0.5 text-body-sm text-ink-secondary">
                   {formatLongDate(alternate.occurrence.date)} • {alternate.occurrence.startTime} •{' '}
                   {alternate.insight.subject.faculty ?? 'Faculty TBA'}
                 </p>
@@ -322,12 +322,12 @@ export function CanISkipScreen() {
 
             <div className="mt-3.5 rounded-block bg-critical-50 p-3.5">
               <div className="flex items-center justify-between">
-                <span className="text-[12px] font-bold text-critical-700">Projected attendance</span>
-                <span className="text-[19px] font-extrabold tabular-nums text-critical-700">
+                <span className="text-label-md text-critical-700">Projected attendance</span>
+                <span className="text-headline-sm tabular-nums text-critical-700">
                   {formatPercent(alternate.projected.percentage)}
                 </span>
               </div>
-              <p className="mt-1.5 text-[12.5px] leading-relaxed text-critical-700/90">
+              <p className="mt-1.5 text-body-sm text-critical-700/90">
                 {(alternate.projected.percentage ?? 0) < alternate.insight.target
                   ? `Falls ${(alternate.insight.target - (alternate.projected.percentage ?? 0)).toFixed(1)}% below the ${
                       alternate.insight.target
@@ -339,7 +339,7 @@ export function CanISkipScreen() {
             <button
               type="button"
               onClick={() => navigate(`/attendance/${alternate.insight.subject.id}`)}
-              className="mt-3.5 inline-flex items-center gap-1.5 text-[13px] font-bold text-brand-700"
+className="mt-3.5 inline-flex items-center gap-1.5 text-label-lg text-brand-700"
             >
               Open {alternate.insight.subject.shortName} recovery plan
               <Icon name="arrow_forward" size={15} />
@@ -461,13 +461,13 @@ function InfoTile({
   caption: string;
 }) {
   return (
-    <div className="rounded-card bg-gradient-to-br from-brand-50 to-surface p-3.5 shadow-ambient ring-1 ring-black/[0.03]">
+    <div className="rounded-card bg-gradient-to-br from-brand-50 to-surface p-3.5 shadow-ambient ring-1 ring-hairline">
       <span className="grid h-9 w-9 place-items-center rounded-full bg-white/80 text-brand-600 shadow-ambient">
         <Icon name={icon} size={18} />
       </span>
-      <p className="mt-2.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink-muted">{label}</p>
-      <p className="text-[15px] font-extrabold leading-tight">{value}</p>
-      <p className="mt-0.5 text-[11.5px] leading-snug text-ink-secondary">{caption}</p>
+      <p className="mt-2.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">{label}</p>
+      <p className="text-body-lg font-bold">{value}</p>
+      <p className="mt-0.5 text-label-sm text-ink-secondary">{caption}</p>
     </div>
   );
 }
@@ -495,15 +495,15 @@ function ProjectionBlock({
   return (
     <div className="rounded-block bg-surface-muted p-3.5">
       <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+        <span className="inline-flex items-center gap-2 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
           <span className={cn('h-2 w-2 rounded-full', dot)} />
           {label}
         </span>
         <span className="flex items-center gap-2">
-          <span className="text-[15px] font-extrabold tabular-nums">{percentage.toFixed(1)}%</span>
+          <span className="text-body-lg font-bold tabular-nums">{percentage.toFixed(1)}%</span>
           <span
             className={cn(
-              'rounded-pill px-2 py-0.5 text-[11px] font-bold',
+              'rounded-pill px-2 py-0.5 text-label-sm font-bold',
               delta >= 0 ? 'bg-safe-50 text-safe-700' : 'bg-critical-50 text-critical-600',
             )}
           >
@@ -513,7 +513,7 @@ function ProjectionBlock({
         </span>
       </div>
       <ProgressBar className="mt-2" value={percentage} tone={tone === 'neutral' ? 'warning' : tone} height={7} animate={false} />
-      <div className="mt-2 flex items-center justify-between text-[11.5px]">
+      <div className="mt-2 flex items-center justify-between text-label-sm">
         <span className="text-ink-secondary">
           {attended} of {conducted} sessions
         </span>
@@ -529,7 +529,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="Go back"
-      className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-black/[0.04]"
+      className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-hairline"
     >
       <Icon name="arrow_back" size={19} />
     </button>
@@ -606,8 +606,8 @@ function WhatIfCalculator({
               aria-pressed={mode === 'miss'}
               className={
                 mode === 'miss'
-                  ? 'flex-1 rounded-pill bg-critical-50 px-4 py-2.5 text-[13px] font-bold text-critical-600'
-                  : 'flex-1 rounded-pill bg-surface-sunken px-4 py-2.5 text-[13px] font-semibold text-ink-secondary'
+                  ? 'flex-1 rounded-pill bg-critical-50 px-4 py-2.5 text-label-lg text-critical-600'
+                  : 'flex-1 rounded-pill bg-surface-sunken px-4 py-2.5 text-label-lg text-ink-secondary'
               }
             >
               What if I miss
@@ -618,8 +618,8 @@ function WhatIfCalculator({
               aria-pressed={mode === 'attend'}
               className={
                 mode === 'attend'
-                  ? 'flex-1 rounded-pill bg-safe-50 px-4 py-2.5 text-[13px] font-bold text-safe-700'
-                  : 'flex-1 rounded-pill bg-surface-sunken px-4 py-2.5 text-[13px] font-semibold text-ink-secondary'
+                  ? 'flex-1 rounded-pill bg-safe-50 px-4 py-2.5 text-label-lg text-safe-700'
+                  : 'flex-1 rounded-pill bg-surface-sunken px-4 py-2.5 text-label-lg text-ink-secondary'
               }
             >
               What if I attend
@@ -636,13 +636,13 @@ function WhatIfCalculator({
             />
           </Field>
 
-          <div className="rounded-block bg-surface p-4 shadow-ambient ring-1 ring-black/[0.03]">
-            <p className="text-[12.5px] text-ink-secondary">
+          <div className="rounded-block bg-surface p-4 shadow-ambient ring-1 ring-hairline">
+            <p className="text-body-sm text-ink-secondary">
               If you {mode === 'miss' ? 'miss' : 'attend'} the next {result.classes}{' '}
               {result.classes === 1 ? 'class' : 'classes'} of {insight.subject.shortName}:
             </p>
             <div className="mt-2.5 flex items-end justify-between">
-              <span className="text-[30px] font-extrabold leading-none tabular-nums">
+              <span className="text-headline-lg tabular-nums">
                 {formatPercent(result.percentage)}
               </span>
               <StatusChip
@@ -662,7 +662,7 @@ function WhatIfCalculator({
                 }
               />
             </div>
-            <p className="mt-2 text-[12px] text-ink-secondary">
+            <p className="mt-2 text-label-md text-ink-secondary">
               {result.attended} attended of {result.conducted} conducted • target {insight.target}%
             </p>
           </div>

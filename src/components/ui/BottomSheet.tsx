@@ -68,16 +68,16 @@ export function BottomSheet({
       <div
         ref={sheetRef}
         className={cn(
-          'relative z-10 max-h-[92dvh] w-full max-w-app animate-sheet-up overflow-hidden rounded-t-[28px] bg-canvas shadow-floating',
+          'relative z-10 max-h-[92dvh] w-full max-w-app animate-sheet-up overflow-hidden rounded-t-card-lg bg-surface shadow-elevated',
           className,
         )}
       >
         <div className="flex items-start justify-between gap-4 px-5 pb-2 pt-4">
           <div className="min-w-0 flex-1">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink/15" aria-hidden />
-            {title ? <h2 className="text-[19px] font-bold tracking-[-0.01em]">{title}</h2> : null}
+            {title ? <h2 className="text-headline-sm">{title}</h2> : null}
             {description ? (
-              <p className="mt-1 text-[13px] leading-snug text-ink-secondary">{description}</p>
+              <p className="mt-1 text-body-sm text-ink-secondary">{description}</p>
             ) : null}
           </div>
           <button
@@ -85,7 +85,7 @@ export function BottomSheet({
             data-sheet-close
             onClick={onClose}
             aria-label="Close sheet"
-            className="mt-2 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface text-ink-secondary shadow-ambient"
+            className="mt-2 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface-sunken text-ink-secondary"
           >
             <Icon name="close" size={18} />
           </button>
@@ -94,7 +94,7 @@ export function BottomSheet({
         <div className="max-h-[70dvh] overflow-y-auto overscroll-contain px-5 pb-4">{children}</div>
 
         {footer ? (
-          <div className="border-t border-black/[0.05] bg-surface/80 px-5 pb-safe-plus-3 pt-3 backdrop-blur">
+          <div className="border-t border-divider bg-surface/80 px-5 pb-safe-plus-3 pt-3 backdrop-blur">
             {footer}
           </div>
         ) : (

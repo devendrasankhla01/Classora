@@ -20,7 +20,7 @@ export function NextClassCard() {
 
   if (!occurrence || !subject) {
     return (
-      <section className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-black/[0.03]">
+      <section className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
         <EmptyState
           icon="event_available"
           title="Your schedule is clear"
@@ -28,7 +28,7 @@ export function NextClassCard() {
           action={
             <Link
               to="/timetable"
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-brand-600 px-5 text-[14px] font-semibold text-white shadow-elevated"
+className="inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-brand-600 px-5 text-label-lg text-white shadow-elevated"
             >
               <Icon name="calendar_month" size={18} />
               Open timetable
@@ -45,32 +45,32 @@ export function NextClassCard() {
   const quick = (action: AttendanceAction) => () => void markAttendance(occurrence.id, action);
 
   return (
-    <section className="overflow-hidden rounded-card bg-surface p-5 shadow-ambient ring-1 ring-black/[0.03]">
+    <section className="overflow-hidden rounded-card bg-surface p-5 shadow-ambient ring-1 ring-hairline">
       <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-2 rounded-pill bg-brand-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-brand-700">
+        <span className="inline-flex items-center gap-2 rounded-pill bg-brand-50 px-3 py-1.5 text-label-sm uppercase text-brand-700">
           <span className="h-1.5 w-1.5 rounded-full bg-brand-600" />
           {state === 'in_progress' ? 'Now • In Progress' : `Next Class • ${formatCountdown(secondsUntilStart)}`}
         </span>
-        <span className="rounded-pill bg-surface-sunken px-3 py-1.5 text-[11.5px] font-semibold text-ink-secondary">
+        <span className="rounded-pill bg-surface-sunken px-3 py-1.5 text-label-sm font-semibold text-ink-secondary">
           Lecture {indexInDay} of {dayCount}
         </span>
       </div>
 
-      <h2 className="mt-4 text-[26px] font-extrabold leading-tight tracking-[-0.02em] text-ink">
+      <h2 className="mt-4 text-headline-md text-ink">
         {subject.name}
       </h2>
-      <p className="mt-1 text-[13.5px] text-ink-secondary">
+      <p className="mt-1 text-body-md text-ink-secondary">
         {[subject.faculty, subject.defaultRoom, subject.subjectCode].filter(Boolean).join(' • ')}
       </p>
 
-      <div className="mt-4 grid grid-cols-2 divide-x divide-black/[0.06] rounded-block border border-black/[0.06] bg-surface-muted">
+      <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block border border-divider bg-surface-muted">
         <div className="flex items-start gap-3 p-3.5">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-ink-secondary shadow-ambient">
             <Icon name="schedule" size={18} />
           </span>
           <div className="min-w-0">
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink-muted">Time</p>
-            <p className="mt-0.5 text-[14.5px] font-bold leading-snug text-ink">
+            <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Time</p>
+            <p className="mt-0.5 text-label-lg text-ink">
               {formatTimeRange(occurrence.startTime, occurrence.endTime)}
             </p>
           </div>
@@ -80,8 +80,8 @@ export function NextClassCard() {
             <Icon name="location_on" size={18} />
           </span>
           <div className="min-w-0">
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink-muted">Location</p>
-            <p className="mt-0.5 text-[14.5px] font-bold leading-snug text-ink">
+            <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Location</p>
+            <p className="mt-0.5 text-label-lg text-ink">
               {occurrence.room ?? 'To be announced'}
             </p>
           </div>
@@ -90,7 +90,7 @@ export function NextClassCard() {
 
       {state === 'in_progress' && intervalProgress !== null ? (
         <div className="mt-4">
-          <div className="flex items-center justify-between text-[12.5px] font-semibold">
+          <div className="flex items-center justify-between text-label-md">
             <span className="text-ink-secondary">Interval countdown</span>
             <span className="text-brand-700">{Math.round(intervalProgress)}% passed</span>
           </div>
@@ -104,7 +104,7 @@ export function NextClassCard() {
       ) : null}
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <p className="text-[12.5px] text-ink-secondary">
+        <p className="text-body-sm text-ink-secondary">
           {isToday ? `Today • ${formatLongDate(occurrence.date)}` : formatLongDate(occurrence.date)}
         </p>
         {finished ? (
@@ -115,7 +115,7 @@ export function NextClassCard() {
                 <button
                   type="button"
                   onClick={() => void markAttendance(occurrence.id, record.status === 'present' ? 'absent' : 'present')}
-                  className="text-[12.5px] font-semibold text-brand-700"
+className="text-label-md text-brand-700"
                 >
                   Change
                 </button>
@@ -130,7 +130,7 @@ export function NextClassCard() {
         ) : (
           <Link
             to="/timetable"
-            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-pill bg-brand-50 px-4 text-[13px] font-bold text-brand-700"
+className="inline-flex min-h-[40px] items-center gap-1.5 rounded-pill bg-brand-50 px-4 text-label-lg text-brand-700"
           >
             <Icon name="edit_calendar" size={16} />
             Modify day
@@ -158,8 +158,8 @@ function QuickAction({
       onClick={onClick}
       className={
         tone === 'safe'
-          ? 'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill bg-safe-50 px-4 text-[13px] font-bold text-safe-700 transition active:scale-95'
-          : 'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill bg-critical-50 px-4 text-[13px] font-bold text-critical-600 transition active:scale-95'
+          ? 'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill bg-safe-50 px-4 text-label-lg text-safe-700 transition active:scale-95'
+          : 'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill bg-critical-50 px-4 text-label-lg text-critical-600 transition active:scale-95'
       }
     >
       <Icon name={icon} size={16} />

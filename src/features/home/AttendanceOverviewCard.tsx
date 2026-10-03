@@ -23,24 +23,24 @@ export function AttendanceOverviewCard() {
   const safeMisses = useSafeMissTotal();
 
   return (
-    <section className="rounded-card bg-surface p-5 shadow-ambient ring-1 ring-black/[0.03]">
+    <section className="rounded-card bg-surface p-5 shadow-ambient ring-1 ring-hairline">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <IconTile icon="analytics" tone="indigo" size={38} iconSize={19} />
-          <h2 className="text-[17px] font-bold tracking-[-0.01em]">Attendance Overview</h2>
+          <h2 className="text-headline-sm">Attendance Overview</h2>
         </div>
         <Pill>Target: {target}%</Pill>
       </div>
 
       <div className="mt-5">
-        <AttendanceGauge value={stats.percentage} caption="Overall attendance" size={236} />
+        <AttendanceGauge value={stats.percentage} caption="Overall attendance" size={236} target={target} />
       </div>
 
       <div className="mt-5 flex items-start gap-3 rounded-block bg-safe-50 p-3.5">
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-safe-500 text-white">
           <Icon name="check" size={17} weight={700} />
         </span>
-        <p className="text-[13.5px] font-medium leading-relaxed text-safe-700">
+        <p className="text-body-md font-medium text-safe-700">
           {safeMisses > 0 ? (
             <>
               <span className="font-bold">Safe Zone:</span> You can safely miss up to{' '}
@@ -61,23 +61,23 @@ export function AttendanceOverviewCard() {
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 divide-x divide-black/[0.06] rounded-block border border-black/[0.06] bg-surface-muted py-3.5">
+      <div className="mt-4 grid grid-cols-3 divide-x divide-divider rounded-block border border-divider bg-surface-muted py-3.5">
         <StatColumn label="Attended" value={stats.attended} color={classoraGreen} />
         <StatColumn label="Missed" value={stats.missed} color={classoraRed} />
         <StatColumn label="Conducted" value={stats.conducted} color={classoraInkMuted} />
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2 px-0.5">
-        <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-ink-secondary">
+        <span className="inline-flex items-center gap-1.5 text-label-md text-ink-secondary">
           <Icon name="verified" size={15} className="text-brand-600" />
           Data confidence {confidence.percent}%
         </span>
         {confidence.missingClasses > 0 ? (
-          <Link to="/attendance/review" className="text-[12.5px] font-bold text-brand-700">
+          <Link to="/attendance/review" className="text-label-md text-brand-700">
             Review {confidence.missingClasses} missing
           </Link>
         ) : (
-          <span className="text-[12px] text-ink-muted">You’re all caught up</span>
+          <span className="text-label-md text-ink-muted">You’re all caught up</span>
         )}
       </div>
     </section>
@@ -87,11 +87,11 @@ export function AttendanceOverviewCard() {
 function StatColumn({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="px-3 text-center">
-      <p className="inline-flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+      <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
         {label}
       </p>
-      <p className="mt-1.5 text-[22px] font-extrabold leading-none tabular-nums">{value}</p>
+      <p className="mt-1.5 text-metric-sm tabular-nums">{value}</p>
     </div>
   );
 }

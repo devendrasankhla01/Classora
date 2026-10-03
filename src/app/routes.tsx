@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AppShell } from '@/components/layout/AppShell';
 import { HomeScreen } from '@/features/home/HomeScreen';
+import { LoginScreen, readStoredSession } from '@/features/auth/LoginScreen';
 import { MetricCardSkeleton } from '@/components/ui/feedback';
 
 /* Secondary destinations are code-split: the first paint stays small. */
@@ -84,11 +85,39 @@ function RouteFallback() {
   );
 }
 
+/**
+ * Compulsory login gate (Option B).
+ *
+ * When no session is stored yet, any route inside the app redirects to `/login`
+ * and preserves the target path in router state so sign-in returns there.
+ */
+function ProtectedAppShell() {
+  const location = useLocation();
+  const [signedIn, setSignedIn] = useState<boolean>(() => readStoredSession() !== null);
+
+  useEffect(() => {
+    const sync = () => setSignedIn(readStoredSession() !== null);
+    window.addEventListener('classora:auth-change', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('classora:auth-change', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+
+  if (!signedIn) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  return <AppShell />;
+}
+
 export function AppRoutes() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
-        <Route element={<AppShell />}>
+        <Route path="/login" element={<LoginScreen />} />
+        <Route element={<ProtectedAppShell />}>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/timetable" element={<TimetableScreen />} />
           <Route path="/timetable/import" element={<TimetableImportScreen />} />

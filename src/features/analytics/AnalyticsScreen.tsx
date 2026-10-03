@@ -115,19 +115,19 @@ export function AnalyticsScreen() {
         />
 
         <Card>
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+          <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
             Overall attendance
           </p>
           <div className="mt-2 flex flex-wrap items-end gap-3">
-            <span className="text-[38px] font-extrabold leading-none tracking-[-0.03em] tabular-nums">
+            <span className="text-metric-xl tabular-nums">
               {formatPercent(stats.percentage)}
             </span>
             {monthComparison.delta !== null ? (
               <span
                 className={
                   monthComparison.delta >= 0
-                    ? 'rounded-pill bg-safe-50 px-2.5 py-1 text-[12px] font-bold text-safe-700'
-                    : 'rounded-pill bg-critical-50 px-2.5 py-1 text-[12px] font-bold text-critical-600'
+                    ? 'rounded-pill bg-safe-50 px-2.5 py-1 text-label-md text-safe-700'
+                    : 'rounded-pill bg-critical-50 px-2.5 py-1 text-label-md text-critical-600'
                 }
               >
                 {monthComparison.delta >= 0 ? '↗ +' : '↘ '}
@@ -136,32 +136,32 @@ export function AnalyticsScreen() {
             ) : null}
           </div>
           {monthComparison.previous !== null ? (
-            <p className="mt-1 text-[12.5px] text-ink-secondary">
+            <p className="mt-1 text-body-sm text-ink-secondary">
               vs {formatPercent(monthComparison.previous)} last month
             </p>
           ) : null}
 
-          <div className="mt-4 grid grid-cols-2 divide-x divide-black/[0.06] rounded-block border border-black/[0.06] bg-surface-muted py-3.5">
+          <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block border border-divider bg-surface-muted py-3.5">
             <div className="px-3.5">
-              <p className="inline-flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+              <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 <Icon name="calendar_view_week" size={14} className="text-brand-600" />
                 This week
               </p>
-              <p className="mt-1.5 text-[22px] font-extrabold leading-none tabular-nums">
+              <p className="mt-1.5 text-metric-sm tabular-nums">
                 {report.attended}
-                <span className="text-[15px] font-bold text-ink-muted"> / {report.conducted}</span>
+                <span className="text-label-lg text-ink-muted"> / {report.conducted}</span>
               </p>
-              <p className="mt-1 text-[11.5px] text-ink-secondary">
+              <p className="mt-1 text-label-sm text-ink-secondary">
                 {report.presenceRate === null ? 'No classes yet' : `${report.presenceRate.toFixed(1)}% presence rate`}
               </p>
             </div>
             <div className="px-3.5">
-              <p className="inline-flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+              <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 <Icon name="bolt" size={14} className="text-warning-500" />
                 Consistency
               </p>
-              <p className="mt-1.5 text-[22px] font-extrabold leading-none tabular-nums">{report.consistency}%</p>
-              <p className="mt-1 text-[11.5px] text-ink-secondary">{report.stabilityLabel}</p>
+              <p className="mt-1.5 text-metric-sm tabular-nums">{report.consistency}%</p>
+              <p className="mt-1 text-label-sm text-ink-secondary">{report.stabilityLabel}</p>
             </div>
           </div>
         </Card>
@@ -171,14 +171,14 @@ export function AnalyticsScreen() {
             title="Attendance Trajectory"
             subtitle={`${trajectory.windowSize}-Week Moving Average`}
             action={
-              <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-ink-secondary">
+              <span className="inline-flex items-center gap-1.5 text-label-sm font-semibold text-ink-secondary">
                 <span className="h-[2px] w-4 rounded-full bg-ink-muted" />
                 {target}% Target
               </span>
             }
           />
           {trajectory.points.length === 0 ? (
-            <p className="py-6 text-center text-[13px] text-ink-secondary">
+            <p className="py-6 text-center text-body-sm text-ink-secondary">
               Insights appear after your first marked classes.
             </p>
           ) : (
@@ -263,10 +263,10 @@ export function AnalyticsScreen() {
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: dotColor(insight.status.health) }}
                     />
-                    <span className="truncate text-[14px] font-bold">{insight.subject.name}</span>
+                    <span className="truncate text-label-lg">{insight.subject.name}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2">
-                    <span className="text-[13.5px] font-extrabold tabular-nums">
+                    <span className="text-body-md font-bold tabular-nums">
                       {formatPercent(insight.summary.percentage)}
                     </span>
                     <StatusChip tone={insight.status.health} label={insight.status.label} />
@@ -279,7 +279,7 @@ export function AnalyticsScreen() {
                   markerAt={insight.target}
                   height={7}
                 />
-                <div className="mt-1.5 flex items-center justify-between text-[11.5px]">
+                <div className="mt-1.5 flex items-center justify-between text-label-sm">
                   <span className="text-ink-secondary">
                     {insight.summary.attended} / {insight.summary.conducted} Attended
                   </span>
@@ -307,32 +307,32 @@ export function AnalyticsScreen() {
             <div className="flex items-start gap-3">
               <IconTile icon="priority_high" tone="rose" size={40} iconSize={20} />
               <div className="min-w-0">
-                <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-critical-500">
+                <p className="text-label-sm uppercase tracking-[0.03em] text-critical-500">
                   Attendance alert
                 </p>
-                <h3 className="mt-0.5 text-[18px] font-extrabold tracking-[-0.02em]">
+                <h3 className="mt-0.5 text-headline-sm">
                   {mostMissed.subject.name}
                 </h3>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 divide-x divide-black/[0.06] rounded-block bg-surface-muted py-3.5">
+            <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block bg-surface-muted py-3.5">
               <div className="px-3.5">
-                <p className="text-[11px] font-semibold text-ink-secondary">Most missed subject</p>
-                <p className="mt-1 text-[13.5px] font-bold">
+                <p className="text-label-sm font-semibold text-ink-secondary">Most missed subject</p>
+                <p className="mt-1 text-label-lg">
                   {mostMissed.summary.missed} missed{' '}
                   {mostMissed.subject.attendanceCountMode === 'session' ? 'sessions' : 'lectures'}
                 </p>
               </div>
               <div className="px-3.5">
-                <p className="text-[11px] font-semibold text-ink-secondary">Recovery need</p>
-                <p className="mt-1 text-[13.5px] font-bold text-critical-600">
+                <p className="text-label-sm font-semibold text-ink-secondary">Recovery need</p>
+                <p className="mt-1 text-label-lg text-critical-600">
                   +{mostMissed.recovery.classes} Consecutive
                 </p>
               </div>
             </div>
 
-            <p className="mt-3.5 text-[13px] leading-relaxed text-ink-secondary">
+            <p className="mt-3.5 text-body-sm text-ink-secondary">
               Attending the next {mostMissed.recovery.classes}{' '}
               {mostMissed.recovery.classes === 1 ? 'class' : 'classes'} will bring{' '}
               {mostMissed.subject.shortName} back to the {mostMissed.target}% benchmark
@@ -344,7 +344,7 @@ export function AnalyticsScreen() {
 
             <Link
               to={`/attendance/${mostMissed.subject.id}`}
-              className="mt-4 flex min-h-[46px] w-full items-center justify-center gap-2 rounded-pill bg-brand-600 text-[14px] font-bold text-white shadow-elevated"
+className="mt-4 flex min-h-[46px] w-full items-center justify-center gap-2 rounded-pill bg-brand-600 text-label-lg text-white shadow-elevated"
             >
               View Recovery Plan
               <Icon name="arrow_forward" size={17} />
@@ -356,8 +356,8 @@ export function AnalyticsScreen() {
           <div className="flex items-center gap-3.5">
             <IconTile icon="verified_user" tone="indigo" size={40} iconSize={20} />
             <div className="min-w-0 flex-1">
-              <p className="text-[13.5px] font-bold">Streak Protector</p>
-              <p className="truncate text-[12.5px] text-ink-secondary">
+              <p className="text-label-lg">Streak Protector</p>
+              <p className="truncate text-body-sm text-ink-secondary">
                 {report.nextClassLabel ??
                   'Mark attendance after each class to keep your data complete.'}
               </p>

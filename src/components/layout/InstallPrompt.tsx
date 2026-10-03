@@ -34,8 +34,8 @@ export function InstallPrompt() {
           </span>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[13.5px] font-bold leading-tight">Install Classora</p>
-            <p className="mt-0.5 text-[12px] leading-snug text-ink-secondary">
+            <p className="text-label-lg">Install Classora</p>
+            <p className="mt-0.5 text-label-md text-ink-secondary">
               Works offline, opens full screen, no app store needed.
             </p>
           </div>
@@ -62,7 +62,7 @@ export function InstallPrompt() {
               setSheetOpen(true);
             }}
             className={cn(
-              'shrink-0 rounded-pill bg-brand-600 px-3.5 py-2 text-[12.5px] font-bold text-white',
+              'shrink-0 rounded-pill bg-brand-600 px-3.5 py-2 text-label-md text-white',
               'transition active:scale-95',
             )}
           >
@@ -99,7 +99,7 @@ export function InstallPrompt() {
             detail="Classora then opens full screen and works with no signal."
           />
         </ol>
-        <p className="mt-4 rounded-block bg-surface-muted p-3.5 text-[12px] leading-relaxed text-ink-secondary">
+        <p className="mt-4 rounded-block bg-surface-muted p-3.5 text-label-md text-ink-secondary">
           Your attendance data stays on this device in local mode — installing does not send anything anywhere.
         </p>
       </BottomSheet>
@@ -114,8 +114,8 @@ function Step({ icon, title, detail }: { icon: string; title: string; detail: st
         <Icon name={icon} size={18} />
       </span>
       <span className="min-w-0">
-        <span className="block text-[13.5px] font-bold leading-tight">{title}</span>
-        <span className="mt-0.5 block text-[12.5px] leading-relaxed text-ink-secondary">{detail}</span>
+        <span className="block text-label-lg">{title}</span>
+        <span className="mt-0.5 block text-body-sm text-ink-secondary">{detail}</span>
       </span>
     </li>
   );

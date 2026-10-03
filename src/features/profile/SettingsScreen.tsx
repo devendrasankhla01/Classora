@@ -47,7 +47,7 @@ export function SettingsScreen() {
                   'flex-1 rounded-block border p-3 text-left transition',
                   settings?.theme === theme
                     ? 'border-brand-500 bg-brand-50/60'
-                    : 'border-black/[0.07] bg-surface',
+                    : 'border-edge bg-surface',
                 )}
               >
                 <span className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export function SettingsScreen() {
                   />
                   <span
                     className={cn(
-                      'text-[13px] font-bold capitalize',
+                      'text-label-lg capitalize',
                       settings?.theme === theme ? 'text-brand-700' : 'text-ink',
                     )}
                   >
@@ -70,8 +70,8 @@ export function SettingsScreen() {
           </div>
           <div className="mt-3.5 flex items-center justify-between">
             <div className="min-w-0">
-              <p className="text-[13.5px] font-bold">Working Saturdays</p>
-              <p className="text-[12px] text-ink-secondary">Show the Saturday column in weekly view</p>
+              <p className="text-label-lg">Working Saturdays</p>
+              <p className="text-label-md text-ink-secondary">Show the Saturday column in weekly view</p>
             </div>
             <Pill tone="muted">Set in Academic Calendar</Pill>
           </div>
@@ -83,7 +83,7 @@ export function SettingsScreen() {
             subtitle={`${records} records on this device`}
             action={<Pill tone={mode === 'local' ? 'muted' : 'brand'}>{mode === 'local' ? 'Local' : 'Cloud'}</Pill>}
           />
-          <p className="text-[13px] leading-relaxed text-ink-secondary">
+          <p className="text-body-sm text-ink-secondary">
             Classora keeps your timetable and attendance in an on-device database so it works with no signal.
             {mode === 'local'
               ? ' In Local mode nothing leaves this device unless you export it.'
@@ -92,8 +92,8 @@ export function SettingsScreen() {
 
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div className="rounded-block bg-surface-muted p-3.5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">Sync</p>
-              <p className="mt-1 inline-flex items-center gap-1.5 text-[13.5px] font-bold capitalize">
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Sync</p>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-label-lg capitalize">
                 <span
                   className={cn(
                     'h-2 w-2 rounded-full',
@@ -104,8 +104,8 @@ export function SettingsScreen() {
               </p>
             </div>
             <div className="rounded-block bg-surface-muted p-3.5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">Confidence</p>
-              <p className="mt-1 text-[13.5px] font-bold tabular-nums">{confidence()}%</p>
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Confidence</p>
+              <p className="mt-1 text-label-lg tabular-nums">{confidence()}%</p>
             </div>
           </div>
 
@@ -151,13 +151,13 @@ export function SettingsScreen() {
               Clear caches
             </Button>
           </div>
-          {note ? <p className="mt-2.5 text-[12px] text-ink-secondary">{note}</p> : null}
+          {note ? <p className="mt-2.5 text-label-md text-ink-secondary">{note}</p> : null}
         </Card>
 
         <Card>
           <SectionHeader title="Notifications" subtitle="Reminder preferences and device permission" />
-          <div className="flex items-center justify-between rounded-block bg-surface-muted px-3.5 py-3.5">
-            <span className="inline-flex items-center gap-2.5 text-[13.5px] font-semibold">
+          <div className="flex min-h-14 items-center justify-between rounded-block bg-surface-muted px-3.5 py-3">
+            <span className="inline-flex items-center gap-2.5 text-label-lg">
               <Icon name="notifications" size={18} className="text-ink-muted" />
               Browser permission
             </span>
@@ -167,7 +167,7 @@ export function SettingsScreen() {
           </div>
           <Link
             to="/profile/notifications"
-            className="mt-3 flex items-center gap-3 text-[13.5px] font-bold text-brand-700"
+className="mt-3 flex items-center gap-3 text-label-lg text-brand-700"
           >
             Reminder settings
             <Icon name="arrow_forward" size={16} />
@@ -182,12 +182,12 @@ export function SettingsScreen() {
           >
             <Icon name="ios_share" size={19} className="text-ink-muted" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[14px] font-bold">Export data</span>
-              <span className="block text-[12px] text-ink-secondary">CSV statement or full JSON backup</span>
+              <span className="block text-label-lg">Export data</span>
+              <span className="block text-label-md text-ink-secondary">CSV statement or full JSON backup</span>
             </span>
             <Icon name="chevron_right" size={19} className="text-ink-muted" />
           </Link>
-          <p className="mt-3 text-[11.5px] text-ink-muted">
+          <p className="mt-3 text-label-sm text-ink-muted">
             Deleting the app removes on-device data. Export first if you want to keep it.
           </p>
         </Card>
@@ -197,12 +197,12 @@ export function SettingsScreen() {
           onClick={() =>
             announce({ tone: 'info', message: 'Classora is up to date — build 1.0.0' })
           }
-          className="w-full rounded-pill py-3 text-[12.5px] font-semibold text-ink-muted"
+className="w-full rounded-pill py-3 text-label-md text-ink-muted"
         >
           Check for updates
         </button>
 
-        <p className="pb-2 text-center text-[11px] text-ink-muted">
+        <p className="pb-2 text-center text-label-sm text-ink-muted">
           Classora • Build 1.0.0 • Offline first, built for students
         </p>
       </div>

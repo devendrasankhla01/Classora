@@ -91,7 +91,7 @@ export function ReviewAttendanceScreen() {
             type="button"
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-black/[0.04]"
+            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-hairline"
           >
             <Icon name="arrow_back" size={19} />
           </button>
@@ -103,11 +103,11 @@ export function ReviewAttendanceScreen() {
           <div className="flex gap-3">
             <Icon name="fact_check" size={19} className="mt-0.5 shrink-0 text-warning-600" />
             <div>
-              <p className="text-[13px] font-bold text-warning-700">
+              <p className="text-label-lg text-warning-700">
                 Data Confidence {confidence.percent}% — {reviewableUnits}{' '}
                 {reviewableUnits === 1 ? 'attendance unit' : 'attendance units'} unresolved
               </p>
-              <p className="mt-0.5 text-[12.5px] leading-relaxed text-warning-700/90">
+              <p className="mt-0.5 text-body-sm text-warning-700/90">
                 These classes are in the past but never marked. They are left out of your percentage rather than
                 guessed, so marking them now sharpens every projection in the app.
               </p>
@@ -140,7 +140,7 @@ export function ReviewAttendanceScreen() {
                 <button
                   type="button"
                   onClick={() => setSelected(new Set())}
-                  className="text-[12.5px] font-semibold text-ink-secondary"
+className="text-label-md text-ink-secondary"
                 >
                   Clear
                 </button>
@@ -148,7 +148,7 @@ export function ReviewAttendanceScreen() {
                 <button
                   type="button"
                   onClick={() => setSelected(new Set(allIds))}
-                  className="text-[12.5px] font-semibold text-brand-700"
+className="text-label-md text-brand-700"
                 >
                   Select all {allIds.length}
                 </button>
@@ -164,7 +164,7 @@ export function ReviewAttendanceScreen() {
                     <button
                       type="button"
                       onClick={() => void Promise.all(group.items.map((item) => markAttendance(item.id, 'present')))}
-                      className="text-[12px] font-bold text-brand-700"
+className="text-label-md text-brand-700"
                     >
                       All present
                     </button>
@@ -184,7 +184,7 @@ export function ReviewAttendanceScreen() {
                         key={occurrence.id}
                         className={cn(
                           'rounded-block border p-3.5 transition',
-                          isSelected ? 'border-brand-500 bg-brand-50/50' : 'border-black/[0.06] bg-surface',
+                          isSelected ? 'border-brand-500 bg-brand-50/50' : 'border-divider bg-surface',
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -204,14 +204,14 @@ export function ReviewAttendanceScreen() {
                           {subject ? <SubjectGlyph subject={subject} size={38} /> : null}
 
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-[14px] font-bold">{subject?.name ?? 'Class'}</p>
-                            <p className="mt-0.5 text-[12px] text-ink-secondary">
+                            <p className="truncate text-label-lg">{subject?.name ?? 'Class'}</p>
+                            <p className="mt-0.5 text-label-md text-ink-secondary">
                               {formatTimeRange(occurrence.startTime, occurrence.endTime)}
                               {occurrence.room ? ` • ${occurrence.room}` : ''}
                               {weight > 1 ? ` • ${weight} periods` : ''}
                             </p>
                             {occurrence.date < today ? (
-                              <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-ink-muted">
+                              <p className="mt-1 inline-flex items-center gap-1 text-label-sm font-semibold text-ink-muted">
                                 <Icon name="history" size={12} />
                                 {formatRelativeDayLabel(occurrence.date)}
                               </p>
@@ -223,14 +223,14 @@ export function ReviewAttendanceScreen() {
                           <button
                             type="button"
                             onClick={() => void markAttendance(occurrence.id, 'present')}
-                            className="flex-1 rounded-pill bg-safe-50 py-2.5 text-[12.5px] font-bold text-safe-700 transition active:scale-[0.98]"
+className="flex-1 rounded-pill bg-safe-50 py-2.5 text-label-md text-safe-700 transition active:scale-[0.98]"
                           >
                             Present
                           </button>
                           <button
                             type="button"
                             onClick={() => void markAttendance(occurrence.id, 'absent')}
-                            className="flex-1 rounded-pill bg-critical-50 py-2.5 text-[12.5px] font-bold text-critical-600 transition active:scale-[0.98]"
+className="flex-1 rounded-pill bg-critical-50 py-2.5 text-label-md text-critical-600 transition active:scale-[0.98]"
                           >
                             Absent
                           </button>
@@ -240,7 +240,7 @@ export function ReviewAttendanceScreen() {
                             onClick={() =>
                               void cancelClass({ occurrenceId: occurrence.id, reason: 'Not conducted' })
                             }
-                            className="rounded-pill bg-surface-sunken px-3.5 py-2.5 text-[12.5px] font-bold text-ink-secondary transition active:scale-[0.98]"
+className="rounded-pill bg-surface-sunken px-3.5 py-2.5 text-label-md text-ink-secondary transition active:scale-[0.98]"
                           >
                             Not held
                           </button>
@@ -264,7 +264,7 @@ export function ReviewAttendanceScreen() {
               >
                 Mark {selectedIds.length > 0 ? selectedIds.length : allIds.length} absent
               </Button>
-              <p className="px-1 text-center text-[11.5px] text-ink-muted">
+              <p className="px-1 text-center text-label-sm text-ink-muted">
                 {selectedIds.length > 0
                   ? 'Applies only to the classes you selected.'
                   : 'Nothing is selected, so the bulk action applies to every unmarked class listed above.'}

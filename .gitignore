@@ -47,3 +47,6 @@ tmp/
 
 # --- dev-dist for PWA (generated) ---
 dev-dist/
+
+# --- dev inbox payloads (transient; real assets live in public/ + design/) ---
+.dev/inbox/

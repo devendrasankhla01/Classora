@@ -34,13 +34,13 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
                 'relative flex w-[58px] flex-col items-center gap-1 rounded-[18px] px-2 pb-2.5 pt-3 transition-all duration-200 ease-porcelain',
                 selected
                   ? 'bg-brand-600 text-white shadow-elevated'
-                  : 'bg-surface text-ink-secondary shadow-ambient ring-1 ring-black/[0.03]',
+                  : 'bg-surface text-ink-secondary shadow-ambient ring-1 ring-hairline',
               )}
             >
-              <span className={cn('text-[11px] font-semibold uppercase tracking-wide', selected ? 'text-white/80' : 'text-ink-muted')}>
+              <span className={cn('text-label-sm font-semibold uppercase tracking-wide', selected ? 'text-white/80' : 'text-ink-muted')}>
                 {formatWeekdayShort(date)}
               </span>
-              <span className={cn('text-[19px] font-bold leading-none', selected ? 'text-white' : 'text-ink')}>
+              <span className={cn('text-headline-sm ', selected ? 'text-white' : 'text-ink')}>
                 {formatDayNumber(date)}
               </span>
               <span

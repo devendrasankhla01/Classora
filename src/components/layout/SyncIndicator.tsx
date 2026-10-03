@@ -39,7 +39,7 @@ export function SyncIndicator() {
     <div className="fixed inset-x-0 top-0 z-40 flex justify-center pt-safe">
       <div
         className={cn(
-          'mt-2 inline-flex items-center gap-2 rounded-pill px-3.5 py-1.5 text-[11.5px] font-semibold shadow-ambient',
+          'mt-2 inline-flex items-center gap-2 rounded-pill px-3.5 py-1.5 text-label-sm font-semibold shadow-ambient',
           syncState === 'offline' ? 'bg-warning-50 text-warning-700' : 'bg-brand-50 text-brand-700',
         )}
       >

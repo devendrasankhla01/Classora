@@ -44,26 +44,26 @@ export function SubjectAttendanceCard({ insight }: { insight: SubjectInsight }) 
   return (
     <Link
       to={`/attendance/${subject.id}`}
-      className="block rounded-card bg-surface p-4 shadow-ambient ring-1 ring-black/[0.03] transition active:scale-[0.995]"
+      className="block rounded-card bg-surface p-4 shadow-ambient ring-1 ring-hairline transition active:scale-[0.995]"
     >
       <div className="flex items-start gap-3.5">
         <SubjectGlyph subject={subject} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="min-w-0 truncate text-[15.5px] font-bold tracking-[-0.01em] text-ink">
+            <h3 className="min-w-0 truncate text-label-lg text-ink">
               {subject.name}
             </h3>
             <StatusChip tone={status.health} label={status.label} />
           </div>
-          <p className="mt-0.5 truncate text-[12.5px] text-ink-secondary">
+          <p className="mt-0.5 truncate text-body-sm text-ink-secondary">
             {[subject.subjectCode, subject.faculty].filter(Boolean).join(' • ')}
           </p>
 
           <div className="mt-2.5 flex items-end justify-between gap-3">
-            <span className={cn('text-[26px] font-extrabold leading-none tracking-[-0.02em] tabular-nums', PERCENT_TEXT[status.health])}>
+            <span className={cn('text-headline-md   tabular-nums', PERCENT_TEXT[status.health])}>
               {summary.percentage === null ? '—' : `${percentage.toFixed(1)}%`}
             </span>
-            <span className="pb-0.5 text-[12px] font-semibold text-ink-secondary">
+            <span className="pb-0.5 text-label-md text-ink-secondary">
               {summary.attended} / {summary.conducted}{' '}
               {subject.attendanceCountMode === 'session' ? 'sessions' : 'attended'}
             </span>
@@ -78,7 +78,7 @@ export function SubjectAttendanceCard({ insight }: { insight: SubjectInsight }) 
           />
 
           <div className="mt-2.5 flex items-center justify-between gap-2">
-            <span className={cn('inline-flex items-center gap-1.5 text-[12px] font-semibold', footer.tone)}>
+            <span className={cn('inline-flex items-center gap-1.5 text-label-md', footer.tone)}>
               <Icon name={footer.icon} size={14} />
               {footer.text}
             </span>

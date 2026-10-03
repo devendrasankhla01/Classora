@@ -21,6 +21,7 @@ import { ReviewAttendanceScreen } from '@/features/attendance/ReviewAttendanceSc
 import { TimetableImportScreen } from '@/features/timetable/TimetableImportScreen';
 import { AcademicCalendarScreen } from '@/features/timetable/AcademicCalendarScreen';
 import { NotificationsScreen } from '@/features/notifications/NotificationsScreen';
+import { LoginScreen, writeStoredSession } from '@/features/auth/LoginScreen';
 
 function renderScreen(element: React.ReactElement, path = '/') {
   return render(
@@ -131,5 +132,14 @@ describe('screens render with real data', () => {
   it('Notifications renders the inbox or its empty state', () => {
     renderScreen(<NotificationsScreen />);
     expect(screen.getAllByText(/notifications/i).length).toBeGreaterThan(0);
+  });
+
+  it('Login renders the sign-in tabs and guest continue action', () => {
+    writeStoredSession(null);
+    renderScreen(<LoginScreen />, '/login');
+    expect(screen.getByRole('tab', { name: /sign in/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /create/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /magic link/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /skip for now/i })).toBeTruthy();
   });
 });

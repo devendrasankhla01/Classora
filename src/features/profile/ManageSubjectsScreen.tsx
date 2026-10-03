@@ -55,8 +55,8 @@ export function ManageSubjectsScreen() {
                   <div className="flex items-start gap-3.5">
                     <SubjectGlyph subject={subject} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-bold leading-tight">{subject.name}</p>
-                      <p className="mt-0.5 text-[12.5px] text-ink-secondary">
+                      <p className="text-label-lg">{subject.name}</p>
+                      <p className="mt-0.5 text-body-sm text-ink-secondary">
                         {[subject.subjectCode, subject.faculty, subject.defaultRoom].filter(Boolean).join(' • ')}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -97,15 +97,15 @@ export function ManageSubjectsScreen() {
               {archived.map((subject) => (
                 <li key={subject.id} className="flex items-center justify-between gap-3 rounded-block bg-surface-muted px-3.5 py-3">
                   <span className="min-w-0">
-                    <span className="block truncate text-[13.5px] font-semibold">{subject.name}</span>
-                    <span className="block text-[11.5px] text-ink-secondary">{subject.subjectCode ?? '—'}</span>
+                    <span className="block truncate text-label-lg">{subject.name}</span>
+                    <span className="block text-label-sm text-ink-secondary">{subject.subjectCode ?? '—'}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() =>
                       void upsertSubject({ ...subject, archived: false, updatedAt: nowInstant() })
                     }
-                    className="text-[12.5px] font-bold text-brand-700"
+className="text-label-md text-brand-700"
                   >
                     Restore
                   </button>
@@ -277,14 +277,14 @@ export function SubjectSheet({
                 className={
                   value('colorKey', 'indigo') === tone
                     ? 'h-9 w-9 rounded-full ring-2 ring-brand-500 ring-offset-2'
-                    : 'h-9 w-9 rounded-full ring-1 ring-black/10'
+                    : 'h-9 w-9 rounded-full ring-1 ring-edge'
                 }
                 style={{ backgroundColor: TONE_HEX[tone] }}
               />
             ))}
           </div>
         </Field>
-        <p className="text-[11.5px] text-ink-muted">
+        <p className="text-label-sm text-ink-muted">
           <Icon name="info" size={13} className="mr-1 inline align-middle" />
           Changing the counting rule only affects future calculations; existing records keep the weight they
           were marked with.

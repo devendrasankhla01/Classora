@@ -61,20 +61,20 @@ export function NotificationSettingsScreen() {
           />
 
           {permission === 'granted' ? (
-            <p className="text-[13px] leading-relaxed text-ink-secondary">
+            <p className="text-body-sm text-ink-secondary">
               Notifications are enabled on this device. Reminders are scheduled locally from your own
               timetable — no server keeps a copy of your schedule.
             </p>
           ) : permission === 'denied' ? (
             <div className="rounded-block bg-critical-50 p-3.5">
-              <p className="text-[13px] font-semibold text-critical-700">Notifications are blocked</p>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-critical-700/90">
+              <p className="text-label-lg text-critical-700">Notifications are blocked</p>
+              <p className="mt-1 text-body-sm text-critical-700/90">
                 Open your browser's site settings for Classora and allow notifications, then return here. In-app
                 banners still work in the meantime.
               </p>
             </div>
           ) : permission === 'unsupported' ? (
-            <p className="text-[13px] text-ink-secondary">
+            <p className="text-body-sm text-ink-secondary">
               This browser does not support notifications. Classora will keep using in-app reminders.
             </p>
           ) : (
@@ -98,7 +98,7 @@ export function NotificationSettingsScreen() {
 
           {unread > 0 ? (
             <div className="mt-3.5 flex items-center justify-between rounded-block bg-surface-muted px-3.5 py-3">
-              <span className="inline-flex items-center gap-2 text-[13px] font-semibold">
+              <span className="inline-flex items-center gap-2 text-label-lg">
                 <Icon name="inbox" size={17} className="text-ink-muted" />
                 {unread} unread {unread === 1 ? 'alert' : 'alerts'} in the app
               </span>
@@ -110,7 +110,7 @@ export function NotificationSettingsScreen() {
         <Card>
           <SectionHeader title="Reminders" subtitle="What Classora tells you about" />
 
-          <div className="divide-y divide-black/[0.05]">
+          <div className="divide-y divide-divider">
             <SettingRow
               title="After-class reminder"
               hint="Ask you to mark attendance once a lecture ends"
@@ -118,11 +118,11 @@ export function NotificationSettingsScreen() {
               onChange={(value) => patch({ afterClassReminder: value })}
             />
 
-            <div className="py-3.5">
+            <div className="min-h-14 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[14px] font-bold">Reminder delay</p>
-                  <p className="text-[12px] text-ink-secondary">Minutes after the class ends</p>
+                  <p className="text-label-lg">Reminder delay</p>
+                  <p className="text-label-md text-ink-secondary">Minutes after the class ends</p>
                 </div>
                 <div className="flex shrink-0 gap-1.5">
                   {DELAYS.map((delay) => (
@@ -133,8 +133,8 @@ export function NotificationSettingsScreen() {
                       onClick={() => patch({ reminderDelayMinutes: delay })}
                       className={
                         prefs.reminderDelayMinutes === delay
-                          ? 'rounded-pill bg-brand-600 px-3 py-1.5 text-[12px] font-bold text-white'
-                          : 'rounded-pill bg-surface-sunken px-3 py-1.5 text-[12px] font-semibold text-ink-secondary'
+                          ? 'rounded-pill bg-brand-600 px-3 py-1.5 text-label-md text-white'
+                          : 'rounded-pill bg-surface-sunken px-3 py-1.5 text-label-md text-ink-secondary'
                       }
                     >
                       {delay === 0 ? 'Now' : `${delay}m`}
@@ -143,7 +143,7 @@ export function NotificationSettingsScreen() {
                 </div>
               </div>
               {!prefs.afterClassReminder ? (
-                <p className="mt-2 text-[11.5px] text-ink-muted">Turn on after-class reminders to use this.</p>
+                <p className="mt-2 text-label-sm text-ink-muted">Turn on after-class reminders to use this.</p>
               ) : null}
             </div>
 
@@ -200,7 +200,7 @@ export function NotificationSettingsScreen() {
           </Button>
         </Card>
 
-        <p className="pb-2 text-center text-[11px] text-ink-muted">
+        <p className="pb-2 text-center text-label-sm text-ink-muted">
           <Icon name="shield" size={12} className="mr-1 inline align-middle" />
           Preferences are stored on this device and applied by the local scheduler.
         </p>
@@ -221,10 +221,10 @@ function SettingRow({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 py-3.5">
+    <div className="flex min-h-14 items-center gap-3 py-3">
       <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-bold leading-tight">{title}</p>
-        <p className="mt-0.5 text-[12px] text-ink-secondary">{hint}</p>
+        <p className="text-label-lg">{title}</p>
+        <p className="mt-0.5 text-label-md text-ink-secondary">{hint}</p>
       </div>
       <Toggle checked={checked} onChange={onChange} label={title} />
     </div>

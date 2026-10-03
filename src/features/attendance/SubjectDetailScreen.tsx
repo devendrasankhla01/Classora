@@ -48,7 +48,7 @@ export function SubjectDetailScreen() {
               title="Subject not found"
               message="This subject may have been archived. Open Manage Subjects to see all subjects."
               action={
-                <Link to="/profile/subjects" className="text-[13.5px] font-bold text-brand-700">
+                <Link to="/profile/subjects" className="text-label-lg text-brand-700">
                   Manage subjects
                 </Link>
               }
@@ -94,10 +94,10 @@ export function SubjectDetailScreen() {
           <div className="flex items-start gap-3.5">
             <SubjectGlyph subject={subject} size={52} />
             <div className="min-w-0 flex-1">
-              <h2 className="text-[19px] font-extrabold leading-tight tracking-[-0.02em]">
+              <h2 className="text-headline-sm">
                 {subject.name}
               </h2>
-              <p className="mt-1 text-[13px] text-ink-secondary">
+              <p className="mt-1 text-body-sm text-ink-secondary">
                 {[subject.subjectCode, subject.faculty, subject.defaultRoom].filter(identity).join(' • ')}
               </p>
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
@@ -113,19 +113,19 @@ export function SubjectDetailScreen() {
 
           <div className="mt-5 flex items-end justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-muted">
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 Current attendance
               </p>
-              <p className="mt-1 text-[34px] font-extrabold leading-none tracking-[-0.03em] tabular-nums">
+              <p className="mt-1 text-metric-xl tabular-nums">
                 {summary.percentage === null ? '—' : `${percentage.toFixed(1)}%`}
               </p>
             </div>
-            <p className="pb-1 text-[12.5px] font-semibold text-ink-secondary">Target {target}%</p>
+            <p className="pb-1 text-label-md text-ink-secondary">Target {target}%</p>
           </div>
 
           <ProgressBar className="mt-3" value={percentage} tone={status.health} markerAt={target} height={8} />
 
-          <div className="mt-4 grid grid-cols-4 gap-2 rounded-block border border-black/[0.06] bg-surface-muted py-3">
+          <div className="mt-4 grid grid-cols-4 gap-2 rounded-block border border-divider bg-surface-muted py-3">
             <MiniStat label="Attended" value={summary.attended} />
             <MiniStat label="Missed" value={summary.missed} />
             <MiniStat label="Conducted" value={summary.conducted} />
@@ -161,18 +161,18 @@ export function SubjectDetailScreen() {
           </div>
 
           <div className="mt-4 rounded-block bg-surface-muted p-3.5">
-            <p className="text-[13px] font-semibold">
+            <p className="text-label-lg">
               {safeMisses > 0 ? (
                 <>
                   Safe misses remaining:{' '}
-                  <span className="font-extrabold text-safe-700">
+                  <span className="font-bold text-safe-700">
                     {safeMisses} {safeMisses === 1 ? 'class' : 'classes'}
                   </span>
                 </>
               ) : recovery.classes > 0 ? (
                 <>
                   Attend{' '}
-                  <span className="font-extrabold text-critical-600">
+                  <span className="font-bold text-critical-600">
                     {recovery.classes} {recovery.classes === 1 ? 'class' : 'classes'}
                   </span>{' '}
                   to return to {target}%
@@ -182,7 +182,7 @@ export function SubjectDetailScreen() {
               )}
             </p>
             {forecast?.date && !forecast.unreachable ? (
-              <p className="mt-1 text-[12.5px] text-ink-secondary">
+              <p className="mt-1 text-body-sm text-ink-secondary">
                 Attending every upcoming class brings you back to target around{' '}
                 <span className="font-semibold text-ink">{formatMediumDate(forecast.date)}</span>.
               </p>
@@ -202,10 +202,10 @@ export function SubjectDetailScreen() {
         <Card>
           <SectionHeader
             title="Upcoming classes"
-            action={<span className="text-[12.5px] font-semibold text-ink-secondary">{insight.upcoming.length}</span>}
+            action={<span className="text-label-md text-ink-secondary">{insight.upcoming.length}</span>}
           />
           {insight.upcoming.length === 0 ? (
-            <p className="text-[13px] text-ink-secondary">
+            <p className="text-body-sm text-ink-secondary">
               No scheduled classes left this term for {subject.shortName}.
             </p>
           ) : (
@@ -213,8 +213,8 @@ export function SubjectDetailScreen() {
               {insight.upcoming.slice(0, 5).map((occurrence) => (
                 <li key={occurrence.id} className="flex items-center justify-between rounded-block bg-surface-muted px-3.5 py-3">
                   <span>
-                    <span className="block text-[13.5px] font-semibold">{formatMediumDate(occurrence.date)}</span>
-                    <span className="block text-[12px] text-ink-secondary">
+                    <span className="block text-label-lg">{formatMediumDate(occurrence.date)}</span>
+                    <span className="block text-label-md text-ink-secondary">
                       {formatTimeRange(occurrence.startTime, occurrence.endTime)}
                       {occurrence.room ? ` • ${occurrence.room}` : ''}
                     </span>
@@ -240,8 +240,8 @@ export function SubjectDetailScreen() {
               return (
                 <li key={occurrence.id} className="flex items-center justify-between gap-3 rounded-block bg-surface-muted px-3.5 py-3">
                   <span className="min-w-0">
-                    <span className="block text-[13.5px] font-semibold">{formatMediumDate(occurrence.date)}</span>
-                    <span className="block text-[12px] text-ink-secondary">
+                    <span className="block text-label-lg">{formatMediumDate(occurrence.date)}</span>
+                    <span className="block text-label-md text-ink-secondary">
                       {formatTimeRange(occurrence.startTime, occurrence.endTime)}
                       {occurrence.occurrenceType !== 'regular'
                         ? ` • ${occurrence.occurrenceType === 'extra' ? 'Extra class' : 'Replacement'}`
@@ -253,7 +253,7 @@ export function SubjectDetailScreen() {
               );
             })}
           </ul>
-          <p className="mt-3 text-[12px] text-ink-muted">
+          <p className="mt-3 text-label-md text-ink-muted">
             Corrections are always possible — open a class from the Timetable timeline to change a record.
           </p>
         </Card>
@@ -268,7 +268,7 @@ function BackButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="Go back"
-      className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-black/[0.04]"
+      className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-hairline"
     >
       <Icon name="arrow_back" size={19} />
     </button>
@@ -278,8 +278,8 @@ function BackButton({ onClick }: { onClick: () => void }) {
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="text-center">
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-ink-muted">{label}</p>
-      <p className="mt-1 text-[17px] font-extrabold tabular-nums">{value}</p>
+      <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">{label}</p>
+      <p className="mt-1 text-body-lg font-bold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -303,13 +303,13 @@ function ProjectionRow({
   return (
     <div className={`rounded-block ${bg} p-3.5`}>
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-ink-muted">{label}</span>
-        <span className={`text-[16px] font-extrabold tabular-nums ${color}`}>
+        <span className="text-label-md uppercase tracking-[0.03em] text-ink-muted">{label}</span>
+        <span className={`text-body-lg font-bold tabular-nums ${color}`}>
           {value === null ? '—' : `${value.toFixed(1)}%`}
         </span>
       </div>
       <ProgressBar className="mt-2" value={value ?? 0} tone={tone} height={6} animate={false} />
-      <div className="mt-2 flex items-center justify-between text-[11.5px]">
+      <div className="mt-2 flex items-center justify-between text-label-sm">
         <span className="text-ink-secondary">{note}</span>
         {delta !== null ? (
           <span className={delta >= 0 ? 'font-semibold text-safe-700' : 'font-semibold text-critical-600'}>

@@ -8,6 +8,8 @@ import { useClassora } from '@/app/store';
 
 interface AppHeaderProps {
   eyebrow?: string;
+  /** Swap the text eyebrow for the Classora wordmark artwork. */
+  wordmark?: boolean;
   title: string;
   /** Muted line rendered directly above the title (e.g. the current date). */
   overline?: string;
@@ -25,6 +27,7 @@ interface AppHeaderProps {
  */
 export function AppHeader({
   eyebrow = 'Classora',
+  wordmark = false,
   title,
   overline,
   subtitle,
@@ -40,15 +43,19 @@ export function AppHeader({
       {leading ? <div className="mb-3">{leading}</div> : null}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-muted">{eyebrow}</p>
+          {wordmark ? (
+            <img src="/branding/wordmark.png" alt="Classora" className="h-[19px] w-auto" />
+          ) : (
+            <p className="text-label-sm uppercase text-ink-muted">{eyebrow}</p>
+          )}
           {overline ? (
-            <p className="mt-2 text-[15px] font-medium text-ink-secondary">{overline}</p>
+            <p className="mt-2 text-body-lg font-medium text-ink-secondary">{overline}</p>
           ) : null}
-          <h1 className="mt-1 text-[28px] font-extrabold leading-[1.1] tracking-[-0.02em] text-ink">
+          <h1 className="mt-1 text-headline-lg text-ink">
             {title}
           </h1>
           {subtitle ? (
-            <p className="mt-1 text-[22px] font-bold leading-tight tracking-[-0.02em] text-ink-secondary">
+            <p className="mt-1 text-headline-md text-ink-secondary">
               {subtitle}
             </p>
           ) : null}
@@ -59,7 +66,7 @@ export function AppHeader({
             <Link
               to="/notifications"
               aria-label="Notifications"
-              className="relative grid h-10 w-10 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-black/[0.04] transition active:scale-95"
+              className="relative grid h-10 w-10 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-hairline transition active:scale-95"
             >
               <Icon name="notifications" size={19} />
               {unreadCount > 0 ? (
@@ -69,7 +76,7 @@ export function AppHeader({
             <Link
               to="/profile"
               aria-label="Profile"
-              className="grid h-10 w-10 place-items-center overflow-hidden rounded-full shadow-ambient ring-1 ring-black/[0.04]"
+              className="grid h-10 w-10 place-items-center overflow-hidden rounded-full shadow-ambient ring-1 ring-hairline"
             >
               {profile ? (
                 <Avatar name={profile.name} size={40} />
