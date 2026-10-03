@@ -119,7 +119,24 @@ export function AttendanceScreen() {
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {insights.length === 0 ? (
+          <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
+            <EmptyState
+              icon="library_books"
+              title="No subjects added yet"
+              message="Add your subjects or import a timetable to begin tracking your attendance."
+              action={
+                <Link
+                  to="/profile/subjects"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-brand-600 px-5 text-label-lg text-white shadow-elevated"
+                >
+                  <Icon name="add" size={18} />
+                  Add subjects
+                </Link>
+              }
+            />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
             <EmptyState
               icon="filter_list_off"

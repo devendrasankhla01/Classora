@@ -7,8 +7,6 @@
  * mutation is applied optimistically so the UI never waits on the network.
  */
 import { create } from 'zustand';
-
-import { buildDemoDataset } from '@/data/demo';
 import { LocalStore } from '@/services/local/localStore';
 import { createCloudStoreIfConfigured } from '@/services/cloud/createCloudStore';
 import type { DataStore } from '@/services/types';
@@ -217,33 +215,49 @@ export const useClassora = create<ClassoraState>((set, get) => {
       const seeded = await store.isSeeded();
 
       if (!seeded) {
-        const dataset = buildDemoDataset(new Date());
-        await store.importBackup({
-          schemaVersion: 1,
-          exportedAt: nowInstant(),
-          profile: dataset.profile,
-          semesters: [dataset.semester],
-          subjects: dataset.subjects,
-          versions: dataset.versions,
-          slots: dataset.slots,
-          occurrences: dataset.occurrences,
-          attendance: dataset.attendance,
-          overrides: dataset.overrides,
-          audit: dataset.audit,
-          settings: {
-            id: 'settings',
-            theme: 'light',
-            previewDate: null,
-            onboarded: true,
-          },
-          preferences: dataset.notificationPreferences,
-        });
-        await store.saveSettings({
+        const now = nowInstant();
+        const cleanProfile: Profile = {
+          id: createId('prof'),
+          userId: null,
+          name: 'Student',
+          email: null,
+          studentId: null,
+          avatarUrl: null,
+          college: null,
+          department: null,
+          departmentLabel: null,
+          semesterLabel: null,
+          batchRoll: null,
+          timezone: 'Asia/Kolkata',
+          attendanceTarget: 75,
+          safeMarginAlertClasses: 3,
+          defaultCountMode: 'period',
+          createdAt: now,
+          updatedAt: now,
+        };
+        const cleanPreferences: NotificationPreference = {
+          id: createId('pref'),
+          profileId: cleanProfile.id,
+          afterClassReminder: true,
+          reminderDelayMinutes: 10,
+          timetableChangeAlert: true,
+          attendanceRiskAlert: true,
+          morningDigest: true,
+          morningDigestTime: '07:30',
+          combinedBackToBackAlerts: true,
+          notifyOnWorkingSaturdays: true,
+          createdAt: now,
+          updatedAt: now,
+        };
+        const cleanSettings: AppSettings = {
           id: 'settings',
           theme: 'light',
           previewDate: null,
           onboarded: true,
-        });
+        };
+        await store.saveProfile(cleanProfile);
+        await store.savePreferences(cleanPreferences);
+        await store.saveSettings(cleanSettings);
       }
 
       const [profile, semesters, settings] = await Promise.all([
@@ -253,9 +267,30 @@ export const useClassora = create<ClassoraState>((set, get) => {
       ]);
       const notifications = profile ? await store.listNotifications(profile.id) : [];
 
-      const semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
-      if (!semester || !profile) {
+      if (!profile) {
         set({ ready: true, mode: store.mode });
+        return;
+      }
+
+      const semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
+      if (!semester) {
+        const preferences = await store.getPreferences(profile.id);
+        set({
+          ready: true,
+          mode: store.mode,
+          profile,
+          semester: null,
+          subjects: [],
+          versions: [],
+          slots: [],
+          occurrences: [],
+          attendance: [],
+          overrides: [],
+          audit: [],
+          notifications,
+          preferences,
+          settings,
+        });
         return;
       }
 
@@ -314,7 +349,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
         preferences: null,
       });
       await get().initialize();
-      set({ toast: toast('Demo data restored') });
+      set({ toast: toast('All data cleared', 'info') });
     },
 
     setSyncState: (syncState) => set({ syncState }),
@@ -650,12 +685,31 @@ export const useClassora = create<ClassoraState>((set, get) => {
      * Subjects & policy                                                 *
      * ---------------------------------------------------------------- */
     upsertSubject: async (subject) => {
+      let semester = get().semester;
+      if (!semester) {
+        const today = new Date();
+        const start = today.toISOString().slice(0, 10);
+        const end = new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        semester = {
+          id: createId('sem'),
+          name: 'Current Semester',
+          startDate: start,
+          endDate: end,
+          isActive: true,
+          archived: false,
+          createdAt: nowInstant(),
+          updatedAt: nowInstant(),
+        };
+        await store.saveSemester(semester);
+        set({ semester });
+      }
+      const subjectToSave: Subject = { ...subject, semesterId: subject.semesterId || semester.id };
       set((state) => ({
-        subjects: [...state.subjects.filter((item) => item.id !== subject.id), subject].sort((a, b) =>
+        subjects: [...state.subjects.filter((item) => item.id !== subjectToSave.id), subjectToSave].sort((a, b) =>
           a.name.localeCompare(b.name),
         ),
       }));
-      await store.saveSubject(subject);
+      await store.saveSubject(subjectToSave);
       set({ toast: toast('Subject saved') });
     },
 
@@ -773,8 +827,25 @@ export const useClassora = create<ClassoraState>((set, get) => {
     },
 
     applyImportedTimetable: async ({ subjects, slots, notes }) => {
-      const { semester, versions, subjects: existingSubjects } = get();
-      if (!semester) return;
+      let semester = get().semester;
+      if (!semester) {
+        const today = new Date();
+        const start = today.toISOString().slice(0, 10);
+        const end = new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        semester = {
+          id: createId('sem'),
+          name: 'Current Semester',
+          startDate: start,
+          endDate: end,
+          isActive: true,
+          archived: false,
+          createdAt: nowInstant(),
+          updatedAt: nowInstant(),
+        };
+        await store.saveSemester(semester);
+        set({ semester });
+      }
+      const { versions, subjects: existingSubjects } = get();
 
       const merged = [...existingSubjects.filter((s) => !subjects.some((n) => n.id === s.id)), ...subjects];
       set({ subjects: merged });
