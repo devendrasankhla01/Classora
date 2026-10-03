@@ -11,6 +11,10 @@ const ALLOWED_MIME = new Set([
   'image/webp',
   'image/heic',
   'image/heif',
+  'text/csv',
+  'application/csv',
+  'text/plain',
+  'application/vnd.ms-excel',
 ]);
 
 /**
@@ -28,9 +32,10 @@ export function validateUpload(file: File): void {
     );
   }
   const mime = file.type.toLowerCase();
-  if (!ALLOWED_MIME.has(mime)) {
+  const isCsv = file.name.toLowerCase().endsWith('.csv');
+  if (!ALLOWED_MIME.has(mime) && !isCsv) {
     throw new ExtractionError(
-      'Unsupported file type. Upload a PDF, PNG, JPG or a screenshot of your timetable.',
+      'Unsupported file type. Upload a CSV, PDF, PNG, JPG or a screenshot of your timetable.',
       'unsupported-type',
     );
   }

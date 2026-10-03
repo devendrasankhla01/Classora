@@ -1,0 +1,36 @@
+Day,Start,End,Subject,Code,Faculty,Room,Type,Academic Year,Semester,Section,Effective From,Notes
+Monday,08:00,09:00,Object Oriented Programming with Java (OOPS),1BCS302,Mrs. Manjula H,E201,theory,2026-27,III,A,2026-09-15,
+Monday,09:00,10:00,Data Structures and Applications (DS),1BCS305,Ms. Vinutha M H,E201,theory,2026-27,III,A,2026-09-15,
+Monday,10:30,11:30,Operating Systems (OS),1BCS304,Mr. Maruthi S T,E201,theory,2026-27,III,A,2026-09-15,
+Monday,11:30,12:30,Digital Design and Computer Organization (DDCO),1BCS303,,E201,theory,2026-27,III,A,2026-09-15,
+Monday,13:30,14:30,M3,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Monday,14:30,15:30,RC,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Monday,15:30,16:30,Yoga,,,,other,2026-27,III,A,2026-09-15,
+Tuesday,08:00,09:00,Operating Systems (OS),1BCS304,Mr. Maruthi S T,E201,theory,2026-27,III,A,2026-09-15,
+Tuesday,09:00,10:00,Digital Design and Computer Organization (DDCO),1BCS303,,E201,theory,2026-27,III,A,2026-09-15,
+Tuesday,10:30,11:30,Data Structures and Applications (DS),1BCS305,Ms. Vinutha M H,E201,theory,2026-27,III,A,2026-09-15,
+Tuesday,11:30,12:30,M3,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Tuesday,13:30,14:30,Object Oriented Programming with Java (OOPS),1BCS302,Mrs. Manjula H,E201,theory,2026-27,III,A,2026-09-15,
+Tuesday,14:30,16:30,Community Project,,,,other,2026-27,III,A,2026-09-15,Image appears to show this block across two afternoon periods
+Wednesday,08:00,09:00,M3,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Wednesday,09:00,10:00,Data Structures and Applications (DS),1BCS305,Ms. Vinutha M H,E201,theory,2026-27,III,A,2026-09-15,
+Wednesday,10:30,11:30,Object Oriented Programming with Java (OOPS),1BCS302,Mrs. Manjula H,E201,theory,2026-27,III,A,2026-09-15,
+Wednesday,11:30,12:30,Digital Design and Computer Organization (DDCO),1BCS303,,E201,theory,2026-27,III,A,2026-09-15,
+Wednesday,13:30,15:30,AI-G1/AI-G2-OOPS Lab,,,,lab,2026-27,III,A,2026-09-15,Group label transcribed as visible; verify exact text
+Wednesday,15:30,16:30,Yoga,,,,other,2026-27,III,A,2026-09-15,
+Thursday,08:00,09:00,M3,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Thursday,09:00,10:00,Data Structures and Applications (DS),1BCS305,Ms. Vinutha M H,E201,theory,2026-27,III,A,2026-09-15,
+Thursday,10:30,12:30,A1-DS/A2-DDCO Lab,,,,lab,2026-27,III,A,2026-09-15,Combined group label transcribed as visible; verify exact text
+Thursday,13:30,14:30,DIP MATHS,,,,other,2026-27,III,A,2026-09-15,
+Thursday,14:30,15:30,Library,,,,other,2026-27,III,A,2026-09-15,
+Thursday,15:30,16:30,Mentoring,,,,other,2026-27,III,A,2026-09-15,
+Friday,08:00,09:00,RC,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Friday,09:00,10:00,Object Oriented Programming with Java (OOPS),1BCS302,Mrs. Manjula H,E201,theory,2026-27,III,A,2026-09-15,
+Friday,10:30,11:30,M3,,,,other,2026-27,III,A,2026-09-15,Kept as printed; course mapping unclear in image
+Friday,11:30,12:30,Operating Systems (OS),1BCS304,Mr. Maruthi S T,E201,theory,2026-27,III,A,2026-09-15,
+Friday,13:30,14:30,DIP MATHS,,,,other,2026-27,III,A,2026-09-15,
+Friday,14:30,15:30,Library,,,,other,2026-27,III,A,2026-09-15,
+Friday,15:30,16:30,Mentoring,,,,other,2026-27,III,A,2026-09-15,
+Saturday,08:00,09:00,Digital Design and Computer Organization (DDCO),1BCS303,,E201,theory,2026-27,III,A,2026-09-15,
+Saturday,09:00,10:00,Operating Systems (OS),1BCS304,Mr. Maruthi S T,E201,theory,2026-27,III,A,2026-09-15,Please verify this cell against the original image
+Saturday,10:30,12:30,A1-OOPS/A2-DS Lab,,,,lab,2026-27,III,A,2026-09-15,Combined group label transcribed as visible; verify exact text

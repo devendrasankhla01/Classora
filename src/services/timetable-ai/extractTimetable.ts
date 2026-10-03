@@ -8,6 +8,7 @@
  */
 import { demoExtraction } from './fixture';
 import { parseExtractedTimetable, validateExtraction } from './parse';
+import { parseCsvTimetable } from './csvParser';
 import { validateUpload } from './validation';
 import { ExtractionError, type ExtractionRequest, type ExtractionResult } from './types';
 
@@ -20,6 +21,21 @@ export function isAiProviderConfigured(): boolean {
 
 export async function extractTimetable(request: ExtractionRequest): Promise<ExtractionResult> {
   validateUpload(request.file);
+
+  const isCsv =
+    request.file.name.toLowerCase().endsWith('.csv') ||
+    request.file.type.toLowerCase().includes('csv');
+
+  if (isCsv) {
+    const text = await request.file.text();
+    const timetable = parseCsvTimetable(text);
+    return {
+      source: 'ai',
+      provider: 'CSV File',
+      timetable,
+      storagePath: null,
+    };
+  }
 
   if (!isAiProviderConfigured()) {
     return {

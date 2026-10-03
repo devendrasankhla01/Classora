@@ -6,6 +6,7 @@ import { useClassora } from '@/app/store';
 import { useActiveSubjects } from '@/hooks/useClassoraData';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Card, SectionHeader } from '@/components/ui/Card';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button, Field, SelectInput, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
 import { StatusChip } from '@/components/ui/chips';
@@ -15,6 +16,8 @@ import { nowInstant } from '@/lib/date';
 import { createId } from '@/lib/id';
 import { diffWeeklyGrid, findConflictFor, normalizeSignature, type WeeklyGridChange } from '@/lib/schedule';
 import { extractTimetable, isAiProviderConfigured } from '@/services/timetable-ai/extractTimetable';
+import { parseCsvTimetable } from '@/services/timetable-ai/csvParser';
+import { ATTACHED_CSV_DATA } from '@/data/sampleTimetableCsv';
 import { formatBytes, validateUpload } from '@/services/timetable-ai/validation';
 import { ExtractionError } from '@/services/timetable-ai/types';
 import type {
@@ -122,6 +125,8 @@ export function TimetableImportScreen() {
   const [timetable, setTimetable] = useState<ExtractedTimetable | null>(null);
   const [subjectsDraft, setSubjectsDraft] = useState<DraftSubject[]>([]);
   const [rowsDraft, setRowsDraft] = useState<DraftRow[]>([]);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [csvTextInput, setCsvTextInput] = useState('');
   /** Per-change decisions for the diff review: accept (default) or ignore. */
   const [decisions, setDecisions] = useState<Record<string, 'accept' | 'ignore'>>({});
 
@@ -179,6 +184,61 @@ export function TimetableImportScreen() {
   const decide = (change: WeeklyGridChange, value: 'accept' | 'ignore') =>
     setDecisions((current) => ({ ...current, [`${change.kind}:${change.key}`]: value }));
 
+  const loadParsedTimetable = (
+    extracted: ExtractedTimetable,
+    src: 'ai' | 'demo-fixture' | null,
+    providerName: string,
+  ) => {
+    setSource(src);
+    setProvider(providerName);
+    setTimetable(extracted);
+
+    const drafts: DraftSubject[] = extracted.subjects.map((subject) => ({
+      id: createId('draft-sub'),
+      include: true,
+      name: subject.name,
+      shortName: subject.shortName ?? abbreviate(subject.name),
+      subjectCode: subject.subjectCode,
+      faculty: subject.faculty,
+      room: subject.room,
+      classType: subject.classType,
+      attendanceCountMode: subject.attendanceCountMode ?? (subject.classType === 'lab' ? 'session' : 'period'),
+      confidence: subject.confidence,
+    }));
+
+    setSubjectsDraft(drafts);
+    setRowsDraft(
+      extracted.schedule.map((slot) => ({
+        ...slot,
+        id: createId('draft-row'),
+        include: true,
+        subjectDraftId:
+          drafts.find(
+            (draft) =>
+              draft.name.toLowerCase() === slot.subjectName.toLowerCase() ||
+              (draft.subjectCode && draft.subjectCode === slot.subjectCode),
+          )?.id ?? null,
+      })),
+    );
+    setStep('review');
+  };
+
+  const handlePasteCsv = (csvText: string) => {
+    setError(null);
+    try {
+      const extracted = parseCsvTimetable(csvText);
+      setFile(null);
+      loadParsedTimetable(extracted, 'ai', 'CSV Data');
+      setPasteOpen(false);
+    } catch (thrown) {
+      setError(thrown instanceof Error ? thrown.message : 'Could not parse CSV. Please check column format.');
+    }
+  };
+
+  const handleLoadAttachedCsv = () => {
+    handlePasteCsv(ATTACHED_CSV_DATA);
+  };
+
   const handleFile = async (selected: File) => {
     setError(null);
     try {
@@ -195,38 +255,7 @@ export function TimetableImportScreen() {
 
     try {
       const result = await extractTimetable({ file: selected });
-      setSource(result.source);
-      setProvider(result.provider);
-      setTimetable(result.timetable);
-
-      const drafts: DraftSubject[] = result.timetable.subjects.map((subject) => ({
-        id: createId('draft-sub'),
-        include: true,
-        name: subject.name,
-        shortName: subject.shortName ?? abbreviate(subject.name),
-        subjectCode: subject.subjectCode,
-        faculty: subject.faculty,
-        room: subject.room,
-        classType: subject.classType,
-        attendanceCountMode: subject.attendanceCountMode ?? (subject.classType === 'lab' ? 'session' : 'period'),
-        confidence: subject.confidence,
-      }));
-
-      setSubjectsDraft(drafts);
-      setRowsDraft(
-        result.timetable.schedule.map((slot) => ({
-          ...slot,
-          id: createId('draft-row'),
-          include: true,
-          subjectDraftId:
-            drafts.find(
-              (draft) =>
-                draft.name.toLowerCase() === slot.subjectName.toLowerCase() ||
-                (draft.subjectCode && draft.subjectCode === slot.subjectCode),
-            )?.id ?? null,
-        })),
-      );
-      setStep('review');
+      loadParsedTimetable(result.timetable, result.source, result.provider);
     } catch (thrown) {
       setError(thrown instanceof Error ? thrown.message : 'Extraction failed. Please try again.');
       setStep('upload');
@@ -353,7 +382,7 @@ export function TimetableImportScreen() {
               <input
                 ref={fileInput}
                 type="file"
-                accept="image/*,application/pdf"
+                accept="image/*,application/pdf,.csv,text/csv"
                 className="hidden"
                 onChange={(event) => {
                   const selected = event.target.files?.[0];
@@ -372,7 +401,7 @@ export function TimetableImportScreen() {
                 </span>
                 <span className="text-[14.5px] font-bold">Choose a file</span>
                 <span className="text-[12.5px] text-ink-secondary">
-                  PNG, JPG, WebP, HEIC or PDF · up to 12 MB
+                  CSV, PDF, PNG, JPG, WebP or HEIC · up to 12 MB
                 </span>
               </button>
 
@@ -382,6 +411,30 @@ export function TimetableImportScreen() {
                   <p className="text-[12.5px] leading-relaxed text-critical-700">{error}</p>
                 </div>
               ) : null}
+
+              <div className="mt-4 border-t border-divider pt-3.5">
+                <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted mb-2.5">
+                  Direct CSV Options
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    icon="content_paste"
+                    onClick={() => setPasteOpen(true)}
+                  >
+                    Paste CSV
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    icon="table_chart"
+                    onClick={() => handleLoadAttachedCsv()}
+                  >
+                    Load Sem III CSV
+                  </Button>
+                </div>
+              </div>
             </Card>
 
             <Card className={cn(!aiConfigured && '!bg-warning-50/70')}>
@@ -393,16 +446,49 @@ export function TimetableImportScreen() {
                 />
                 <div>
                   <p className="text-[13px] font-bold">
-                    {aiConfigured ? 'AI extraction is enabled' : 'AI provider not configured — demo fixture'}
+                    {aiConfigured ? 'AI extraction is enabled' : 'AI provider not configured · CSV import active'}
                   </p>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-ink-secondary">
                     {aiConfigured
                       ? 'The model runs on the server, never in the browser, so no key can leak into the app bundle.'
-                      : 'Without an API key, Classora extracts a clearly labelled sample timetable so you can test the whole review workflow. It never pretends a live model read your file.'}
+                      : 'You can directly upload or paste CSV timetable files for instant offline parsing with 100% accuracy.'}
                   </p>
                 </div>
               </div>
             </Card>
+
+            <BottomSheet
+              open={pasteOpen}
+              onClose={() => setPasteOpen(false)}
+              title="Paste Timetable CSV"
+              description="Paste comma-separated timetable rows. Day, Start, End, and Subject columns are supported."
+              footer={
+                <div className="flex gap-2">
+                  <Button variant="secondary" block onClick={() => setPasteOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    block
+                    icon="check"
+                    disabled={csvTextInput.trim().length === 0}
+                    onClick={() => handlePasteCsv(csvTextInput)}
+                  >
+                    Import CSV
+                  </Button>
+                </div>
+              }
+            >
+              <div className="space-y-3 pt-2">
+                <textarea
+                  value={csvTextInput}
+                  onChange={(e) => setCsvTextInput(e.target.value)}
+                  placeholder="Day,Start,End,Subject,Code,Faculty,Room,Type&#10;Monday,08:00,09:00,Operating Systems,1BCS304,Mr. Maruthi,E201,theory"
+                  rows={8}
+                  className="w-full rounded-block border border-divider bg-surface p-3 font-mono text-[12px] leading-relaxed text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                />
+              </div>
+            </BottomSheet>
           </>
         ) : null}
 
