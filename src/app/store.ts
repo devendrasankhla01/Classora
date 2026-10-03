@@ -218,7 +218,6 @@ export const useClassora = create<ClassoraState>((set, get) => {
         const now = nowInstant();
         const cleanProfile: Profile = {
           id: createId('prof'),
-          userId: null,
           name: 'Student',
           email: null,
           studentId: null,
@@ -237,16 +236,14 @@ export const useClassora = create<ClassoraState>((set, get) => {
         };
         const cleanPreferences: NotificationPreference = {
           id: createId('pref'),
-          profileId: cleanProfile.id,
+          userId: cleanProfile.id,
           afterClassReminder: true,
           reminderDelayMinutes: 10,
-          timetableChangeAlert: true,
+          missingAttendanceReminder: true,
           attendanceRiskAlert: true,
-          morningDigest: true,
-          morningDigestTime: '07:30',
-          combinedBackToBackAlerts: true,
-          notifyOnWorkingSaturdays: true,
-          createdAt: now,
+          timetableChangeAlert: true,
+          workingSaturdayAlert: true,
+          combineBackToBack: true,
           updatedAt: now,
         };
         const cleanSettings: AppSettings = {
@@ -685,13 +682,14 @@ export const useClassora = create<ClassoraState>((set, get) => {
      * Subjects & policy                                                 *
      * ---------------------------------------------------------------- */
     upsertSubject: async (subject) => {
-      let semester = get().semester;
-      if (!semester) {
+      let activeSemester = get().semester;
+      if (!activeSemester) {
         const today = new Date();
         const start = today.toISOString().slice(0, 10);
         const end = new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        semester = {
+        const newSemester: Semester = {
           id: createId('sem'),
+          userId: get().profile?.id ?? 'local',
           name: 'Current Semester',
           startDate: start,
           endDate: end,
@@ -700,10 +698,11 @@ export const useClassora = create<ClassoraState>((set, get) => {
           createdAt: nowInstant(),
           updatedAt: nowInstant(),
         };
-        await store.saveSemester(semester);
-        set({ semester });
+        await store.saveSemester(newSemester);
+        set({ semester: newSemester });
+        activeSemester = newSemester;
       }
-      const subjectToSave: Subject = { ...subject, semesterId: subject.semesterId || semester.id };
+      const subjectToSave: Subject = { ...subject, semesterId: subject.semesterId || activeSemester.id };
       set((state) => ({
         subjects: [...state.subjects.filter((item) => item.id !== subjectToSave.id), subjectToSave].sort((a, b) =>
           a.name.localeCompare(b.name),
@@ -827,13 +826,14 @@ export const useClassora = create<ClassoraState>((set, get) => {
     },
 
     applyImportedTimetable: async ({ subjects, slots, notes }) => {
-      let semester = get().semester;
-      if (!semester) {
+      let activeSemester = get().semester;
+      if (!activeSemester) {
         const today = new Date();
         const start = today.toISOString().slice(0, 10);
         const end = new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        semester = {
+        const newSemester: Semester = {
           id: createId('sem'),
+          userId: get().profile?.id ?? 'local',
           name: 'Current Semester',
           startDate: start,
           endDate: end,
@@ -842,8 +842,9 @@ export const useClassora = create<ClassoraState>((set, get) => {
           createdAt: nowInstant(),
           updatedAt: nowInstant(),
         };
-        await store.saveSemester(semester);
-        set({ semester });
+        await store.saveSemester(newSemester);
+        set({ semester: newSemester });
+        activeSemester = newSemester;
       }
       const { versions, subjects: existingSubjects } = get();
 
@@ -854,7 +855,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
       const nextNumber = Math.max(0, ...versions.map((version) => version.versionNumber)) + 1;
       const version: TimetableVersion = {
         id: createId('ver'),
-        semesterId: semester.id,
+        semesterId: activeSemester.id,
         versionNumber: nextNumber,
         label: `Version ${nextNumber}`,
         notes,
@@ -866,12 +867,12 @@ export const useClassora = create<ClassoraState>((set, get) => {
       const updatedVersions = [version, ...versions.map((item) => ({ ...item, isCurrent: false }))];
       set({ versions: updatedVersions, slots });
       await store.saveVersions(updatedVersions);
-      await store.replaceSlots(semester.id, version.id, slots);
+      await store.replaceSlots(activeSemester.id, version.id, slots);
 
-      const range = futureGenerationRange(semester, new Date(), 45);
+      const range = futureGenerationRange(activeSemester, new Date(), 45);
       const existingIds = new Set(get().occurrences.map((occurrence) => occurrence.id));
       const fresh = generateOccurrences({
-        semester,
+        semester: activeSemester,
         slots: slots.filter((slot) => slot.kind === 'class'),
         overrides: get().overrides,
         from: range.from,
