@@ -6,16 +6,20 @@ import { Icon } from './Icon';
 
 export type ChipTone = AttendanceHealth | 'neutral' | 'brand' | 'completed' | 'upcoming' | 'cancelled';
 
+/**
+ * Status tints are a 12% wash of the status hue with a deep text tone, exactly
+ * as DESIGN.md specifies.
+ */
 const TONES: Record<ChipTone, string> = {
-  safe: 'bg-safe-50 text-safe-700',
-  warning: 'bg-warning-50 text-warning-700',
-  critical: 'bg-critical-50 text-critical-700',
-  no_data: 'bg-surface-sunken text-ink-secondary',
-  neutral: 'bg-surface-sunken text-ink-secondary',
-  brand: 'bg-brand-50 text-brand-700',
-  completed: 'bg-safe-50 text-safe-700',
-  upcoming: 'bg-brand-50 text-brand-700',
-  cancelled: 'bg-surface-sunken text-ink-secondary',
+  safe: 'bg-safe-500/[0.12] text-safe-700',
+  warning: 'bg-warning-500/[0.12] text-warning-700',
+  critical: 'bg-critical-500/[0.12] text-critical-700',
+  no_data: 'bg-surface-sunken text-ink-info',
+  neutral: 'bg-surface-sunken text-ink-info',
+  brand: 'bg-brand-500/[0.12] text-brand-700',
+  completed: 'bg-safe-500/[0.12] text-safe-700',
+  upcoming: 'bg-brand-500/[0.12] text-brand-700',
+  cancelled: 'bg-surface-sunken text-ink-info',
 };
 
 const DOTS: Record<ChipTone, string> = {
@@ -43,7 +47,8 @@ export function StatusChip({ tone, label, className, icon, showDot = true }: Sta
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11.5px] font-semibold leading-none',
+        // Status pill: 24px tall, 10px horizontal padding, label-sm type.
+        'inline-flex h-6 shrink-0 items-center gap-1.5 rounded-pill px-2.5 text-label-sm',
         TONES[tone],
         className,
       )}
@@ -70,9 +75,9 @@ export function Pill({ children, className, tone = 'default', icon }: PillProps)
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-pill px-3 py-1.5 text-[12px] font-semibold leading-none',
+        'inline-flex h-7 shrink-0 items-center gap-1.5 rounded-pill px-2.5 text-label-md',
         tone === 'default' && 'bg-surface-sunken text-ink-secondary',
-        tone === 'muted' && 'border border-black/[0.06] bg-white/70 text-ink-secondary',
+        tone === 'muted' && 'border border-divider bg-white/70 text-ink-secondary',
         tone === 'brand' && 'bg-brand-50 text-brand-700',
         tone === 'danger' && 'bg-critical-50 text-critical-600',
         className,

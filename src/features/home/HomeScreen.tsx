@@ -33,6 +33,7 @@ export function HomeScreen() {
   return (
     <>
       <AppHeader
+        wordmark
         title={`${greetingFor(now)}, ${firstName}`}
         overline={formatLongDate(dateKey)}
         unreadCount={unread}
@@ -50,11 +51,11 @@ export function HomeScreen() {
               <Icon name="pending_actions" size={19} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13.5px] font-bold text-warning-700">
+              <p className="text-label-lg text-warning-700">
                 {yesterdayMissing.length} {yesterdayMissing.length === 1 ? 'class is' : 'classes are'} still
                 unmarked
               </p>
-              <p className="text-[12.5px] text-warning-700/80">
+              <p className="text-body-sm text-warning-700/80">
                 Tap to review and keep your insights accurate.
               </p>
             </div>
@@ -68,13 +69,13 @@ export function HomeScreen() {
           <SectionHeader
             title="Today’s Schedule"
             action={
-              <Link to="/timetable" className="text-[13px] font-bold text-brand-700">
+              <Link to="/timetable" className="text-label-lg text-brand-700">
                 Timetable
               </Link>
             }
           />
           {today.length === 0 ? (
-            <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-black/[0.03]">
+            <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
               <EmptyState
                 icon="beach_access"
                 title="Your schedule is clear today"

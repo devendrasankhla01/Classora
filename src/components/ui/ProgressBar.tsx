@@ -1,7 +1,11 @@
 import { cn } from '@/lib/cn';
 import type { AttendanceHealth } from '@/lib/attendance';
 
-const BAR_COLORS: Record<AttendanceHealth, string> = {
+/** `brand` is the design-system default for plain progress. */
+export type ProgressTone = AttendanceHealth | 'brand';
+
+const BAR_COLORS: Record<ProgressTone, string> = {
+  brand: 'bg-brand-600',
   safe: 'bg-safe-500',
   warning: 'bg-warning-500',
   critical: 'bg-critical-500',
@@ -11,7 +15,7 @@ const BAR_COLORS: Record<AttendanceHealth, string> = {
 interface ProgressBarProps {
   /** 0–100. */
   value: number;
-  tone?: AttendanceHealth;
+  tone?: ProgressTone;
   className?: string;
   height?: number;
   /** Optional marker line, e.g. the attendance target. */
@@ -21,9 +25,10 @@ interface ProgressBarProps {
 
 export function ProgressBar({
   value,
-  tone = 'safe',
+  tone = 'brand',
   className,
-  height = 6,
+  /* DESIGN.md: linear progress is 8px tall with a fully rounded fill. */
+  height = 8,
   markerAt = null,
   animate = true,
 }: ProgressBarProps) {

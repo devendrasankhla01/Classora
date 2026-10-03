@@ -86,7 +86,7 @@ export function LeaveImpactScreen() {
             type="button"
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-black/[0.04]"
+            className="grid h-11 w-11 place-items-center rounded-full bg-surface text-ink shadow-ambient ring-1 ring-hairline"
           >
             <Icon name="arrow_back" size={19} />
           </button>
@@ -109,7 +109,7 @@ export function LeaveImpactScreen() {
                   onClick={() => setScope(option.value)}
                   aria-pressed={scope === option.value}
                   className={cn(
-                    'rounded-pill px-4 py-2 text-[12.5px] font-bold transition',
+                    'rounded-pill px-4 py-2 text-label-md transition',
                     scope === option.value
                       ? 'bg-brand-600 text-white shadow-elevated'
                       : 'bg-surface-sunken text-ink-secondary',
@@ -138,7 +138,7 @@ export function LeaveImpactScreen() {
             subtitle={`${affected.length} ${affected.length === 1 ? 'class' : 'classes'} in this window`}
           />
           {dayOccurrences.length === 0 ? (
-            <p className="text-[13px] text-ink-secondary">No classes are scheduled on this date.</p>
+            <p className="text-body-sm text-ink-secondary">No classes are scheduled on this date.</p>
           ) : (
             <ul className="space-y-2">
               {dayOccurrences.map((occurrence) => {
@@ -153,17 +153,17 @@ export function LeaveImpactScreen() {
                     )}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-[13.5px] font-semibold">
+                      <span className="block truncate text-label-lg">
                         {subject?.name ?? 'Class'}
                       </span>
-                      <span className="block text-[12px] text-ink-secondary">
+                      <span className="block text-label-md text-ink-secondary">
                         {formatTimeRange(occurrence.startTime, occurrence.endTime)}
                         {occurrence.room ? ` • ${occurrence.room}` : ''}
                       </span>
                     </span>
                     <span
                       className={cn(
-                        'shrink-0 rounded-pill px-2.5 py-1 text-[11px] font-bold',
+                        'shrink-0 rounded-pill px-2.5 py-1 text-label-sm font-bold',
                         included ? 'bg-critical-500 text-white' : 'bg-surface-sunken text-ink-secondary',
                       )}
                     >
@@ -184,20 +184,20 @@ export function LeaveImpactScreen() {
                 {result.lines.map((line) => (
                   <li key={line.subjectId}>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="min-w-0 truncate text-[14px] font-bold">{line.subjectName}</span>
+                      <span className="min-w-0 truncate text-label-lg">{line.subjectName}</span>
                       <StatusChip
                         tone={line.healthAfter}
                         label={line.healthAfter === 'critical' ? 'Below Target' : 'Still safe'}
                       />
                     </div>
-                    <div className="mt-1.5 flex items-center gap-2 text-[13px] font-semibold tabular-nums">
+                    <div className="mt-1.5 flex items-center gap-2 text-label-lg tabular-nums">
                       <span className="text-ink-secondary">
                         {line.before === null ? '—' : `${line.before.toFixed(1)}%`}
                       </span>
                       <Icon name="arrow_forward" size={15} className="text-ink-muted" />
                       <span
                         className={
-                          line.healthAfter === 'critical' ? 'font-extrabold text-critical-600' : 'text-ink'
+                          line.healthAfter === 'critical' ? 'font-bold text-critical-600' : 'text-ink'
                         }
                       >
                         {line.after === null ? '—' : `${line.after.toFixed(1)}%`}
@@ -243,7 +243,7 @@ export function LeaveImpactScreen() {
                 <div>
                   <p
                     className={cn(
-                      'text-[15px] font-extrabold',
+                      'text-body-lg font-bold',
                       result.newlyBreaking.length > 0 ? 'text-critical-700' : 'text-safe-700',
                     )}
                   >
@@ -253,7 +253,7 @@ export function LeaveImpactScreen() {
                         } drop below target`
                       : 'Every subject stays above target'}
                   </p>
-                  <p className="mt-0.5 text-[12.5px] text-ink-secondary">
+                  <p className="mt-0.5 text-body-sm text-ink-secondary">
                     {result.lines.length - result.belowTargetAfter.length} subjects remain safe ·{' '}
                     {result.totalClasses} attendance {result.totalClasses === 1 ? 'unit' : 'units'} affected
                   </p>
@@ -263,7 +263,7 @@ export function LeaveImpactScreen() {
               {result.newlyBreaking.length > 0 ? (
                 <ul className="mt-3 space-y-1">
                   {result.newlyBreaking.map((name) => (
-                    <li key={name} className="flex items-center gap-2 text-[12.5px] font-semibold text-critical-700">
+                    <li key={name} className="flex items-center gap-2 text-label-md text-critical-700">
                       <Icon name="trending_down" size={15} />
                       {name}
                     </li>
@@ -274,7 +274,7 @@ export function LeaveImpactScreen() {
           </>
         ) : (
           <Card>
-            <p className="text-[13px] text-ink-secondary">
+            <p className="text-body-sm text-ink-secondary">
               Nothing would be affected in this window. Try a different date or leave window.
             </p>
           </Card>
@@ -289,7 +289,7 @@ export function LeaveImpactScreen() {
           </Button>
         </div>
 
-        <p className="px-1 pb-2 text-center text-[11.5px] text-ink-muted">
+        <p className="px-1 pb-2 text-center text-label-sm text-ink-muted">
           Simulated for {formatLongDate(date)} · current time {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>

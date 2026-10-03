@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAggregateStats, useConfidence, useSubjectInsights } from '@/hooks/useScheduleData';
+import { useClassora } from '@/app/store';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AttendanceRing } from '@/components/attendance/AttendanceGauge';
 import { Icon } from '@/components/ui/Icon';
@@ -20,6 +21,8 @@ type Filter = 'all' | 'safe' | 'warning' | 'critical';
 export function AttendanceScreen() {
   const insights = useSubjectInsights();
   const stats = useAggregateStats();
+  const profile = useClassora((state) => state.profile);
+  const target = profile?.attendanceTarget ?? 75;
   const confidence = useConfidence();
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -52,21 +55,21 @@ export function AttendanceScreen() {
       <AppHeader title="Attendance" subtitle="Overall Status" />
 
       <div className="space-y-5 px-5">
-        <section className="rounded-card bg-gradient-to-b from-safe-50/70 to-surface p-5 shadow-ambient ring-1 ring-black/[0.03]">
+        <section className="rounded-card bg-gradient-to-b from-safe-50/70 to-surface p-5 shadow-ambient ring-1 ring-hairline">
           <div className="flex items-center justify-between">
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+            <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
               Aggregate health
             </p>
             <Icon name="verified" size={18} className="text-safe-600" />
           </div>
 
           <div className="mt-3 flex justify-center">
-            <AttendanceRing value={stats.percentage} delta={null} size={186} />
+            <AttendanceRing value={stats.percentage} delta={null} size={186} target={target} />
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             {stats.health === 'safe' ? (
-              <span className="inline-flex items-center gap-2 rounded-pill bg-safe-50 px-3.5 py-2 text-[12.5px] font-bold text-safe-700">
+              <span className="inline-flex items-center gap-2 rounded-pill bg-safe-50 px-3.5 py-2 text-label-md text-safe-700">
                 <Icon name="check_circle" size={15} filled />
                 Safe Zone
                 <span className="font-medium text-safe-700/80">
@@ -74,14 +77,14 @@ export function AttendanceScreen() {
                 </span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-pill bg-warning-50 px-3.5 py-2 text-[12.5px] font-bold text-warning-700">
+              <span className="inline-flex items-center gap-2 rounded-pill bg-warning-50 px-3.5 py-2 text-label-md text-warning-700">
                 <Icon name="error" size={15} />
                 {stats.health === 'critical' ? 'Below target' : 'Thin margin'}
               </span>
             )}
           </div>
 
-          <div className="mt-4 grid grid-cols-3 divide-x divide-black/[0.06] rounded-block border border-black/[0.06] bg-surface/80 py-3.5">
+          <div className="mt-4 grid grid-cols-3 divide-x divide-divider rounded-block border border-divider bg-surface/80 py-3.5">
             <Stat label="Attended" value={stats.attended} color={classoraGreen} />
             <Stat label="Missed" value={stats.missed} color={classoraRed} />
             <Stat label="Conducted" value={stats.conducted} color={classoraInkMuted} />
@@ -92,11 +95,11 @@ export function AttendanceScreen() {
               to="/attendance/review"
               className="mt-3 flex items-center justify-between rounded-block bg-warning-50 px-3.5 py-3"
             >
-              <span className="text-[12.5px] font-semibold text-warning-700">
+              <span className="text-label-md text-warning-700">
                 {confidence.missingClasses} past {confidence.missingClasses === 1 ? 'class' : 'classes'} not
                 updated yet
               </span>
-              <span className="text-[12.5px] font-bold text-warning-700">Review</span>
+              <span className="text-label-md text-warning-700">Review</span>
             </Link>
           ) : null}
         </section>
@@ -117,7 +120,7 @@ export function AttendanceScreen() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-black/[0.03]">
+          <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
             <EmptyState
               icon="filter_list_off"
               title="Nothing in this filter"
@@ -136,8 +139,8 @@ export function AttendanceScreen() {
           <section className="flex items-start gap-3.5 rounded-card bg-brand-50 p-4 shadow-ambient ring-1 ring-brand-500/10">
             <IconTile icon="auto_awesome" tone="indigo" size={40} iconSize={20} />
             <div className="min-w-0">
-              <p className="text-[13.5px] font-bold text-brand-700">Proactive Planner</p>
-              <p className="mt-0.5 text-[12.5px] leading-relaxed text-brand-700/85">
+              <p className="text-label-lg text-brand-700">Proactive Planner</p>
+              <p className="mt-0.5 text-body-sm text-brand-700/85">
                 Attend{' '}
                 {nextClass
                   ? `${nextClass.date === new Date().toISOString().slice(0, 10) ? 'today’s' : 'the next'} ${planner.recovery.classes}`
@@ -147,7 +150,7 @@ export function AttendanceScreen() {
               </p>
               <Link
                 to={`/attendance/${planner.subject.id}`}
-                className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-bold text-brand-700"
+className="mt-2 inline-flex items-center gap-1 text-label-md text-brand-700"
               >
                 Recovery plan
                 <Icon name="arrow_forward" size={15} />
@@ -155,11 +158,11 @@ export function AttendanceScreen() {
             </div>
           </section>
         ) : (
-          <section className="flex items-start gap-3.5 rounded-card bg-surface p-4 shadow-ambient ring-1 ring-black/[0.03]">
+          <section className="flex items-start gap-3.5 rounded-card bg-surface p-4 shadow-ambient ring-1 ring-hairline">
             <IconTile icon="shield" tone="emerald" size={40} iconSize={20} />
             <div>
-              <p className="text-[13.5px] font-bold">Every subject is above target</p>
-              <p className="mt-0.5 text-[12.5px] text-ink-secondary">
+              <p className="text-label-lg">Every subject is above target</p>
+              <p className="mt-0.5 text-body-sm text-ink-secondary">
                 Nothing needs recovery right now. Keep marking attendance after each class.
               </p>
             </div>
@@ -178,11 +181,11 @@ export function AttendanceScreen() {
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="px-3 text-center">
-      <p className="inline-flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+      <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
         {label}
       </p>
-      <p className="mt-1.5 text-[20px] font-extrabold leading-none tabular-nums">{value}</p>
+      <p className="mt-1.5 text-headline-sm tabular-nums">{value}</p>
     </div>
   );
 }
@@ -203,8 +206,8 @@ function FilterChip({
       aria-pressed={active}
       className={
         active
-          ? 'shrink-0 rounded-pill bg-brand-600 px-4 py-2 text-[12.5px] font-bold text-white shadow-elevated'
-          : 'shrink-0 rounded-pill bg-surface px-4 py-2 text-[12.5px] font-semibold text-ink-secondary shadow-ambient ring-1 ring-black/[0.04]'
+          ? 'shrink-0 rounded-pill bg-brand-600 px-4 py-2 text-label-md text-white shadow-elevated'
+          : 'shrink-0 rounded-pill bg-surface px-4 py-2 text-label-md text-ink-secondary shadow-ambient ring-1 ring-hairline'
       }
     >
       {label}

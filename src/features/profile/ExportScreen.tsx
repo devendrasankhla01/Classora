@@ -219,8 +219,8 @@ export function ExportScreen() {
 
         <Card>
           <SectionHeader title="Preview" subtitle={`${rows.length} records ready`} />
-          <div className="overflow-hidden rounded-block border border-black/[0.06]">
-            <table className="w-full text-left text-[11.5px]">
+          <div className="overflow-hidden rounded-block border border-divider">
+            <table className="w-full text-left text-label-sm">
               <thead className="bg-surface-muted text-ink-secondary">
                 <tr>
                   <th className="px-3 py-2 font-bold">Date</th>
@@ -228,7 +228,7 @@ export function ExportScreen() {
                   <th className="px-3 py-2 font-bold">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/[0.05]">
+              <tbody className="divide-y divide-divider">
                 {rows.slice(0, 5).map((row) => (
                   <tr key={`${row.date}-${row.start}-${row.subject}`}>
                     <td className="whitespace-nowrap px-3 py-2 tabular-nums">{formatMediumDate(row.date)}</td>
@@ -240,7 +240,7 @@ export function ExportScreen() {
             </table>
           </div>
           {rows.length > 5 ? (
-            <p className="mt-2 text-[11.5px] text-ink-muted">
+            <p className="mt-2 text-label-sm text-ink-muted">
               Showing the first 5 of {rows.length} rows.
             </p>
           ) : null}
@@ -255,7 +255,7 @@ export function ExportScreen() {
         <Card className="!bg-brand-50/50">
           <div className="flex gap-3">
             <Icon name="lock" size={19} className="mt-0.5 shrink-0 text-brand-600" />
-            <p className="text-[12.5px] leading-relaxed text-ink-secondary">
+            <p className="text-body-sm text-ink-secondary">
               The file is generated on this device. Classora never uploads your attendance to a server in Local
               mode, and tokens for cloud sync are never written into an export.
             </p>
@@ -306,14 +306,14 @@ function FormatTile({
       aria-pressed={active}
       className={cn(
         'rounded-block border p-3.5 text-left transition',
-        active ? 'border-brand-500 bg-brand-50/60' : 'border-black/[0.07] bg-surface',
+        active ? 'border-brand-500 bg-brand-50/60' : 'border-edge bg-surface',
       )}
     >
       <Icon name={icon} size={20} className={active ? 'text-brand-600' : 'text-ink-muted'} />
-      <span className={cn('mt-2 block text-[13px] font-bold', active ? 'text-brand-700' : 'text-ink')}>
+      <span className={cn('mt-2 block text-label-lg', active ? 'text-brand-700' : 'text-ink')}>
         {title}
       </span>
-      <span className="mt-1 block text-[11.5px] leading-snug text-ink-secondary">{caption}</span>
+      <span className="mt-1 block text-label-sm text-ink-secondary">{caption}</span>
     </button>
   );
 }

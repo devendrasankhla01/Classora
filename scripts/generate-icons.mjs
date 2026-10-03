@@ -161,6 +161,75 @@ function placeholderPixels(size, maskable) {
   return pixels;
 }
 
+
+/* ------------------------------------------------------------------ *
+ * Wordmark extraction                                                  *
+ * ------------------------------------------------------------------ */
+
+/**
+ * Pull the "Classora" wordmark out of the lock-up as a transparent PNG, so the
+ * home header can show the real brand mark instead of a text label.
+ */
+async function writeWordmark(sharp, source) {
+  const meta = await sharp(source).metadata();
+  const width = meta.width ?? 0;
+  const height = meta.height ?? 0;
+  const square = Math.min(width, height);
+  // The wordmark sits below the mark, in the lower part of the lock-up.
+  const top = Math.round(square * 0.64);
+  const regionHeight = height - top;
+  if (regionHeight < 8) return;
+
+  const { data, info } = await sharp(source)
+    .extract({ left: 0, top, width, height: regionHeight })
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const luminance = (i) => 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+
+  let minX = info.width;
+  let minY = info.height;
+  let maxX = 0;
+  let maxY = 0;
+  let darkest = 255;
+  for (let y = 0; y < info.height; y += 1) {
+    for (let x = 0; x < info.width; x += 1) {
+      const lum = luminance((y * info.width + x) * info.channels);
+      if (lum >= 240) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      if (lum < darkest) darkest = lum;
+    }
+  }
+  if (maxX <= minX || maxY <= minY) return;
+
+  const cropWidth = maxX - minX + 1;
+  const cropHeight = maxY - minY + 1;
+  const out = Buffer.alloc(cropWidth * cropHeight * 4);
+  // White paper becomes transparent; the darkest ink becomes fully opaque.
+  const scale = 255 / Math.max(1, 255 - darkest);
+
+  for (let y = 0; y < cropHeight; y += 1) {
+    for (let x = 0; x < cropWidth; x += 1) {
+      const from = ((y + minY) * info.width + (x + minX)) * info.channels;
+      const to = (y * cropWidth + x) * 4;
+      out[to] = data[from];
+      out[to + 1] = data[from + 1];
+      out[to + 2] = data[from + 2];
+      out[to + 3] = Math.max(0, Math.min(255, Math.round((255 - luminance(from)) * scale)));
+    }
+  }
+
+  await sharp(out, { raw: { width: cropWidth, height: cropHeight, channels: 4 } })
+    .png()
+    .toFile(resolve(brandingDir, 'wordmark.png'));
+
+  console.log(`wordmark.png ← ${source.split('/').pop()} (${cropWidth}x${cropHeight}, transparent)`);
+}
+
 /* ------------------------------------------------------------------ *
  * Generator                                                            *
  * ------------------------------------------------------------------ */
@@ -201,14 +270,78 @@ async function main() {
   const sharp = source ? await loadSharp() : null;
 
   if (source && sharp) {
-    for (const { file, size, maskable } of SIZES) {
-      const pipeline = sharp(source).resize(size, size, {
-        fit: maskable ? 'contain' : 'cover',
-        background: maskable ? { r: 0, g: 0, b: 0, alpha: 0 } : { ...PORCELAIN, alpha: 1 },
-      });
-      await pipeline.png().toFile(resolve(outDir, file));
-      console.log(`${file} ← ${file.replace(/.*/, source.split('/').pop())} (${size}px)`);
+    // The full lock-up (mark + wordmark) only reads well at large sizes; the
+    // favicon and the maskable variants need just the mark, scaled up. Find the
+    // mark's exact bounding box by scanning pixels: the logo is a mark on top,
+    // wordmark below, on white.
+    const meta = await sharp(source).metadata();
+    const square = Math.min(meta.width ?? 0, meta.height ?? 0);
+    const lockupHeight = Math.round(square * 0.64);
+    const { data: raw, info: rawInfo } = await sharp(source)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    const isInk = (x, y) => {
+      const i = (y * rawInfo.width + x) * rawInfo.channels;
+      // Anything meaningfully off-white counts as part of the mark.
+      return raw[i] < 244 || raw[i + 1] < 244 || raw[i + 2] < 244;
+    };
+
+    let minX = rawInfo.width;
+    let minY = lockupHeight;
+    let maxX = 0;
+    let maxY = 0;
+    for (let y = 0; y < lockupHeight; y += 1) {
+      for (let x = 0; x < rawInfo.width; x += 1) {
+        if (!isInk(x, y)) continue;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
     }
+
+    const markWidth = Math.max(1, maxX - minX + 1);
+    const markHeight = Math.max(1, maxY - minY + 1);
+
+    for (const { file, size, maskable } of SIZES) {
+      // Chrome crops maskable icons to a circle inset by 10% per side;
+      // reserving ~12% keeps the mark fully inside the safe zone.
+      const inset = maskable ? Math.round(size * 0.12) : 0;
+      const content = size - inset * 2;
+
+      if (file === 'favicon-32.png' || maskable) {
+        const resized = await sharp(source)
+          .extract({ left: minX, top: minY, width: markWidth, height: markHeight })
+          .resize(content, content, { fit: 'contain', background: { ...PORCELAIN, alpha: 0 } })
+          .png()
+          .toBuffer();
+
+        await sharp({
+          create: {
+            width: size,
+            height: size,
+            channels: 4,
+            background: maskable
+              ? { r: 0, g: 0, b: 0, alpha: 0 }
+              : { ...PORCELAIN, alpha: 1 },
+          },
+        })
+          .composite([{ input: resized, left: inset, top: inset }])
+          .png()
+          .toFile(resolve(outDir, file));
+      } else {
+        await sharp(source)
+          .resize(size, size, { fit: 'cover', background: { ...PORCELAIN, alpha: 1 } })
+          .png()
+          .toFile(resolve(outDir, file));
+      }
+
+      const variant = file === 'favicon-32.png' ? 'mark only' : maskable ? 'mark, 14% safe inset' : 'full lock-up';
+      console.log(`${file} ← ${source.split('/').pop()} (${size}px, ${variant})`);
+    }
+    await writeWordmark(sharp, source);
     writeFileSync(
       resolve(outDir, 'SOURCE.txt'),
       `Generated from ${source.split('/').pop()} on ${new Date().toISOString()}\n`,

@@ -69,7 +69,7 @@ export function AttendanceHeatmap({ occurrences, attendance }: AttendanceHeatmap
         title="Attendance Calendar"
         subtitle={monthLabel}
         action={
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink-secondary">
+          <span className="inline-flex items-center gap-1.5 text-label-sm font-semibold text-ink-secondary">
             <span className="h-2.5 w-2.5 rounded-[4px] bg-safe-500" /> all present
           </span>
         }
@@ -77,7 +77,7 @@ export function AttendanceHeatmap({ occurrences, attendance }: AttendanceHeatmap
 
       <div className="grid grid-cols-7 gap-1.5">
         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, index) => (
-          <span key={`${label}-${index}`} className="text-center text-[10.5px] font-bold text-ink-muted">
+          <span key={`${label}-${index}`} className="text-center text-label-sm text-ink-muted">
             {label}
           </span>
         ))}
@@ -91,7 +91,7 @@ export function AttendanceHeatmap({ occurrences, attendance }: AttendanceHeatmap
               onClick={() => setSelected(day)}
               aria-label={`${formatMediumDate(day.date)} — ${day.present} present, ${day.absent} absent`}
               className={cn(
-                'flex aspect-square items-center justify-center rounded-[9px] text-[11px] font-bold transition active:scale-95',
+                'flex aspect-square items-center justify-center rounded-[9px] text-label-sm font-bold transition active:scale-95',
                 CELL_TONES[day.health],
                 day.health === 'safe' || day.health === 'critical' || day.health === 'warning'
                   ? 'text-white'
@@ -105,7 +105,7 @@ export function AttendanceHeatmap({ occurrences, attendance }: AttendanceHeatmap
         )}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-semibold text-ink-secondary">
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-label-sm font-semibold text-ink-secondary">
         <Legend tone="bg-safe-500" label="All present" />
         <Legend tone="bg-warning-500" label="Mixed" />
         <Legend tone="bg-critical-500" label="Absences" />
@@ -154,8 +154,8 @@ function DetailRow({
   tone?: 'safe' | 'critical' | 'warning' | 'neutral';
 }) {
   return (
-    <div className="flex items-center justify-between rounded-block bg-surface px-3.5 py-3 shadow-ambient ring-1 ring-black/[0.03]">
-      <span className="inline-flex items-center gap-2.5 text-[13.5px] font-semibold">
+    <div className="flex items-center justify-between rounded-block bg-surface px-3.5 py-3 shadow-ambient ring-1 ring-hairline">
+      <span className="inline-flex items-center gap-2.5 text-label-lg">
         <Icon
           name={icon}
           size={17}
@@ -168,7 +168,7 @@ function DetailRow({
         />
         {label}
       </span>
-      <span className="text-[15px] font-extrabold tabular-nums">{value}</span>
+      <span className="text-body-lg font-bold tabular-nums">{value}</span>
     </div>
   );
 }

@@ -20,9 +20,10 @@ export function Card({ children, className, variant = 'elevated', as = 'div', on
     <Tag
       className={cn(
         'relative',
-        variant === 'elevated' &&
-          'rounded-card bg-surface p-5 shadow-ambient ring-1 ring-black/[0.03]',
-        variant === 'inset' && 'rounded-block border border-black/[0.06] bg-surface-muted p-4',
+        // Level 1 dashboard card: pure white, 24px radius, 24px padding,
+        // hairline separation and ambient diffusion.
+        variant === 'elevated' && 'rounded-card bg-surface p-6 shadow-ambient ring-1 ring-hairline',
+        variant === 'inset' && 'rounded-block border border-divider bg-surface-muted p-4',
         variant === 'plain' && 'rounded-block bg-surface-muted p-4',
         onClick && 'cursor-pointer transition-transform duration-200 active:scale-[0.99]',
         className,
@@ -45,8 +46,8 @@ export function SectionHeader({ title, action, className, subtitle }: SectionHea
   return (
     <div className={cn('mb-3 flex items-end justify-between gap-3', className)}>
       <div>
-        <h2 className="text-[17px] font-bold tracking-[-0.01em] text-ink">{title}</h2>
-        {subtitle ? <p className="mt-0.5 text-[13px] text-ink-secondary">{subtitle}</p> : null}
+        <h2 className="text-headline-sm text-ink">{title}</h2>
+        {subtitle ? <p className="mt-0.5 text-body-sm text-ink-secondary">{subtitle}</p> : null}
       </div>
       {action}
     </div>

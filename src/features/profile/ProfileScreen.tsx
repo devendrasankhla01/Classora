@@ -11,6 +11,7 @@ import { Pill } from '@/components/ui/chips';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/controls';
 import { useActiveSubjects } from '@/hooks/useClassoraData';
+import { signOutEverywhere } from '@/features/auth/LoginScreen';
 
 /**
  * Profile — student identity, attendance policy, academic configuration,
@@ -45,31 +46,31 @@ export function ProfileScreen() {
         <Card>
           <div className="flex flex-col items-center text-center">
             <Avatar name={profile?.name ?? 'Classora'} size={78} badge />
-            <h2 className="mt-3 text-[21px] font-extrabold tracking-[-0.02em]">
+            <h2 className="mt-3 text-headline-md">
               {profile?.name ?? 'Student'}
             </h2>
-            <p className="mt-0.5 text-[13.5px] text-ink-secondary">
+            <p className="mt-0.5 text-body-md text-ink-secondary">
               {[semester?.name, profile?.departmentLabel].filter(Boolean).join(' • ')}
             </p>
             {profile?.studentId ? (
-              <span className="mt-3 inline-flex items-center gap-2 rounded-pill bg-brand-50 px-3.5 py-1.5 text-[12.5px] font-bold text-brand-700">
+              <span className="mt-3 inline-flex items-center gap-2 rounded-pill bg-brand-50 px-3.5 py-1.5 text-label-md text-brand-700">
                 <Icon name="badge" size={15} />
                 ID: {profile.studentId}
               </span>
             ) : null}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 divide-x divide-black/[0.06] rounded-block border border-black/[0.06] bg-surface-muted py-3.5">
+          <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block border border-divider bg-surface-muted py-3.5">
             <div className="px-3.5 text-center">
-              <p className="text-[11px] font-semibold text-ink-secondary">Semester Status</p>
-              <p className="mt-1 inline-flex items-center gap-1.5 text-[13px] font-bold">
+              <p className="text-label-sm font-semibold text-ink-secondary">Semester Status</p>
+              <p className="mt-1 inline-flex items-center gap-1.5 text-label-lg">
                 <span className="h-2 w-2 rounded-full bg-safe-500" />
                 Active • On Track
               </p>
             </div>
             <div className="px-3.5 text-center">
-              <p className="text-[11px] font-semibold text-ink-secondary">Batch Roll</p>
-              <p className="mt-1 text-[13px] font-bold">{profile?.batchRoll ?? '—'}</p>
+              <p className="text-label-sm font-semibold text-ink-secondary">Batch Roll</p>
+              <p className="mt-1 text-label-lg">{profile?.batchRoll ?? '—'}</p>
             </div>
           </div>
         </Card>
@@ -100,7 +101,7 @@ export function ProfileScreen() {
                 style={{ width: `${((target - 50) / 45) * 100}%` }}
               />
             </div>
-            <p className="mt-2 text-[11.5px] text-ink-muted">
+            <p className="mt-2 text-label-sm text-ink-muted">
               50% to 95% · different colleges require different minimums
             </p>
           </Card>
@@ -127,7 +128,7 @@ export function ProfileScreen() {
                 onClick={() => void setCountMode('session')}
               />
             </div>
-            <p className="mt-2 text-[11.5px] text-ink-muted">
+            <p className="mt-2 text-label-sm text-ink-muted">
               Applies to every subject. Individual subjects can override this in Manage Subjects.
             </p>
           </Card>
@@ -249,8 +250,8 @@ export function ProfileScreen() {
         <div className="space-y-2.5">
           {confirmLogout ? (
             <Card className="!p-4">
-              <p className="text-[13.5px] font-bold">Log out of Classora?</p>
-              <p className="mt-1 text-[12.5px] text-ink-secondary">
+              <p className="text-label-lg">Log out of Classora?</p>
+              <p className="mt-1 text-body-sm text-ink-secondary">
                 Your data stays on this device. In demo mode you can return to the seeded dataset at any time.
               </p>
               <div className="mt-3 flex gap-2">
@@ -261,8 +262,11 @@ export function ProfileScreen() {
                   variant="danger"
                   block
                   onClick={() => {
-                    setConfirmLogout(false);
-                    navigate('/');
+                    void (async () => {
+                      await signOutEverywhere();
+                      setConfirmLogout(false);
+                      navigate('/login', { replace: true });
+                    })();
                   }}
                 >
                   Log out
@@ -273,7 +277,7 @@ export function ProfileScreen() {
             <button
               type="button"
               onClick={() => setConfirmLogout(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-pill bg-critical-50 py-3.5 text-[14px] font-bold text-critical-600"
+className="flex w-full items-center justify-center gap-2 rounded-pill bg-critical-50 py-3.5 text-label-lg text-critical-600"
             >
               <Icon name="logout" size={18} />
               Log Out {profile?.name?.split(' ')[0] ?? ''}
@@ -283,13 +287,13 @@ export function ProfileScreen() {
           <button
             type="button"
             onClick={() => setResetOpen(true)}
-            className="w-full rounded-pill py-3 text-[12.5px] font-semibold text-ink-muted"
+className="w-full rounded-pill py-3 text-label-md text-ink-muted"
           >
             Restore demo data
           </button>
         </div>
 
-        <p className="pb-2 text-center text-[11px] text-ink-muted">
+        <p className="pb-2 text-center text-label-sm text-ink-muted">
           Classora • Build 1.0.0 • {useClassora.getState().mode === 'local' ? 'Local mode' : 'Cloud mode'}
         </p>
       </div>
@@ -317,7 +321,7 @@ export function ProfileScreen() {
           </div>
         }
       >
-        <p className="pt-1 text-[13px] text-ink-secondary">
+        <p className="pt-1 text-body-sm text-ink-secondary">
           Tip: export a JSON backup first if you want to keep your current records.
         </p>
       </BottomSheet>
@@ -328,7 +332,7 @@ export function ProfileScreen() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2.5 px-1 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-muted">
+      <h2 className="mb-2.5 px-1 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
         {title}
       </h2>
       {children}
@@ -353,8 +357,8 @@ function Row({
     <div className="flex items-center gap-3.5">
       <IconTile icon={icon} tone={tone} size={40} iconSize={19} />
       <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-bold leading-tight">{title}</p>
-        <p className="mt-0.5 text-[12px] text-ink-secondary">{subtitle}</p>
+        <p className="text-label-lg">{title}</p>
+        <p className="mt-0.5 text-label-md text-ink-secondary">{subtitle}</p>
       </div>
       {trailing}
     </div>
@@ -380,10 +384,10 @@ function LinkRow({
     <Link to={to} className="flex items-center gap-3.5 transition active:scale-[0.995]">
       <IconTile icon={icon} tone={tone} size={40} iconSize={19} />
       <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-bold leading-tight">{title}</p>
-        <p className="mt-0.5 truncate text-[12px] text-ink-secondary">{subtitle}</p>
+        <p className="text-label-lg">{title}</p>
+        <p className="mt-0.5 truncate text-label-md text-ink-secondary">{subtitle}</p>
       </div>
-      <span className="shrink-0 text-[12px] font-semibold text-ink-secondary">{trailing}</span>
+      <span className="shrink-0 text-label-md text-ink-secondary">{trailing}</span>
       <Icon name="chevron_right" size={19} className="shrink-0 text-ink-muted" />
     </Link>
   );
@@ -408,8 +412,8 @@ function ToggleRow({
     <div className="flex items-center gap-3.5 py-1.5">
       <IconTile icon={icon} tone={tone} size={40} iconSize={19} />
       <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-bold leading-tight">{title}</p>
-        <p className="mt-0.5 text-[12px] text-ink-secondary">{subtitle}</p>
+        <p className="text-label-lg">{title}</p>
+        <p className="mt-0.5 text-label-md text-ink-secondary">{subtitle}</p>
       </div>
       <Toggle checked={checked} onChange={onChange} label={title} />
     </div>
@@ -417,7 +421,7 @@ function ToggleRow({
 }
 
 function Divider() {
-  return <div className="my-3 h-px bg-black/[0.05]" />;
+  return <div className="my-3 h-px bg-divider" />;
 }
 
 function ModeButton({
@@ -438,13 +442,13 @@ function ModeButton({
       aria-pressed={active}
       className={cn(
         'flex-1 rounded-block border p-3 text-left transition',
-        active ? 'border-brand-500 bg-brand-50/60' : 'border-black/[0.07] bg-surface',
+        active ? 'border-brand-500 bg-brand-50/60' : 'border-edge bg-surface',
       )}
     >
-      <span className={cn('block text-[12.5px] font-bold', active ? 'text-brand-700' : 'text-ink')}>
+      <span className={cn('block text-label-md', active ? 'text-brand-700' : 'text-ink')}>
         {label}
       </span>
-      <span className="mt-0.5 block text-[11px] leading-snug text-ink-secondary">{hint}</span>
+      <span className="mt-0.5 block text-label-sm text-ink-secondary">{hint}</span>
     </button>
   );
 }

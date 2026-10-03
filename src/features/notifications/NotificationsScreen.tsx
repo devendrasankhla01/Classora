@@ -93,14 +93,14 @@ export function NotificationsScreen() {
 
       <div className="space-y-4 px-5">
         {unreadCount > 0 ? (
-          <div className="flex items-center justify-between rounded-block bg-surface px-4 py-3 shadow-ambient ring-1 ring-black/[0.03]">
-            <span className="text-[12.5px] font-semibold text-ink-secondary">
+          <div className="flex items-center justify-between rounded-block bg-surface px-4 py-3 shadow-ambient ring-1 ring-hairline">
+            <span className="text-label-md text-ink-secondary">
               {unreadCount} {unreadCount === 1 ? 'alert needs' : 'alerts need'} your attention
             </span>
             <button
               type="button"
               onClick={() => void Promise.all(notifications.map((item) => markNotificationRead(item.id)))}
-              className="text-[12.5px] font-bold text-brand-700"
+className="text-label-md text-brand-700"
             >
               Mark all read
             </button>
@@ -131,7 +131,7 @@ export function NotificationsScreen() {
         ) : (
           grouped.map(([label, items]) => (
             <section key={label}>
-              <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-muted">
+              <h2 className="mb-2 px-1 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
                 {label === 'Today' ? 'Today' : formatLongDate(label)}
               </h2>
               <ul className="space-y-2.5">
@@ -144,7 +144,7 @@ export function NotificationsScreen() {
                         onClick={() => void open(item)}
                         className={cn(
                           'w-full rounded-card bg-surface p-4 text-left shadow-ambient ring-1 transition active:scale-[0.995]',
-                          item.readAt === null ? 'ring-brand-500/25' : 'ring-black/[0.03]',
+                          item.readAt === null ? 'ring-brand-500/25' : 'ring-hairline',
                         )}
                       >
                         <div className="flex gap-3.5">
@@ -153,15 +153,15 @@ export function NotificationsScreen() {
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="flex items-center gap-2">
-                              <span className="truncate text-[14px] font-bold">{item.title}</span>
+                              <span className="truncate text-label-lg">{item.title}</span>
                               {item.readAt === null ? (
                                 <span className="h-2 w-2 shrink-0 rounded-full bg-brand-600" />
                               ) : null}
                             </span>
-                            <span className="mt-0.5 block text-[12.5px] leading-relaxed text-ink-secondary">
+                            <span className="mt-0.5 block text-body-sm text-ink-secondary">
                               {item.body}
                             </span>
-                            <span className="mt-1.5 flex items-center gap-2 text-[11px] font-semibold text-ink-muted">
+                            <span className="mt-1.5 flex items-center gap-2 text-label-sm font-semibold text-ink-muted">
                               <span className="rounded-pill bg-surface-sunken px-2 py-0.5">{meta.label}</span>
                               <span>{relativeTime(item.createdAt)}</span>
                             </span>
@@ -177,7 +177,7 @@ export function NotificationsScreen() {
           ))
         )}
 
-        <p className="pb-2 text-center text-[11px] text-ink-muted">
+        <p className="pb-2 text-center text-label-sm text-ink-muted">
           Generated on this device · now {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>

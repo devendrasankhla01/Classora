@@ -70,7 +70,7 @@ export function AttendanceActions({
         <button
           type="button"
           onClick={() => void clearAttendance(occurrence.id)}
-          className="min-h-[40px] rounded-pill px-3 text-[12.5px] font-semibold text-ink-secondary underline decoration-ink-muted/40 underline-offset-4"
+className="min-h-[40px] rounded-pill px-3 text-label-md text-ink-secondary underline decoration-ink-muted/40 underline-offset-4"
         >
           Undo
         </button>
@@ -101,7 +101,7 @@ function ActionButton({
       disabled={loading}
       className={cn(
         'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill font-bold transition active:scale-95 disabled:opacity-60',
-        compact ? 'px-3.5 text-[12.5px]' : 'px-4 text-[13px]',
+        compact ? 'px-3.5 text-body-sm' : 'px-4 text-body-sm',
         tone === 'safe' && 'bg-safe-50 text-safe-700',
         tone === 'critical' && 'bg-critical-50 text-critical-600',
         tone === 'neutral' && 'bg-surface-sunken text-ink-secondary',

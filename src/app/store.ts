@@ -138,6 +138,7 @@ interface ClassoraState {
   /* subjects & policy */
   upsertSubject: (subject: Subject) => Promise<void>;
   archiveSubject: (subjectId: string) => Promise<void>;
+  updateProfile: (patch: Partial<Profile>) => Promise<void>;
   setAttendanceTarget: (target: number) => Promise<void>;
   setCountMode: (mode: Subject['attendanceCountMode'], subjectId?: string) => Promise<void>;
 
@@ -668,6 +669,14 @@ export const useClassora = create<ClassoraState>((set, get) => {
       }));
       await store.saveSubject(archived);
       set({ toast: toast('Subject archived — history kept', 'info') });
+    },
+
+    updateProfile: async (patch) => {
+      const profile = get().profile;
+      if (!profile) return;
+      const updated: Profile = { ...profile, ...patch, updatedAt: nowInstant() };
+      set({ profile: updated });
+      await store.saveProfile(updated);
     },
 
     setAttendanceTarget: async (target) => {

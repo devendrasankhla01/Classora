@@ -18,8 +18,8 @@ export function EmptyState({ icon, title, message, action, className }: EmptySta
       <span className="grid h-14 w-14 place-items-center rounded-full bg-surface text-ink-muted shadow-ambient">
         <Icon name={icon} size={24} />
       </span>
-      <h3 className="mt-4 text-[16px] font-bold text-ink">{title}</h3>
-      <p className="mt-1 max-w-[280px] text-[13px] leading-relaxed text-ink-secondary">{message}</p>
+      <h3 className="mt-4 text-headline-sm text-ink">{title}</h3>
+      <p className="mt-1 max-w-[280px] text-body-sm text-ink-secondary">{message}</p>
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
@@ -72,7 +72,7 @@ export function LoadingSteps({ steps }: LoadingStepsProps) {
         <li key={step.label} className="flex items-center gap-3">
           <span
             className={cn(
-              'grid h-7 w-7 shrink-0 place-items-center rounded-full text-[12px] font-bold',
+              'grid h-7 w-7 shrink-0 place-items-center rounded-full text-label-md',
               step.state === 'done' && 'bg-safe-50 text-safe-700',
               step.state === 'active' && 'bg-brand-50 text-brand-700',
               step.state === 'pending' && 'bg-surface-sunken text-ink-muted',
@@ -82,7 +82,7 @@ export function LoadingSteps({ steps }: LoadingStepsProps) {
           </span>
           <span
             className={cn(
-              'text-[13.5px] font-medium',
+              'text-body-md font-medium',
               step.state === 'pending' ? 'text-ink-muted' : 'text-ink',
             )}
           >
@@ -129,7 +129,7 @@ export function Toast({ message, tone, onDismiss }: ToastProps) {
         )}
         filled
       />
-      <span className="text-[13px] font-semibold">{message}</span>
+      <span className="text-label-lg">{message}</span>
       {onDismiss ? (
         <button type="button" onClick={onDismiss} aria-label="Dismiss" className="text-white/70">
           <Icon name="close" size={15} />

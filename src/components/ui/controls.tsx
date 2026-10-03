@@ -53,7 +53,7 @@ interface StepperProps {
 export function Stepper({ value, onChange, min = 50, max = 95, step = 5, label, format }: StepperProps) {
   const clamp = (next: number) => Math.min(max, Math.max(min, next));
   return (
-    <div className="flex items-center gap-1 rounded-pill bg-surface p-1 shadow-ambient ring-1 ring-black/[0.04]">
+    <div className="flex items-center gap-1 rounded-pill bg-surface p-1 shadow-ambient ring-1 ring-hairline">
       <button
         type="button"
         aria-label={`Decrease ${label}`}
@@ -62,7 +62,7 @@ export function Stepper({ value, onChange, min = 50, max = 95, step = 5, label, 
       >
         <Icon name="remove" size={16} />
       </button>
-      <span className="min-w-[52px] text-center text-[14px] font-bold tabular-nums">
+      <span className="min-w-[52px] text-center text-label-lg tabular-nums">
         {format ? format(value) : value}
       </span>
       <button
@@ -90,15 +90,15 @@ interface FieldShellProps {
 export function Field({ label, hint, children, className }: FieldShellProps) {
   return (
     <label className={cn('block', className)}>
-      <span className="mb-1.5 block text-[12.5px] font-semibold text-ink-secondary">{label}</span>
+      <span className="mb-1.5 block text-label-md text-ink-secondary">{label}</span>
       {children}
-      {hint ? <span className="mt-1 block text-[11.5px] text-ink-muted">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-label-sm text-ink-muted">{hint}</span> : null}
     </label>
   );
 }
 
 const CONTROL_CLASS =
-  'w-full rounded-block border border-black/[0.07] bg-surface px-3.5 py-3 text-[14px] font-medium text-ink placeholder:text-ink-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/15';
+  'h-12 w-full rounded-block border border-edge bg-surface px-3.5 text-body-md text-ink placeholder:text-ink-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/15';
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(CONTROL_CLASS, props.className)} />;
@@ -131,12 +131,14 @@ export function Button({
     <button
       {...rest}
       className={cn(
-        'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-pill px-5 text-[14px] font-semibold transition-all duration-200 ease-porcelain active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+        // DESIGN.md §Components 5: 48px tall pill, label-lg type, 0.98 tap scale.
+        'inline-flex min-h-12 items-center justify-center gap-2 rounded-pill px-5 text-label-lg transition-all duration-200 ease-porcelain active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
         block && 'w-full',
         variant === 'primary' && 'bg-brand-600 text-white shadow-elevated hover:bg-brand-700',
-        variant === 'secondary' && 'bg-surface text-ink shadow-ambient ring-1 ring-black/[0.05] hover:bg-surface-muted',
+        variant === 'secondary' &&
+          'border border-edge bg-surface text-ink hover:bg-surface-muted',
         variant === 'ghost' && 'text-brand-700 hover:bg-brand-50',
-        variant === 'danger' && 'bg-critical-50 text-critical-600 hover:bg-critical-100',
+        variant === 'danger' && 'bg-critical-500/[0.12] text-critical-700 hover:bg-critical-100',
         className,
       )}
     >
