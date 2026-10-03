@@ -241,12 +241,21 @@ export function LoginScreen() {
           return;
         }
 
+        const resolvedName =
+          result.user?.name && result.user.name.trim().length > 0
+            ? result.user.name.trim()
+            : tab === 'signup' && displayName
+              ? displayName
+              : profile?.name && profile.name !== 'Student'
+                ? profile.name
+                : deriveDisplayName(cleanEmail, '');
+
         await finishLocalSignIn({
           mode: 'cloud',
           email: cleanEmail,
-          name: tab === 'signup' ? displayName : undefined,
-          studentId: tab === 'signup' ? studentId : undefined,
-          greeting: `Signed in as ${cleanEmail}`,
+          name: resolvedName,
+          studentId: tab === 'signup' && studentId ? studentId : profile?.studentId ?? undefined,
+          greeting: `Signed in as ${resolvedName}`,
         });
         return;
       }
