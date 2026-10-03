@@ -98,11 +98,12 @@ function fromDraftRows(rows: DraftRow[]): SlotInput[] {
 }
 
 /**
- * AI timetable import.
+ * Timetable import.
  *
- * The multimodal model runs server-side only; when no provider is configured
- * the extraction is an explicitly labelled demo fixture. Nothing is written to
- * the timetable until the student reviews and confirms it here.
+ * When an AI provider is configured (server-side key), the multimodal model
+ * reads images/PDFs. Otherwise Classora parses CSV / text uploads directly in
+ * the browser — no fake demo data is ever injected. You can always edit rows
+ * manually before saving, and nothing is written until you confirm.
  */
 export function TimetableImportScreen() {
   const navigate = useNavigate();
@@ -117,7 +118,7 @@ export function TimetableImportScreen() {
   const [step, setStep] = useState<Step>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [source, setSource] = useState<'ai' | 'demo-fixture' | null>(null);
+  const [source, setSource] = useState<'ai' | 'local-parse' | null>(null);
   const [provider, setProvider] = useState<string>('');
   const [timetable, setTimetable] = useState<ExtractedTimetable | null>(null);
   const [subjectsDraft, setSubjectsDraft] = useState<DraftSubject[]>([]);
@@ -126,6 +127,11 @@ export function TimetableImportScreen() {
   const [decisions, setDecisions] = useState<Record<string, 'accept' | 'ignore'>>({});
 
   const aiConfigured = isAiProviderConfigured();
+  const aiWillReadFile = Boolean(
+    aiConfigured &&
+      file &&
+      (file.type.toLowerCase().startsWith('application/pdf') || file.type.toLowerCase().startsWith('image/')),
+  );
   const signature = useMemo(
     () => (timetable ? normalizeSignature(buildSlots(fromExtracted(timetable), 'sig', 'pending')) : null),
     [timetable],
@@ -143,7 +149,13 @@ export function TimetableImportScreen() {
     [slots],
   );
 
-  const activeRows = rowsDraft.filter((row) => row.include && !row.isBreak);
+  const activeRows = rowsDraft.filter(
+    (row) =>
+      row.include &&
+      !row.isBreak &&
+      row.subjectDraftId !== null &&
+      subjectsDraft.some((subject) => subject.id === row.subjectDraftId && subject.include),
+  );
 
   /**
    * How the import changes the *weekly grid*. Computed from real slots, so the
@@ -233,18 +245,33 @@ export function TimetableImportScreen() {
     }
   };
 
-  const patchSubject = (id: string, patch: Partial<DraftSubject>) =>
+  const patchSubject = (id: string, patch: Partial<DraftSubject>) => {
     setSubjectsDraft((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    if ('room' in patch || 'faculty' in patch) {
+      setRowsDraft((current) =>
+        current.map((row) =>
+          row.subjectDraftId === id
+            ? {
+                ...row,
+                ...(patch.room !== undefined ? { room: patch.room } : {}),
+                ...(patch.faculty !== undefined ? { faculty: patch.faculty } : {}),
+              }
+            : row,
+        ),
+      );
+    }
+  }
 
   const patchRow = (id: string, patch: Partial<DraftRow>) =>
     setRowsDraft((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
 
   const apply = async () => {
-    if (!timetable) return;
+    if (!timetable || activeRows.length === 0) return;
 
     const now = nowInstant();
-    const semesterId = useClassora.getState().semester?.id ?? '';
-    const userId = useClassora.getState().profile?.id ?? 'local';
+    const state = useClassora.getState();
+    const semesterId = state.semester?.id ?? (await state.ensureSemester()).id;
+    const userId = state.profile?.id ?? 'local';
 
     const keptSubjects = subjectsDraft.filter((subject) => subject.include);
     const subjectIdByDraft = new Map<string, string>();
@@ -319,7 +346,7 @@ export function TimetableImportScreen() {
     await applyImportedTimetable({
       subjects: builtSubjects,
       slots: allSlots,
-      notes: `Imported from ${file?.name ?? 'timetable'} — ${source === 'ai' ? provider : 'demo fixture'}`,
+      notes: `Imported from ${file?.name ?? 'timetable'} — ${source === 'ai' ? provider : 'on-device parser'}`,
     });
     setStep('applied');
   };
@@ -328,7 +355,7 @@ export function TimetableImportScreen() {
     <>
       <AppHeader
         title="Import Timetable"
-        subtitle="AI-assisted extraction"
+        subtitle="Upload CSV or build your schedule manually"
         showActions={false}
         leading={
           <button
@@ -348,12 +375,12 @@ export function TimetableImportScreen() {
             <Card>
               <SectionHeader
                 title="Upload your timetable"
-                subtitle="A photo, screenshot or PDF from your college portal"
+                subtitle="Upload a CSV / text export, or start from a blank timetable"
               />
               <input
                 ref={fileInput}
                 type="file"
-                accept="image/*,application/pdf"
+                accept={aiConfigured ? 'image/*,application/pdf,.csv,.tsv,.txt' : '.csv,.tsv,.txt,text/csv,text/plain'}
                 className="hidden"
                 onChange={(event) => {
                   const selected = event.target.files?.[0];
@@ -372,7 +399,9 @@ export function TimetableImportScreen() {
                 </span>
                 <span className="text-[14.5px] font-bold">Choose a file</span>
                 <span className="text-[12.5px] text-ink-secondary">
-                  PNG, JPG, WebP, HEIC or PDF · up to 12 MB
+                  {aiConfigured
+                    ? 'CSV, TXT, PNG, JPG or PDF from your portal · up to 12 MB'
+                    : 'CSV or TXT export from your college portal · up to 12 MB'}
                 </span>
               </button>
 
@@ -384,25 +413,57 @@ export function TimetableImportScreen() {
               ) : null}
             </Card>
 
-            <Card className={cn(!aiConfigured && '!bg-warning-50/70')}>
+            <Card className={cn(!aiConfigured && '!bg-brand-50/60')}>
               <div className="flex gap-3">
                 <Icon
-                  name={aiConfigured ? 'auto_awesome' : 'science'}
+                  name={aiConfigured ? 'auto_awesome' : 'description'}
                   size={19}
-                  className={cn('mt-0.5 shrink-0', aiConfigured ? 'text-brand-600' : 'text-warning-600')}
+                  className="mt-0.5 shrink-0 text-brand-600"
                 />
                 <div>
                   <p className="text-[13px] font-bold">
-                    {aiConfigured ? 'AI extraction is enabled' : 'AI provider not configured — demo fixture'}
+                    {aiConfigured ? 'AI + on-device parsing' : 'On-device CSV / text parser'}
                   </p>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-ink-secondary">
                     {aiConfigured
-                      ? 'The model runs on the server, never in the browser, so no key can leak into the app bundle.'
-                      : 'Without an API key, Classora extracts a clearly labelled sample timetable so you can test the whole review workflow. It never pretends a live model read your file.'}
+                      ? 'Images and PDFs are read by the AI on the server; CSV and text files are parsed locally.'
+                      : 'Classora reads CSV and text exports from your college portal right on your device — your schedule never leaves the browser. For scanned images, an administrator can configure a server-side AI provider.'}
                   </p>
                 </div>
               </div>
             </Card>
+
+            <div className="rounded-card bg-surface-sunken p-4">
+              <p className="text-[12.5px] font-semibold text-ink-secondary">
+                No CSV export? Build it manually:
+              </p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">
+                After upload, edit subject names, times, rooms and faculty. You can add classes or exclude rows before saving.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const blank: ExtractedTimetable = {
+                    semester: { name: 'My Semester', startDate: null, endDate: null },
+                    subjects: [],
+                    schedule: [],
+                    warnings: ['Blank timetable — add your classes below.'],
+                  };
+                  setFile(new File([''], 'manual-timetable.txt', { type: 'text/plain' }));
+                  setSource('local-parse');
+                  setProvider('manual entry');
+                  setTimetable(blank);
+                  setSubjectsDraft([]);
+                  setRowsDraft([]);
+                  setError(null);
+                  setStep('review');
+                }}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-pill bg-white px-4 py-2 text-[12.5px] font-semibold text-ink shadow-ambient ring-1 ring-hairline transition active:scale-95"
+              >
+                <Icon name="add" size={16} />
+                Start with a blank timetable
+              </button>
+            </div>
           </>
         ) : null}
 
@@ -413,9 +474,9 @@ export function TimetableImportScreen() {
             </p>
             <LoadingSteps
               steps={[
-                { label: 'Uploading securely', state: 'done' },
+                { label: aiWillReadFile ? 'Uploading securely' : 'Reading the file locally', state: 'done' },
                 {
-                  label: aiConfigured ? 'Reading the timetable layout' : 'Building the demo fixture',
+                  label: aiWillReadFile ? 'Reading the timetable layout' : 'Parsing the timetable on your device',
                   state: 'active',
                 },
                 { label: 'Validating every row', state: 'pending' },
@@ -426,27 +487,19 @@ export function TimetableImportScreen() {
 
         {step === 'review' && timetable ? (
           <>
-            {source === 'demo-fixture' ? (
-              <Card className="!bg-warning-50/70">
-                <div className="flex gap-3">
-                  <Icon name="info" size={19} className="mt-0.5 shrink-0 text-warning-600" />
-                  <p className="text-[12.5px] leading-relaxed text-warning-700">
-                    <strong className="font-bold">Demo extraction.</strong> No AI provider is configured, so these
-                    rows are sample data generated locally. Review them before applying.
-                  </p>
-                </div>
-              </Card>
-            ) : (
-              <Card className="!bg-brand-50/60">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 text-[13px] font-bold text-brand-700">
-                    <Icon name="auto_awesome" size={17} />
-                    Extracted by {provider}
-                  </span>
-                  <StatusChip tone="brand" label="AI" showDot={false} />
-                </div>
-              </Card>
-            )}
+            <Card className="!bg-brand-50/60">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-2 text-[13px] font-bold text-brand-700">
+                  <Icon name={source === 'ai' ? 'auto_awesome' : 'description'} size={17} />
+                  Extracted by {provider}
+                </span>
+                <StatusChip
+                  tone="brand"
+                  label={source === 'ai' ? 'AI' : 'Device'}
+                  showDot={false}
+                />
+              </div>
+            </Card>
 
             {duplicateOf || signature === existingSignature ? (
               <Card className="!bg-critical-50/70">
@@ -619,7 +672,7 @@ export function TimetableImportScreen() {
                       </button>
                     </div>
 
-                    {draft.confidence < 0.8 && draft.include ? (
+                    {(draft.confidence < 0.8 || source === 'local-parse') && draft.include ? (
                       <div className="mt-3 space-y-2.5">
                         <Field label="Subject name">
                           <TextInput value={draft.name} onChange={(event) => patchSubject(draft.id, { name: event.target.value })} />
@@ -643,6 +696,20 @@ export function TimetableImportScreen() {
                               <option value="period">Per period</option>
                               <option value="session">One session</option>
                             </SelectInput>
+                          </Field>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <Field label="Faculty">
+                            <TextInput
+                              value={draft.faculty ?? ''}
+                              onChange={(event) => patchSubject(draft.id, { faculty: event.target.value || null })}
+                            />
+                          </Field>
+                          <Field label="Default room">
+                            <TextInput
+                              value={draft.room ?? ''}
+                              onChange={(event) => patchSubject(draft.id, { room: event.target.value || null })}
+                            />
                           </Field>
                         </div>
                       </div>
@@ -730,28 +797,120 @@ export function TimetableImportScreen() {
                         </p>
                       ) : null}
 
-                      {row.confidence < 0.8 && row.include && !row.isBreak ? (
-                        <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-                          <Field label="Starts">
-                            <TextInput
-                              type="time"
-                              value={row.startTime}
-                              onChange={(event) => patchRow(row.id, { startTime: event.target.value })}
-                            />
-                          </Field>
-                          <Field label="Ends">
-                            <TextInput
-                              type="time"
-                              value={row.endTime}
-                              onChange={(event) => patchRow(row.id, { endTime: event.target.value })}
-                            />
-                          </Field>
+                      {(row.confidence < 0.8 || source === 'local-parse') && row.include && !row.isBreak ? (
+                        <div className="mt-2.5 space-y-2.5">
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <Field label="Day">
+                              <SelectInput
+                                value={String(row.dayOfWeek ?? 1)}
+                                onChange={(event) =>
+                                  patchRow(row.id, { dayOfWeek: Number(event.target.value) as DayOfWeek })
+                                }
+                              >
+                                {DAY_LABELS.map((label, day) => (
+                                  <option key={label} value={day}>
+                                    {label}
+                                  </option>
+                                ))}
+                              </SelectInput>
+                            </Field>
+                            <Field label="Subject">
+                              <SelectInput
+                                value={row.subjectDraftId ?? ''}
+                                onChange={(event) => patchRow(row.id, { subjectDraftId: event.target.value || null })}
+                              >
+                                <option value="">Choose a subject</option>
+                                {subjectsDraft
+                                  .filter((draft) => draft.include)
+                                  .map((draft) => (
+                                    <option key={draft.id} value={draft.id}>
+                                      {draft.name}
+                                    </option>
+                                  ))}
+                              </SelectInput>
+                            </Field>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <Field label="Starts">
+                              <TextInput
+                                type="time"
+                                value={row.startTime}
+                                onChange={(event) => patchRow(row.id, { startTime: event.target.value })}
+                              />
+                            </Field>
+                            <Field label="Ends">
+                              <TextInput
+                                type="time"
+                                value={row.endTime}
+                                onChange={(event) => patchRow(row.id, { endTime: event.target.value })}
+                              />
+                            </Field>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <Field label="Room">
+                              <TextInput
+                                value={row.room ?? ''}
+                                onChange={(event) => patchRow(row.id, { room: event.target.value || null })}
+                              />
+                            </Field>
+                            <Field label="Faculty">
+                              <TextInput
+                                value={row.faculty ?? ''}
+                                onChange={(event) => patchRow(row.id, { faculty: event.target.value || null })}
+                              />
+                            </Field>
+                          </div>
                         </div>
                       ) : null}
                     </li>
                   );
                 })}
               </ul>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const subjectId = createId('draft-sub');
+                  setSubjectsDraft((current) => [
+                    ...current,
+                    {
+                      id: subjectId,
+                      include: true,
+                      name: 'New class',
+                      shortName: 'New class',
+                      subjectCode: null,
+                      faculty: null,
+                      room: null,
+                      classType: 'theory',
+                      attendanceCountMode: 'period',
+                      confidence: 0.6,
+                    },
+                  ]);
+                  const newRow: DraftRow = {
+                    id: createId('draft-row'),
+                    dayOfWeek: 1,
+                    date: null,
+                    startTime: '09:00',
+                    endTime: '10:00',
+                    subjectName: 'New class',
+                    subjectCode: null,
+                    faculty: null,
+                    room: null,
+                    classType: 'theory',
+                    periodCount: 1,
+                    isBreak: false,
+                    breakLabel: null,
+                    confidence: 0.6,
+                    include: true,
+                    subjectDraftId: subjectId,
+                  };
+                  setRowsDraft((current) => [...current, newRow]);
+                }}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-pill border border-dashed border-brand-500/40 px-4 py-2 text-[12.5px] font-semibold text-brand-700 transition active:scale-[0.97]"
+              >
+                <Icon name="add" size={16} />
+                Add class
+              </button>
 
               {timetable.warnings.length > 0 ? (
                 <ul className="mt-3 space-y-2">
@@ -766,8 +925,13 @@ export function TimetableImportScreen() {
             </Card>
 
             <div className="space-y-2.5 pb-2">
-              <Button block icon="check_circle" onClick={() => void apply()}>
-                Accept & apply import
+              <Button
+                block
+                icon="check_circle"
+                disabled={activeRows.length === 0}
+                onClick={() => void apply()}
+              >
+                {activeRows.length === 0 ? 'Add a class to continue' : 'Accept & apply import'}
               </Button>
               <Button block variant="secondary" icon="restart_alt" onClick={() => {
                 setStep('upload');

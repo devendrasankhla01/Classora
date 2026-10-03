@@ -8,7 +8,6 @@
  */
 import { create } from 'zustand';
 
-import { buildDemoDataset } from '@/data/demo';
 import { LocalStore } from '@/services/local/localStore';
 import { createCloudStoreIfConfigured } from '@/services/cloud/createCloudStore';
 import type { DataStore } from '@/services/types';
@@ -139,6 +138,7 @@ interface ClassoraState {
   upsertSubject: (subject: Subject) => Promise<void>;
   archiveSubject: (subjectId: string) => Promise<void>;
   updateProfile: (patch: Partial<Profile>) => Promise<void>;
+  ensureSemester: () => Promise<Semester>;
   setAttendanceTarget: (target: number) => Promise<void>;
   setCountMode: (mode: Subject['attendanceCountMode'], subjectId?: string) => Promise<void>;
 
@@ -216,33 +216,14 @@ export const useClassora = create<ClassoraState>((set, get) => {
       await store.init();
       const seeded = await store.isSeeded();
 
+      // A fresh install stays empty: students enter their own timetable during
+      // onboarding instead of receiving fictional subjects or attendance.
       if (!seeded) {
-        const dataset = buildDemoDataset(new Date());
-        await store.importBackup({
-          schemaVersion: 1,
-          exportedAt: nowInstant(),
-          profile: dataset.profile,
-          semesters: [dataset.semester],
-          subjects: dataset.subjects,
-          versions: dataset.versions,
-          slots: dataset.slots,
-          occurrences: dataset.occurrences,
-          attendance: dataset.attendance,
-          overrides: dataset.overrides,
-          audit: dataset.audit,
-          settings: {
-            id: 'settings',
-            theme: 'light',
-            previewDate: null,
-            onboarded: true,
-          },
-          preferences: dataset.notificationPreferences,
-        });
         await store.saveSettings({
           id: 'settings',
           theme: 'light',
           previewDate: null,
-          onboarded: true,
+          onboarded: false,
         });
       }
 
@@ -255,7 +236,22 @@ export const useClassora = create<ClassoraState>((set, get) => {
 
       const semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
       if (!semester || !profile) {
-        set({ ready: true, mode: store.mode });
+        set({
+          ready: true,
+          mode: store.mode,
+          profile,
+          semester,
+          settings,
+          subjects: [],
+          versions: [],
+          slots: [],
+          occurrences: [],
+          attendance: [],
+          overrides: [],
+          audit: [],
+          notifications,
+          preferences: profile ? await store.getPreferences(profile.id) : null,
+        });
         return;
       }
 
@@ -314,7 +310,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
         preferences: null,
       });
       await get().initialize();
-      set({ toast: toast('Demo data restored') });
+      set({ toast: toast('Data cleared') });
     },
 
     setSyncState: (syncState) => set({ syncState }),
@@ -671,13 +667,75 @@ export const useClassora = create<ClassoraState>((set, get) => {
       set({ toast: toast('Subject archived — history kept', 'info') });
     },
 
+    ensureSemester: async () => {
+      const existing = get().semester;
+      if (existing) return existing;
+      const all = await store.listSemesters();
+      if (all.length > 0) {
+        const active = all.find((semester) => semester.isActive && !semester.archived) ?? all[0]!;
+        set({ semester: active });
+        return active;
+      }
+
+      // Brand-new account: create a default semester so timetable imports have
+      // a stable parent record even if the student has not entered term dates.
+      const now = nowInstant();
+      const today = new Date();
+      const start = new Date(today);
+      start.setDate(today.getDate() - 14);
+      const end = new Date(today);
+      end.setDate(today.getDate() + 120);
+      const semester: Semester = {
+        id: createId('sem'),
+        userId: get().profile?.id ?? 'local',
+        name: 'My Semester',
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10),
+        isActive: true,
+        archived: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await store.saveSemester(semester);
+      set({ semester });
+      return semester;
+    },
+
     updateProfile: async (patch) => {
-      const profile = get().profile;
-      if (!profile) return;
-      const updated: Profile = { ...profile, ...patch, updatedAt: nowInstant() };
+      const existing = get().profile;
+      const now = nowInstant();
+      if (!existing) {
+        // Bootstrap a minimal profile when someone continues on this device.
+        const created: Profile = {
+          id: createId('user'),
+          name: 'Student',
+          email: null,
+          avatarUrl: null,
+          college: null,
+          department: null,
+          departmentLabel: null,
+          semesterLabel: null,
+          studentId: null,
+          batchRoll: null,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+          attendanceTarget: 75,
+          safeMarginAlertClasses: 2,
+          defaultCountMode: 'period',
+          createdAt: now,
+          updatedAt: now,
+          ...patch,
+        };
+        set({ profile: created });
+        await store.saveProfile(created);
+        await get().ensureSemester();
+        return;
+      }
+
+      const updated: Profile = { ...existing, ...patch, updatedAt: now };
       set({ profile: updated });
       await store.saveProfile(updated);
     },
+
 
     setAttendanceTarget: async (target) => {
       const profile = get().profile;
@@ -773,8 +831,11 @@ export const useClassora = create<ClassoraState>((set, get) => {
     },
 
     applyImportedTimetable: async ({ subjects, slots, notes }) => {
-      const { semester, versions, subjects: existingSubjects } = get();
-      if (!semester) return;
+      let { semester, versions, subjects: existingSubjects } = get();
+      if (!semester) {
+        semester = await get().ensureSemester();
+        if (!semester) return;
+      }
 
       const merged = [...existingSubjects.filter((s) => !subjects.some((n) => n.id === s.id)), ...subjects];
       set({ subjects: merged });

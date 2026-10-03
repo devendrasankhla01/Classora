@@ -11,7 +11,14 @@ const ALLOWED_MIME = new Set([
   'image/webp',
   'image/heic',
   'image/heif',
+  'text/csv',
+  'application/csv',
+  'application/vnd.ms-excel',
+  'text/plain',
+  'text/tab-separated-values',
 ]);
+
+const ALLOWED_TEXT_EXTENSION = /\.(csv|tsv|txt)$/i;
 
 /**
  * Validate an upload before it ever leaves the device.
@@ -28,9 +35,9 @@ export function validateUpload(file: File): void {
     );
   }
   const mime = file.type.toLowerCase();
-  if (!ALLOWED_MIME.has(mime)) {
+  if (!ALLOWED_MIME.has(mime) && !ALLOWED_TEXT_EXTENSION.test(file.name)) {
     throw new ExtractionError(
-      'Unsupported file type. Upload a PDF, PNG, JPG or a screenshot of your timetable.',
+      'Unsupported file type. Upload a CSV or text export, PDF, PNG, JPG or a timetable screenshot.',
       'unsupported-type',
     );
   }

@@ -5,6 +5,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { LoginScreen, readStoredSession } from '@/features/auth/LoginScreen';
 import { MetricCardSkeleton } from '@/components/ui/feedback';
+import { RequireTimetable } from '@/components/layout/RequireTimetable';
 
 /* Secondary destinations are code-split: the first paint stays small. */
 const TimetableScreen = lazy(() =>
@@ -118,18 +119,23 @@ export function AppRoutes() {
       <Routes>
         <Route path="/login" element={<LoginScreen />} />
         <Route element={<ProtectedAppShell />}>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/timetable" element={<TimetableScreen />} />
+          {/* Analytics and attendance features need an imported timetable. */}
+          <Route element={<RequireTimetable />}>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/timetable" element={<TimetableScreen />} />
+            <Route path="/timetable/versions" element={<TimetableVersionsScreen />} />
+            <Route path="/timetable/calendar" element={<AcademicCalendarScreen />} />
+            <Route path="/attendance" element={<AttendanceScreen />} />
+            <Route path="/attendance/review" element={<ReviewAttendanceScreen />} />
+            <Route path="/attendance/:subjectId" element={<SubjectDetailScreen />} />
+            <Route path="/analytics" element={<AnalyticsScreen />} />
+            <Route path="/can-i-skip" element={<CanISkipScreen />} />
+            <Route path="/leave-impact" element={<LeaveImpactScreen />} />
+          </Route>
+
+          {/* These destinations must remain usable before a timetable exists. */}
           <Route path="/timetable/import" element={<TimetableImportScreen />} />
           <Route path="/timetable/review" element={<TimetableReviewRedirect />} />
-          <Route path="/timetable/versions" element={<TimetableVersionsScreen />} />
-          <Route path="/timetable/calendar" element={<AcademicCalendarScreen />} />
-          <Route path="/attendance" element={<AttendanceScreen />} />
-          <Route path="/attendance/review" element={<ReviewAttendanceScreen />} />
-          <Route path="/attendance/:subjectId" element={<SubjectDetailScreen />} />
-          <Route path="/analytics" element={<AnalyticsScreen />} />
-          <Route path="/can-i-skip" element={<CanISkipScreen />} />
-          <Route path="/leave-impact" element={<LeaveImpactScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/profile/subjects" element={<SubjectsCrudScreen />} />
           <Route path="/profile/subjects/manage" element={<ManageSubjectsScreen />} />

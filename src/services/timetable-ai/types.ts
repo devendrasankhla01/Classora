@@ -8,7 +8,7 @@ export interface ExtractionRequest {
 
 export interface ExtractionResult {
   /** Where the data came from — surfaced honestly in the UI. */
-  source: 'ai' | 'demo-fixture';
+  source: 'ai' | 'local-parse';
   provider: string;
   timetable: ExtractedTimetable;
   /** Randomised storage key if the upload was retained. */

@@ -252,7 +252,7 @@ export function ProfileScreen() {
             <Card className="!p-4">
               <p className="text-label-lg">Log out of Classora?</p>
               <p className="mt-1 text-body-sm text-ink-secondary">
-                Your data stays on this device. In demo mode you can return to the seeded dataset at any time.
+                Your data stays on this device. Sign back in any time to pick up where you left off.
               </p>
               <div className="mt-3 flex gap-2">
                 <Button variant="secondary" block onClick={() => setConfirmLogout(false)}>
@@ -289,7 +289,7 @@ className="flex w-full items-center justify-center gap-2 rounded-pill bg-critica
             onClick={() => setResetOpen(true)}
 className="w-full rounded-pill py-3 text-label-md text-ink-muted"
           >
-            Restore demo data
+            Clear all data
           </button>
         </div>
 
@@ -301,8 +301,8 @@ className="w-full rounded-pill py-3 text-label-md text-ink-muted"
       <BottomSheet
         open={resetOpen}
         onClose={() => setResetOpen(false)}
-        title="Restore demo data?"
-        description="This replaces everything on this device with the seeded Semester 5 dataset. It cannot be undone."
+        title="Clear all data?"
+        description="This wipes your timetable, attendance history and settings from this device. It cannot be undone."
         footer={
           <div className="flex gap-2">
             <Button variant="secondary" block onClick={() => setResetOpen(false)}>
@@ -316,7 +316,7 @@ className="w-full rounded-pill py-3 text-label-md text-ink-muted"
                 void resetDemoData();
               }}
             >
-              Restore
+              Clear
             </Button>
           </div>
         }
