@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
 import { loadAuth, type AuthResult } from '@/services/cloud/auth';
 import { isCloudModeEnabled } from '@/services/cloud/client';
+import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/usnTimetable';
 import { Card } from '@/components/ui/Card';
 import { Button, Field, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
@@ -93,6 +94,8 @@ export function LoginScreen() {
   const location = useLocation();
   const profile = useClassora((state) => state.profile);
   const updateProfile = useClassora((state) => state.updateProfile);
+  const applyImportedTimetable = useClassora((state) => state.applyImportedTimetable);
+  const slots = useClassora((state) => state.slots);
   const announce = useClassora((state) => state.announce);
 
   const cloudEnabled = isCloudModeEnabled();
@@ -166,24 +169,47 @@ export function LoginScreen() {
     studentId?: string;
     greeting: string;
   }) {
+    const finalStudentId =
+      opts.studentId && opts.studentId.trim().length > 0
+        ? opts.studentId.trim().toUpperCase()
+        : profile?.studentId ?? null;
+
+    const isMatch = isUsnInBuiltinRange(finalStudentId);
+
     if (opts.email || opts.name || opts.studentId) {
       await updateProfile({
         email: opts.email ?? profile?.email ?? null,
         name: opts.name && opts.name.trim().length > 0 ? opts.name.trim() : profile?.name ?? 'Student',
-        studentId:
-          opts.studentId && opts.studentId.trim().length > 0
-            ? opts.studentId.trim()
-            : profile?.studentId ?? null,
+        studentId: finalStudentId,
+        department: isMatch ? 'Computer Science & Engineering' : profile?.department ?? null,
+        departmentLabel: isMatch ? 'CSE • Section A' : profile?.departmentLabel ?? null,
+        semesterLabel: isMatch ? 'Semester III' : profile?.semesterLabel ?? null,
+        batchRoll: isMatch ? finalStudentId : profile?.batchRoll ?? null,
       });
     }
+
+    if (isMatch && slots.length === 0) {
+      const builtinData = generateBuiltinSemester3Data();
+      await applyImportedTimetable({
+        subjects: builtinData.subjects,
+        slots: builtinData.slots,
+        notes: builtinData.notes,
+      });
+    }
+
     writeStoredSession({
       mode: opts.mode,
       email: opts.email,
       name: opts.name ?? profile?.name ?? null,
-      studentId: opts.studentId ?? profile?.studentId ?? null,
+      studentId: finalStudentId,
       signedInAt: new Date().toISOString(),
     });
-    announce({ message: opts.greeting, tone: 'success' });
+    announce({
+      message: isMatch
+        ? `Welcome! Semester III timetable loaded for ${finalStudentId}`
+        : opts.greeting,
+      tone: 'success',
+    });
     navigate(redirectTo, { replace: true });
   }
 
@@ -400,14 +426,23 @@ export function LoginScreen() {
             </Field>
 
             {tab === 'signup' ? (
-              <Field label="Roll / Student ID" hint="Optional">
+              <Field
+                label="USN / Roll Number"
+                hint={isUsnInBuiltinRange(studentId) ? 'Sem III Section A' : 'e.g. 4PM25CS001'}
+              >
                 <TextInput
                   type="text"
                   name="studentId"
-                  placeholder="2024CS1042"
+                  placeholder="4PM25CS001"
                   value={studentId}
-                  onChange={(event) => setStudentId(event.target.value)}
+                  onChange={(event) => setStudentId(event.target.value.toUpperCase())}
                 />
+                {isUsnInBuiltinRange(studentId) ? (
+                  <div className="mt-2 flex items-center gap-2 rounded-card border border-emerald-200 bg-emerald-50 px-3 py-2 text-label-sm font-medium text-emerald-800">
+                    <Icon name="check_circle" size={16} className="text-emerald-600" />
+                    <span>Batch 4PM25CS detected: Semester III Section A timetable will load automatically!</span>
+                  </div>
+                ) : null}
               </Field>
             ) : null}
 

@@ -20,6 +20,7 @@ import {
 import { addDaysToKey, nowInstant, toInstant, todayKey } from '@/lib/date';
 import { buildNotifications, newNotificationsOnly } from '@/lib/notifications';
 import { createId } from '@/lib/id';
+import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/usnTimetable';
 import {
   buildCancellation,
   buildExtraClass,
@@ -730,6 +731,15 @@ export const useClassora = create<ClassoraState>((set, get) => {
       const updated: Profile = { ...profile, ...patch, updatedAt: nowInstant() };
       set({ profile: updated });
       await store.saveProfile(updated);
+
+      if (patch.studentId && isUsnInBuiltinRange(patch.studentId) && get().slots.length === 0) {
+        const builtin = generateBuiltinSemester3Data();
+        await get().applyImportedTimetable({
+          subjects: builtin.subjects,
+          slots: builtin.slots,
+          notes: builtin.notes,
+        });
+      }
     },
 
     setAttendanceTarget: async (target) => {
