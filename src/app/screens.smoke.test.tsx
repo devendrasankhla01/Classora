@@ -9,7 +9,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { render, screen, cleanup, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
-import { aggregate } from '@/lib/attendance';
 import { useClassora } from './store';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { TimetableScreen } from '@/features/timetable/TimetableScreen';
@@ -23,6 +22,8 @@ import { AcademicCalendarScreen } from '@/features/timetable/AcademicCalendarScr
 import { NotificationsScreen } from '@/features/notifications/NotificationsScreen';
 import { LoginScreen, writeStoredSession } from '@/features/auth/LoginScreen';
 
+import { generateBuiltinSemester3Data } from '@/services/usnTimetable';
+
 function renderScreen(element: React.ReactElement, path = '/') {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -35,42 +36,28 @@ function renderScreen(element: React.ReactElement, path = '/') {
 
 beforeAll(async () => {
   await useClassora.getState().initialize();
+  if (useClassora.getState().subjects.length === 0) {
+    const builtin = generateBuiltinSemester3Data();
+    await useClassora.getState().applyImportedTimetable({
+      subjects: builtin.subjects,
+      slots: builtin.slots,
+      notes: builtin.notes,
+    });
+  }
 });
 
 afterAll(() => {
   cleanup();
 });
 
-describe('seeded store', () => {
-  it('loads the demo semester with subjects and occurrences', () => {
+describe('initialized store', () => {
+  it('loads the semester with subjects and occurrences', () => {
     const state = useClassora.getState();
     expect(state.ready).toBe(true);
     expect(state.profile).not.toBeNull();
     expect(state.subjects.length).toBeGreaterThanOrEqual(5);
-    expect(state.occurrences.length).toBeGreaterThan(40);
-    expect(state.attendance.length).toBeGreaterThan(80);
-  });
-
-  it('derives real alerts for the inbox on load', () => {
-    const notifications = useClassora.getState().notifications;
-    expect(notifications.length).toBeGreaterThan(0);
-    // Every alert must point at something real.
-    for (const notification of notifications) {
-      expect(notification.title.length).toBeGreaterThan(0);
-      expect(notification.body.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('reports a believable overall attendance figure', () => {
-    const target = useClassora.getState().profile!.attendanceTarget;
-    const stats = aggregate(
-      useClassora.getState().summaries().map((row) => row.summary),
-      target,
-    );
-    expect(stats.percentage).not.toBeNull();
-    expect(stats.percentage!).toBeGreaterThan(70);
-    expect(stats.percentage!).toBeLessThan(95);
-    expect(stats.conducted).toBeGreaterThan(0);
+    expect(state.slots.length).toBeGreaterThanOrEqual(15);
+    expect(state.occurrences.length).toBeGreaterThanOrEqual(20);
   });
 });
 

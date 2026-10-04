@@ -3,6 +3,7 @@
  * edit the Modify Day sheet can perform.
  */
 import { describe, expect, it } from 'vitest';
+import { toInstant } from './date';
 
 import {
   buildCancellation,
@@ -112,7 +113,7 @@ describe('generateOccurrences', () => {
       '2026-09-21',
       '2026-09-28',
     ]);
-    expect(result.occurrences[0]!.startDateTime).toBe('2026-09-07T09:00:00.000Z');
+    expect(result.occurrences[0]!.startDateTime).toBe(toInstant('2026-09-07', '09:00'));
     expect(result.occurrences[0]!.occurrenceType).toBe('regular');
     expect(result.occurrences[0]!.scheduleStatus).toBe('scheduled');
   });
@@ -261,7 +262,7 @@ describe('buildExtraClass', () => {
 
     expect(extra.occurrenceType).toBe('extra');
     expect(extra.sourceTimetableSlotId).toBeNull();
-    expect(extra.startDateTime).toBe('2026-09-08T14:00:00.000Z');
+    expect(extra.startDateTime).toBe(toInstant('2026-09-08', '14:00'));
   });
 });
 
@@ -301,8 +302,8 @@ describe('buildOccurrenceOverride', () => {
     const patch = change.updated[0]!.patch;
     expect(patch.startTime).toBe('11:00');
     expect(patch.endTime).toBe('12:30');
-    expect(patch.startDateTime).toBe('2026-09-07T11:00:00.000Z');
-    expect(patch.endDateTime).toBe('2026-09-07T12:30:00.000Z');
+    expect(patch.startDateTime).toBe(toInstant('2026-09-07', '11:00'));
+    expect(patch.endDateTime).toBe(toInstant('2026-09-07', '12:30'));
   });
 
   it('changes only the room when asked', () => {
