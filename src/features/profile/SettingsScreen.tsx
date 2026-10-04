@@ -142,15 +142,15 @@ className="mt-3 flex items-center gap-3 text-label-lg text-brand-700"
         <button
           type="button"
           onClick={() =>
-            announce({ tone: 'info', message: 'Classora is up to date — build 1.0.0' })
+            announce({ tone: 'info', message: 'CampusOne is up to date — build 1.0.0' })
           }
-className="w-full rounded-pill py-3 text-label-md text-ink-muted"
+          className="w-full rounded-pill py-3 text-label-md text-ink-muted"
         >
           Check for updates
         </button>
 
         <p className="pb-2 text-center text-label-sm text-ink-muted">
-          Classora • Build 1.0.0 • Offline first, built for students
+          CampusOne • Build 1.0.0 • Offline first, built for students
         </p>
       </div>
     </>

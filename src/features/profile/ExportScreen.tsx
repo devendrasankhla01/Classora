@@ -256,8 +256,7 @@ export function ExportScreen() {
           <div className="flex gap-3">
             <Icon name="lock" size={19} className="mt-0.5 shrink-0 text-brand-600" />
             <p className="text-body-sm text-ink-secondary">
-              The file is generated on this device. Classora never uploads your attendance to a server in Local
-              mode, and tokens for cloud sync are never written into an export.
+              The file is generated directly on this device. CampusOne keeps your attendance data secure, and credentials are never written into an export.
             </p>
           </div>
         </Card>

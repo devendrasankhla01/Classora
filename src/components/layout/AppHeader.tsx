@@ -26,7 +26,7 @@ interface AppHeaderProps {
  * gradient-free supporting title, and the notification / profile controls.
  */
 export function AppHeader({
-  eyebrow = 'Classora',
+  eyebrow = 'CampusOne',
   wordmark = false,
   title,
   overline,
@@ -44,7 +44,11 @@ export function AppHeader({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {wordmark ? (
-            <img src="/branding/wordmark.png" alt="Classora" className="h-[19px] w-auto" />
+            <img
+              src="/branding/campusone-horizontal.png"
+              alt="CampusOne"
+              className="h-[24px] sm:h-[26px] w-auto select-none object-contain"
+            />
           ) : (
             <p className="text-label-sm uppercase text-ink-muted">{eyebrow}</p>
           )}

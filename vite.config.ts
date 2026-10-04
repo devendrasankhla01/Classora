@@ -15,8 +15,8 @@ export default defineConfig({
       includeAssets: ['icons/favicon-32.png', 'icons/apple-touch-icon.png'],
       manifest: {
         id: '/',
-        name: 'Classora',
-        short_name: 'Classora',
+        name: 'CampusOne',
+        short_name: 'CampusOne',
         description:
           'Smart personal attendance and timetable intelligence for college students. Works offline.',
         start_url: '/',

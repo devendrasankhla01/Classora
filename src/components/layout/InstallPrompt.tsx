@@ -34,7 +34,7 @@ export function InstallPrompt() {
           </span>
 
           <div className="min-w-0 flex-1">
-            <p className="text-label-lg">Install Classora</p>
+            <p className="text-label-lg">Install CampusOne</p>
             <p className="mt-0.5 text-label-md text-ink-secondary">
               Works offline, opens full screen, no app store needed.
             </p>
@@ -55,7 +55,7 @@ export function InstallPrompt() {
               if (canPrompt) {
                 const outcome = await promptInstall();
                 if (outcome === 'accepted') {
-                  announce({ tone: 'success', message: 'Classora added to your home screen' });
+                  announce({ tone: 'success', message: 'CampusOne added to your home screen' });
                 }
                 return;
               }
@@ -74,7 +74,7 @@ export function InstallPrompt() {
       <BottomSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        title="Add Classora to your Home Screen"
+        title="Add CampusOne to your Home Screen"
         description="Safari needs two taps — Apple does not allow apps to install themselves."
         footer={
           <Button block variant="secondary" onClick={() => setSheetOpen(false)}>
@@ -96,11 +96,11 @@ export function InstallPrompt() {
           <Step
             icon="check_circle"
             title="Tap “Add”"
-            detail="Classora then opens full screen and works with no signal."
+            detail="CampusOne then opens full screen and works with no signal."
           />
         </ol>
         <p className="mt-4 rounded-block bg-surface-muted p-3.5 text-label-md text-ink-secondary">
-          Your attendance data stays on this device in local mode — installing does not send anything anywhere.
+          Your attendance data stays securely on this device — installing does not send anything anywhere.
         </p>
       </BottomSheet>
     </>

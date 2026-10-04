@@ -294,7 +294,7 @@ className="w-full rounded-pill py-3 text-label-md text-ink-muted"
         </div>
 
         <p className="pb-2 text-center text-label-sm text-ink-muted">
-          Classora • Version 1.0 • Semester III
+          CampusOne • Version 1.0 • Semester III
         </p>
       </div>
 

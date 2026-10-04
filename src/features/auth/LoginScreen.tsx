@@ -9,7 +9,6 @@ import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/us
 import { Card } from '@/components/ui/Card';
 import { Button, Field, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
-import { StatusChip } from '@/components/ui/chips';
 
 /**
  * Session storage key for the local/demo gate.
@@ -328,18 +327,18 @@ export function LoginScreen() {
       <div className="mx-auto flex w-full max-w-app flex-col justify-between">
         {/* Brand header ------------------------------------------------- */}
         <header className="flex flex-col items-center pt-4 text-center">
-          <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-[20px] bg-surface shadow-elevated ring-1 ring-hairline">
+          <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-[20px] bg-transparent">
             <img
-              src="/icons/icon-192.png"
-              alt="Classora"
-              className="h-14 w-14 object-contain"
+              src="/branding/campusone-mark.png"
+              alt="CampusOne"
+              className="h-16 w-16 object-contain"
             />
           </div>
 
           <img
-            src="/branding/wordmark.png"
-            alt="Classora"
-            className="mt-3.5 h-[22px] w-auto select-none object-contain"
+            src="/branding/campusone-wordmark.png"
+            alt="CampusOne"
+            className="mt-3.5 h-[28px] w-auto select-none object-contain"
           />
 
           <h1 className="mt-3 text-headline-md">
@@ -352,13 +351,6 @@ export function LoginScreen() {
           <p className="mt-1 max-w-[30ch] text-body-md text-ink-secondary">
             Track every lecture, guard your 75% benchmark, and know cleanly when you can skip.
           </p>
-
-          <div className="mt-3">
-            <StatusChip
-              tone={cloudEnabled ? 'safe' : 'brand'}
-              label={cloudEnabled ? 'Cloud Sync Active' : 'On-Device Mode • Offline Ready'}
-            />
-          </div>
         </header>
 
         {/* Auth card ---------------------------------------------------- */}
