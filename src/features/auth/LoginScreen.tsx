@@ -428,12 +428,12 @@ export function LoginScreen() {
             {tab === 'signup' ? (
               <Field
                 label="USN / Roll Number"
-                hint={isUsnInBuiltinRange(studentId) ? 'Sem III Section A' : 'e.g. 4PM25CS001'}
+                hint={isUsnInBuiltinRange(studentId) ? 'Sem III Section A' : 'e.g. 4PM25CS043'}
               >
                 <TextInput
                   type="text"
                   name="studentId"
-                  placeholder="4PM25CS001"
+                  placeholder="4PM25CS043"
                   value={studentId}
                   onChange={(event) => setStudentId(event.target.value.toUpperCase())}
                 />
