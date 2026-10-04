@@ -89,11 +89,11 @@ export function AttendanceGauge({
         />
         <text
           x={centerX}
-          y={centerY - 14}
+          y={centerY - 10}
           textAnchor="middle"
           className="fill-ink"
           style={{
-            fontSize: 40,
+            fontSize: Math.round(size * 0.165),
             fontWeight: 700,
             letterSpacing: '-0.03em',
             fontVariantNumeric: 'tabular-nums',
@@ -102,7 +102,7 @@ export function AttendanceGauge({
           {label ?? (value === null ? '—' : `${clamped.toFixed(1)}%`)}
         </text>
       </svg>
-      <p className="mt-1 text-center text-label-sm uppercase tracking-[0.03em] text-ink-muted">{caption}</p>
+      <p className="mt-0.5 text-center text-label-sm uppercase tracking-[0.03em] text-ink-muted">{caption}</p>
     </div>
   );
 }

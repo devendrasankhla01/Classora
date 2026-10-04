@@ -32,8 +32,8 @@ export function AttendanceOverviewCard() {
         <Pill>Target: {target}%</Pill>
       </div>
 
-      <div className="mt-5">
-        <AttendanceGauge value={stats.percentage} caption="Overall attendance" size={236} target={target} />
+      <div className="mt-4">
+        <AttendanceGauge value={stats.percentage} caption="Overall attendance" size={204} target={target} />
       </div>
 
       <div className="mt-5 flex items-start gap-3 rounded-block bg-safe-50 p-3.5">

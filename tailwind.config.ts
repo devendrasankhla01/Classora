@@ -64,6 +64,20 @@ export default {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
+      fontSize: {
+        'display-lg': ['30px', { lineHeight: '38px', letterSpacing: '-0.03em', fontWeight: '700' }],
+        'metric-xl': ['34px', { lineHeight: '42px', letterSpacing: '-0.03em', fontWeight: '700' }],
+        'metric-sm': ['19px', { lineHeight: '24px', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'headline-lg': ['23px', { lineHeight: '29px', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'headline-md': ['18px', { lineHeight: '24px', letterSpacing: '-0.015em', fontWeight: '600' }],
+        'headline-sm': ['15px', { lineHeight: '21px', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'body-lg': ['14.5px', { lineHeight: '21px', letterSpacing: '-0.005em', fontWeight: '400' }],
+        'body-md': ['13px', { lineHeight: '18px', letterSpacing: '0em', fontWeight: '400' }],
+        'body-sm': ['12px', { lineHeight: '16px', letterSpacing: '0em', fontWeight: '400' }],
+        'label-lg': ['13px', { lineHeight: '17px', letterSpacing: '0.01em', fontWeight: '600' }],
+        'label-md': ['11.5px', { lineHeight: '15px', letterSpacing: '0.02em', fontWeight: '600' }],
+        'label-sm': ['10.5px', { lineHeight: '14px', letterSpacing: '0.03em', fontWeight: '500' }],
+      },
       borderRadius: {
         card: '24px',
         'card-lg': '28px',

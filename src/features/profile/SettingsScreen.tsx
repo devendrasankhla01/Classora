@@ -1,15 +1,13 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Card, SectionHeader } from '@/components/ui/Card';
-import { Button } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
 import { Pill } from '@/components/ui/chips';
 import { useActiveSubjects } from '@/hooks/useClassoraData';
-import { notifications, storage } from '@/platform';
+import { notifications } from '@/platform';
 
 /**
  * Device & data settings: appearance, offline storage, sync and export.
@@ -18,14 +16,11 @@ export function SettingsScreen() {
   const settings = useClassora((state) => state.settings);
   const saveSettings = useClassora((state) => state.saveSettings);
   const syncState = useClassora((state) => state.syncState);
-  const mode = useClassora((state) => state.mode);
   const confidence = useClassora((state) => state.confidence);
   const subjects = useActiveSubjects();
   const occurrences = useClassora((state) => state.occurrences);
   const attendance = useClassora((state) => state.attendance);
   const announce = useClassora((state) => state.announce);
-
-  const [note, setNote] = useState<string | null>(null);
 
   const records = subjects.length + occurrences.length + attendance.length;
 
@@ -79,20 +74,16 @@ export function SettingsScreen() {
 
         <Card>
           <SectionHeader
-            title="Offline storage"
-            subtitle={`${records} records on this device`}
-            action={<Pill tone={mode === 'local' ? 'muted' : 'brand'}>{mode === 'local' ? 'Local' : 'Cloud'}</Pill>}
+            title="Sync & Offline Status"
+            subtitle={`${records} items securely stored`}
           />
           <p className="text-body-sm text-ink-secondary">
-            Classora keeps your timetable and attendance in an on-device database so it works with no signal.
-            {mode === 'local'
-              ? ' In Local mode nothing leaves this device unless you export it.'
-              : ' In Cloud mode changes are mirrored to your account when you are online.'}
+            Classora stores your schedule and attendance records securely on this device so the app is fast, responsive, and available without signal.
           </p>
 
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div className="rounded-block bg-surface-muted p-3.5">
-              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Sync</p>
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Status</p>
               <p className="mt-1 inline-flex items-center gap-1.5 text-label-lg capitalize">
                 <span
                   className={cn(
@@ -104,54 +95,10 @@ export function SettingsScreen() {
               </p>
             </div>
             <div className="rounded-block bg-surface-muted p-3.5">
-              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Confidence</p>
+              <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">Data Health</p>
               <p className="mt-1 text-label-lg tabular-nums">{confidence()}%</p>
             </div>
           </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              variant="secondary"
-              icon="analytics"
-              onClick={async () => {
-                const estimate = await storage.estimate();
-                setNote(
-                  estimate
-                    ? `${Math.round(estimate.usage / 1024)} KB used of ${Math.round(
-                        estimate.quota / (1024 * 1024),
-                      )} MB available to this app`
-                    : 'This browser does not expose a storage estimate.',
-                );
-              }}
-            >
-              Check storage
-            </Button>
-            <Button
-              variant="secondary"
-              icon="verified_user"
-              onClick={async () => {
-                const persisted = await storage.requestPersistence();
-                setNote(
-                  persisted
-                    ? 'This device will keep Classora data even under storage pressure.'
-                    : 'The browser did not grant persistent storage; data may be evicted if space runs low.',
-                );
-              }}
-            >
-              Protect data
-            </Button>
-            <Button
-              variant="ghost"
-              icon="cleaning_services"
-              onClick={async () => {
-                const cleared = await storage.clearCaches();
-                setNote(cleared ? 'Cached app assets cleared.' : 'There was nothing cached to clear.');
-              }}
-            >
-              Clear caches
-            </Button>
-          </div>
-          {note ? <p className="mt-2.5 text-label-md text-ink-secondary">{note}</p> : null}
         </Card>
 
         <Card>

@@ -33,14 +33,12 @@ export function FloatingNav() {
   return (
     <nav
       aria-label="Primary"
-      // bottom: 24px above the safe area.
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-safe-plus-6"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-safe-plus-4 sm:pb-safe-plus-6 px-3"
     >
       <div
         className={cn(
-          'pointer-events-auto mx-4 flex h-16 w-full max-w-app items-center justify-center gap-1 rounded-pill px-2 py-1.5',
-          // Translucent frosted white with a 20px blur and Level-3 elevation.
-          'border border-white/70 bg-white/90 shadow-floating backdrop-blur-dock',
+          'pointer-events-auto flex h-14 sm:h-16 w-full max-w-[390px] sm:max-w-app items-center justify-around sm:justify-center gap-1 sm:gap-1.5 rounded-pill px-2 py-1',
+          'border border-white/80 bg-white/95 shadow-floating backdrop-blur-dock',
         )}
       >
         {ITEMS.map((item) => {
@@ -57,17 +55,15 @@ export function FloatingNav() {
               aria-current={active ? 'page' : undefined}
               onClick={() => void haptics.impact('light')}
               className={cn(
-                'flex h-12 flex-none items-center justify-center rounded-pill',
+                'flex h-10 sm:h-12 flex-none items-center justify-center rounded-pill',
                 'transition-all duration-300 ease-porcelain',
                 active
-                  ? // Active tab: dark pill, white icon + label, 16px padding.
-                    'gap-2 bg-ink px-4 text-white shadow-elevated'
-                  : // Inactive: 48px circular icon button, tap wash on press.
-                    'w-12 text-ink-secondary hover:bg-[rgba(17,24,39,0.04)] active:bg-[rgba(17,24,39,0.04)]',
+                  ? 'gap-1.5 bg-ink px-3 sm:px-4 text-white shadow-elevated'
+                  : 'w-10 sm:w-12 text-ink-secondary hover:bg-[rgba(17,24,39,0.04)] active:bg-[rgba(17,24,39,0.04)]',
               )}
             >
-              <Icon name={item.icon} size={active ? 18 : 21} filled={active} />
-              {active ? <span className="text-label-lg text-white">{item.label}</span> : null}
+              <Icon name={item.icon} size={active ? 17 : 20} filled={active} />
+              {active ? <span className="text-label-md sm:text-label-lg font-medium text-white">{item.label}</span> : null}
             </NavLink>
           );
         })}

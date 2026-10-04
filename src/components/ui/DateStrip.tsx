@@ -16,8 +16,8 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
   const today = todayKey();
 
   return (
-    <div className={cn('-mx-5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', className)}>
-      <div className="flex min-w-max items-stretch gap-2">
+    <div className={cn('w-full', className)}>
+      <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
         {dates.map((date) => {
           const selected = date === value;
           const isToday = date === today;
@@ -31,16 +31,16 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
               aria-pressed={selected}
               aria-label={`${formatWeekdayShort(date)} ${formatDayNumber(date)}`}
               className={cn(
-                'relative flex w-[58px] flex-col items-center gap-1 rounded-[18px] px-2 pb-2.5 pt-3 transition-all duration-200 ease-porcelain',
+                'relative flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-[14px] sm:rounded-[18px] py-2 sm:py-2.5 transition-all duration-200 ease-porcelain',
                 selected
                   ? 'bg-brand-600 text-white shadow-elevated'
                   : 'bg-surface text-ink-secondary shadow-ambient ring-1 ring-hairline',
               )}
             >
-              <span className={cn('text-label-sm font-semibold uppercase tracking-wide', selected ? 'text-white/80' : 'text-ink-muted')}>
+              <span className={cn('text-[10px] sm:text-label-sm font-semibold uppercase tracking-wider', selected ? 'text-white/80' : 'text-ink-muted')}>
                 {formatWeekdayShort(date)}
               </span>
-              <span className={cn('text-headline-sm ', selected ? 'text-white' : 'text-ink')}>
+              <span className={cn('text-[15px] sm:text-headline-sm font-bold', selected ? 'text-white' : 'text-ink')}>
                 {formatDayNumber(date)}
               </span>
               <span
@@ -54,7 +54,7 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
                 )}
               />
               {isToday && !selected ? (
-                <span className="absolute inset-x-3 bottom-1 h-[2px] rounded-full bg-brand-400/60" aria-hidden />
+                <span className="absolute inset-x-2 bottom-0.5 h-[2px] rounded-full bg-brand-400/60" aria-hidden />
               ) : null}
             </button>
           );

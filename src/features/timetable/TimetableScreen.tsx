@@ -139,20 +139,21 @@ export function TimetableScreen() {
                   />
                 </Card>
               ) : (
-                <Timeline
-                  occurrences={dayOccurrences}
-                  breaks={dayBreaks}
-                  now={now}
-                  onModify={(occurrence) => openModify(occurrence)}
-                />
+                <>
+                  <Timeline
+                    occurrences={dayOccurrences}
+                    breaks={dayBreaks}
+                    now={now}
+                    onModify={(occurrence) => openModify(occurrence)}
+                  />
+                  <div className="flex justify-center pt-2 pb-2">
+                    <Button icon="add" block onClick={() => openModify()}>
+                      Add Custom Lecture
+                    </Button>
+                  </div>
+                </>
               )}
             </section>
-
-            <div className="flex justify-center pb-2">
-              <Button icon="add" block onClick={() => openModify()}>
-                Add Custom Lecture
-              </Button>
-            </div>
           </>
         ) : (
           <WeeklyView
