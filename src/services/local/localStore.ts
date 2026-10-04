@@ -98,13 +98,13 @@ export class LocalStore implements DataStore {
 
   async replaceSlots(semesterId: string, versionId: string, slots: RecurringSlot[]): Promise<void> {
     await this.db.transaction('rw', this.db.slots, async () => {
-      const existing = await this.db.slots.where('timetableVersionId').equals(versionId).toArray();
+      const existing = await this.db.slots.where('semesterId').equals(semesterId).toArray();
       if (existing.length > 0) {
         await this.db.slots.bulkDelete(existing.map((slot) => slot.id));
       }
-      if (slots.length > 0) await this.db.slots.bulkPut(slots);
+      const tagged = slots.map((s) => ({ ...s, semesterId, timetableVersionId: versionId }));
+      if (tagged.length > 0) await this.db.slots.bulkPut(tagged);
     });
-    void semesterId;
   }
 
   /* Occurrences --------------------------------------------------------- */

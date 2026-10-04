@@ -299,7 +299,8 @@ export class SupabaseStore implements DataStore {
   }
 
   async replaceSlots(semesterId: string, versionId: string, slots: RecurringSlot[]): Promise<void> {
-    await this.cache.replaceSlots(semesterId, versionId, slots);
+    const tagged = slots.map((s) => ({ ...s, semesterId, timetableVersionId: versionId }));
+    await this.cache.replaceSlots(semesterId, versionId, tagged);
     const client = await this.client();
     if (!client || !this.userId) return;
 
@@ -309,16 +310,15 @@ export class SupabaseStore implements DataStore {
       .eq('semester_id', semesterId);
     if (deleteError) return;
 
-    if (slots.length === 0) return;
+    if (tagged.length === 0) return;
     const { error } = await client
       .from('recurring_slots')
-      .upsert(slots.map((slot) => withUser(slotRow(slot), this.userId!)));
+      .upsert(tagged.map((slot) => withUser(slotRow(slot), this.userId!)));
     if (error) {
-      for (const slot of slots) {
+      for (const slot of tagged) {
         await this.queue({ entity: 'semester', op: 'upsert', entityId: slot.id, payload: slotRow(slot) });
       }
     }
-    void versionId;
   }
 
   async listSlotsByVersion(versionId: string): Promise<RecurringSlot[]> {

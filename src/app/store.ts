@@ -311,10 +311,12 @@ export const useClassora = create<ClassoraState>((set, get) => {
         semester,
         subjects,
         versions,
-        slots: slots.filter(
-          (slot) =>
-            slot.timetableVersionId === (versions.find((version) => version.isCurrent)?.id ?? ''),
-        ),
+        slots: (() => {
+          const currentVersion = versions.find((version) => version.isCurrent) ?? versions[0] ?? null;
+          if (!currentVersion) return slots;
+          const matching = slots.filter((slot) => slot.timetableVersionId === currentVersion.id);
+          return matching.length > 0 ? matching : slots;
+        })(),
         occurrences,
         attendance,
         overrides,
@@ -863,27 +865,35 @@ export const useClassora = create<ClassoraState>((set, get) => {
       await store.saveSubjects(subjects);
 
       const nextNumber = Math.max(0, ...versions.map((version) => version.versionNumber)) + 1;
+      const versionId = createId('ver');
+      const normalizedSlots = slots.map((slot, index) => ({
+        ...slot,
+        id: slot.id && !slot.id.startsWith('import-') ? slot.id : `slot-${versionId}-${index + 1}`,
+        timetableVersionId: versionId,
+        semesterId: activeSemester.id,
+      }));
+
       const version: TimetableVersion = {
-        id: createId('ver'),
+        id: versionId,
         semesterId: activeSemester.id,
         versionNumber: nextNumber,
         label: `Version ${nextNumber}`,
         notes,
-        signature: normalizeSignature(slots),
+        signature: normalizeSignature(normalizedSlots),
         isCurrent: true,
         createdBy: 'import',
         createdAt: nowInstant(),
       };
       const updatedVersions = [version, ...versions.map((item) => ({ ...item, isCurrent: false }))];
-      set({ versions: updatedVersions, slots });
+      set({ versions: updatedVersions, slots: normalizedSlots });
       await store.saveVersions(updatedVersions);
-      await store.replaceSlots(activeSemester.id, version.id, slots);
+      await store.replaceSlots(activeSemester.id, versionId, normalizedSlots);
 
       const range = futureGenerationRange(activeSemester, new Date(), 45);
       const existingIds = new Set(get().occurrences.map((occurrence) => occurrence.id));
       const fresh = generateOccurrences({
         semester: activeSemester,
-        slots: slots.filter((slot) => slot.kind === 'class'),
+        slots: normalizedSlots.filter((slot) => slot.kind === 'class'),
         overrides: get().overrides,
         from: range.from,
         to: range.to,
