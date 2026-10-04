@@ -21,6 +21,7 @@ import { addDaysToKey, nowInstant, toInstant, todayKey } from '@/lib/date';
 import { buildNotifications, newNotificationsOnly } from '@/lib/notifications';
 import { createId } from '@/lib/id';
 import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/usnTimetable';
+import { readStoredSession } from '@/features/auth/LoginScreen';
 import {
   buildCancellation,
   buildExtraClass,
@@ -217,17 +218,18 @@ export const useClassora = create<ClassoraState>((set, get) => {
 
       if (!seeded) {
         const now = nowInstant();
+        const storedSession = readStoredSession();
         const cleanProfile: Profile = {
           id: createId('prof'),
-          name: 'Student',
-          email: null,
-          studentId: null,
+          name: storedSession?.name || (storedSession?.email ? storedSession.email.split('@')[0] : 'Student'),
+          email: storedSession?.email ?? null,
+          studentId: storedSession?.studentId ?? null,
           avatarUrl: null,
           college: null,
-          department: null,
-          departmentLabel: null,
-          semesterLabel: null,
-          batchRoll: null,
+          department: storedSession?.studentId && isUsnInBuiltinRange(storedSession.studentId) ? 'Computer Science & Engineering' : null,
+          departmentLabel: storedSession?.studentId && isUsnInBuiltinRange(storedSession.studentId) ? 'CSE • Section A' : null,
+          semesterLabel: storedSession?.studentId && isUsnInBuiltinRange(storedSession.studentId) ? 'Semester III' : null,
+          batchRoll: storedSession?.studentId ?? null,
           timezone: 'Asia/Kolkata',
           attendanceTarget: 75,
           safeMarginAlertClasses: 3,
@@ -289,6 +291,14 @@ export const useClassora = create<ClassoraState>((set, get) => {
           preferences,
           settings,
         });
+        if (profile.studentId && isUsnInBuiltinRange(profile.studentId)) {
+          const builtin = generateBuiltinSemester3Data();
+          await get().applyImportedTimetable({
+            subjects: builtin.subjects,
+            slots: builtin.slots,
+            notes: builtin.notes,
+          });
+        }
         return;
       }
 

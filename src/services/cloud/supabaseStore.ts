@@ -84,9 +84,15 @@ const OUTBOX_TABLE: Record<OutboxEntry['entity'], TableName> = {
   profile: 'profiles',
   semester: 'semesters',
   subject: 'subjects',
+  version: 'timetable_versions',
+  slot: 'recurring_slots',
   occurrence: 'class_occurrences',
   attendance: 'attendance_records',
   override: 'calendar_overrides',
+  preference: 'notification_preferences',
+  notification: 'app_notifications',
+  import: 'timetable_imports',
+  audit: 'occurrence_audit',
 };
 
 export class SupabaseStore implements DataStore {
@@ -130,6 +136,7 @@ export class SupabaseStore implements DataStore {
 
     for (const entry of entries) {
       const table = OUTBOX_TABLE[entry.entity];
+      if (!table) continue;
       const payload = entry.payload as Row;
       const result =
         entry.op === 'delete'
@@ -160,14 +167,16 @@ export class SupabaseStore implements DataStore {
     if (!client || !this.userId) return;
 
     const table = OUTBOX_TABLE[entity];
+    if (!table) return;
+    const payload = entity === 'profile' ? { ...row, id: this.userId } : row;
     const request =
       op === 'delete'
-        ? client.from(table).delete().eq('id', String(row.id))
-        : client.from(table).upsert(withUser(row, this.userId));
+        ? client.from(table).delete().eq('id', String(payload.id))
+        : client.from(table).upsert(withUser(payload, this.userId));
 
     const { error } = await request;
     if (error) {
-      await this.queue({ entity, op, entityId: String(row.id), payload: row });
+      await this.queue({ entity, op, entityId: String(payload.id), payload });
     }
   }
 
@@ -189,7 +198,7 @@ export class SupabaseStore implements DataStore {
     const client = await this.client();
     if (client && this.userId) {
       const { data, error } = await client.from('profiles').select('id').eq('id', this.userId).limit(1);
-      if (!error) return (data ?? []).length > 0;
+      if (!error && (data ?? []).length > 0) return true;
     }
     return this.cache.isSeeded();
   }
@@ -202,13 +211,18 @@ export class SupabaseStore implements DataStore {
     const client = await this.client();
     if (client && this.userId) {
       const { data, error } = await client.from('profiles').select('*').eq('id', this.userId).maybeSingle();
-      if (!error && data) return profileFrom(data as Row);
+      if (!error && data) {
+        const mapped = profileFrom(data as Row);
+        await this.cache.saveProfile(mapped);
+        return mapped;
+      }
     }
     return this.cache.getProfile();
   }
 
   async saveProfile(profile: Profile): Promise<void> {
-    await this.write('profile', profileRow(profile), () => this.cache.saveProfile(profile));
+    const fixed = this.userId ? { ...profile, id: this.userId } : profile;
+    await this.write('profile', profileRow(fixed), () => this.cache.saveProfile(fixed));
   }
 
   async listSemesters(): Promise<Semester[]> {
@@ -217,8 +231,13 @@ export class SupabaseStore implements DataStore {
       const { data, error } = await client
         .from('semesters')
         .select('*')
+        .eq('user_id', this.userId)
         .order('start_date', { ascending: false });
-      if (!error) return ((data ?? []) as Row[]).map(semesterFrom);
+      if (!error && data && data.length > 0) {
+        const mapped = (data as Row[]).map(semesterFrom);
+        for (const s of mapped) await this.cache.saveSemester(s);
+        return mapped;
+      }
     }
     return this.cache.listSemesters();
   }
@@ -235,7 +254,11 @@ export class SupabaseStore implements DataStore {
     const client = await this.client();
     if (client) {
       const { data, error } = await client.from('subjects').select('*').eq('semester_id', semesterId);
-      if (!error) return ((data ?? []) as Row[]).map(subjectFrom);
+      if (!error && data && data.length > 0) {
+        const mapped = ((data ?? []) as Row[]).map(subjectFrom);
+        await this.cache.saveSubjects(mapped);
+        return mapped;
+      }
     }
     return this.cache.listSubjects(semesterId);
   }
@@ -270,7 +293,11 @@ export class SupabaseStore implements DataStore {
         .select('*')
         .eq('semester_id', semesterId)
         .order('version_number', { ascending: false });
-      if (!error) return ((data ?? []) as Row[]).map(versionFrom);
+      if (!error && data && data.length > 0) {
+        const mapped = ((data ?? []) as Row[]).map(versionFrom);
+        await this.cache.saveVersions(mapped);
+        return mapped;
+      }
     }
     return this.cache.listVersions(semesterId);
   }
@@ -281,7 +308,7 @@ export class SupabaseStore implements DataStore {
     if (!client || !this.userId) return;
     const { error } = await client.from('timetable_versions').upsert(withUser(versionRow(version), this.userId));
     if (error) {
-      await this.queue({ entity: 'semester', op: 'upsert', entityId: version.id, payload: versionRow(version) });
+      await this.queue({ entity: 'version', op: 'upsert', entityId: version.id, payload: versionRow(version) });
     }
   }
 
@@ -293,7 +320,9 @@ export class SupabaseStore implements DataStore {
     const client = await this.client();
     if (client) {
       const { data, error } = await client.from('recurring_slots').select('*').eq('semester_id', semesterId);
-      if (!error) return ((data ?? []) as Row[]).map(slotFrom);
+      if (!error && data && data.length > 0) {
+        return ((data ?? []) as Row[]).map(slotFrom);
+      }
     }
     return this.cache.listSlots(semesterId);
   }
@@ -316,7 +345,7 @@ export class SupabaseStore implements DataStore {
       .upsert(tagged.map((slot) => withUser(slotRow(slot), this.userId!)));
     if (error) {
       for (const slot of tagged) {
-        await this.queue({ entity: 'semester', op: 'upsert', entityId: slot.id, payload: slotRow(slot) });
+        await this.queue({ entity: 'slot', op: 'upsert', entityId: slot.id, payload: slotRow(slot) });
       }
     }
   }
@@ -328,7 +357,9 @@ export class SupabaseStore implements DataStore {
         .from('recurring_slots')
         .select('*')
         .eq('timetable_version_id', versionId);
-      if (!error) return ((data ?? []) as Row[]).map(slotFrom);
+      if (!error && data && data.length > 0) {
+        return ((data ?? []) as Row[]).map(slotFrom);
+      }
     }
     return this.cache.listSlotsByVersion(versionId);
   }

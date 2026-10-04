@@ -311,7 +311,19 @@ export type SyncState = 'synced' | 'syncing' | 'offline' | 'pending';
 
 export interface OutboxEntry {
   id: Id;
-  entity: 'profile' | 'semester' | 'subject' | 'occurrence' | 'attendance' | 'override';
+  entity:
+    | 'profile'
+    | 'semester'
+    | 'subject'
+    | 'version'
+    | 'slot'
+    | 'occurrence'
+    | 'attendance'
+    | 'override'
+    | 'preference'
+    | 'notification'
+    | 'import'
+    | 'audit';
   op: 'upsert' | 'delete';
   entityId: Id;
   payload: unknown;
