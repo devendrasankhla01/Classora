@@ -20,7 +20,11 @@ import {
 import { addDaysToKey, nowInstant, toInstant, todayKey } from '@/lib/date';
 import { buildNotifications, newNotificationsOnly } from '@/lib/notifications';
 import { createId } from '@/lib/id';
-import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/usnTimetable';
+import {
+  generateBuiltinSemester3Data,
+  getBuiltinSemester3Complete,
+  isUsnInBuiltinRange,
+} from '@/services/usnTimetable';
 import { readStoredSession } from '@/features/auth/LoginScreen';
 import {
   buildCancellation,
@@ -221,15 +225,15 @@ export const useClassora = create<ClassoraState>((set, get) => {
         const storedSession = readStoredSession();
         const cleanProfile: Profile = {
           id: createId('prof'),
-          name: storedSession?.name || (storedSession?.email ? storedSession.email.split('@')[0] : 'Student'),
-          email: storedSession?.email ?? null,
-          studentId: storedSession?.studentId ?? null,
+          name: storedSession?.name || (storedSession?.email ? storedSession.email.split('@')[0] : 'Devendra Sankhla'),
+          email: storedSession?.email ?? 'devendrasankhla8@gmail.com',
+          studentId: storedSession?.studentId ?? '4PM25CS001',
           avatarUrl: null,
           college: null,
-          department: storedSession?.studentId && isUsnInBuiltinRange(storedSession.studentId) ? 'Computer Science & Engineering' : null,
-          departmentLabel: storedSession?.studentId && isUsnInBuiltinRange(storedSession.studentId) ? 'CSE • Section A' : null,
-          semesterLabel: storedSession?.studentId && isUsnInBuiltinRange(storedSession.studentId) ? 'Semester III' : null,
-          batchRoll: storedSession?.studentId ?? null,
+          department: 'Computer Science & Engineering',
+          departmentLabel: 'CSE • Section A',
+          semesterLabel: 'Semester III',
+          batchRoll: storedSession?.studentId ?? '4PM25CS001',
           timezone: 'Asia/Kolkata',
           attendanceTarget: 75,
           safeMarginAlertClasses: 3,
@@ -258,51 +262,63 @@ export const useClassora = create<ClassoraState>((set, get) => {
         await store.saveProfile(cleanProfile);
         await store.savePreferences(cleanPreferences);
         await store.saveSettings(cleanSettings);
+
+        // Pre-save official Semester III timetable by default
+        const builtin = getBuiltinSemester3Complete(cleanProfile.id);
+        await store.saveSemester(builtin.semester);
+        await store.saveSubjects(builtin.subjects);
+        await store.saveVersion(builtin.version);
+        await store.replaceSlots(builtin.semester.id, builtin.version.id, builtin.slots);
+        if (builtin.occurrences.length > 0) {
+          await store.saveOccurrences(builtin.occurrences);
+        }
       }
 
-      const [profile, semesters, settings] = await Promise.all([
+      let [profile, semesters, settings] = await Promise.all([
         store.getProfile(),
         store.listSemesters(),
         store.getSettings(),
       ]);
-      const notifications = profile ? await store.listNotifications(profile.id) : [];
 
       if (!profile) {
-        set({ ready: true, mode: store.mode });
-        return;
+        const now = nowInstant();
+        const defaultProfile: Profile = {
+          id: createId('prof'),
+          name: 'Devendra Sankhla',
+          email: 'devendrasankhla8@gmail.com',
+          studentId: '4PM25CS001',
+          avatarUrl: null,
+          college: null,
+          department: 'Computer Science & Engineering',
+          departmentLabel: 'CSE • Section A',
+          semesterLabel: 'Semester III',
+          batchRoll: '4PM25CS001',
+          timezone: 'Asia/Kolkata',
+          attendanceTarget: 75,
+          safeMarginAlertClasses: 3,
+          defaultCountMode: 'period',
+          createdAt: now,
+          updatedAt: now,
+        };
+        await store.saveProfile(defaultProfile);
+        profile = defaultProfile;
       }
 
-      const semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
+      let semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
       if (!semester) {
-        const preferences = await store.getPreferences(profile.id);
-        set({
-          ready: true,
-          mode: store.mode,
-          profile,
-          semester: null,
-          subjects: [],
-          versions: [],
-          slots: [],
-          occurrences: [],
-          attendance: [],
-          overrides: [],
-          audit: [],
-          notifications,
-          preferences,
-          settings,
-        });
-        if (profile.studentId && isUsnInBuiltinRange(profile.studentId)) {
-          const builtin = generateBuiltinSemester3Data();
-          await get().applyImportedTimetable({
-            subjects: builtin.subjects,
-            slots: builtin.slots,
-            notes: builtin.notes,
-          });
+        const builtin = getBuiltinSemester3Complete(profile.id);
+        await store.saveSemester(builtin.semester);
+        await store.saveSubjects(builtin.subjects);
+        await store.saveVersion(builtin.version);
+        await store.replaceSlots(builtin.semester.id, builtin.version.id, builtin.slots);
+        if (builtin.occurrences.length > 0) {
+          await store.saveOccurrences(builtin.occurrences);
         }
-        return;
+        semester = builtin.semester;
+        semesters = [semester];
       }
 
-      const [subjects, versions, slots, occurrences, attendance, overrides, audit, preferences] =
+      let [subjects, versions, slots, occurrences, attendance, overrides, audit, preferences] =
         await Promise.all([
           store.listSubjects(semester.id),
           store.listVersions(semester.id),
@@ -313,6 +329,22 @@ export const useClassora = create<ClassoraState>((set, get) => {
           store.listAudit(semester.id),
           store.getPreferences(profile.id),
         ]);
+
+      if (slots.length === 0 || subjects.length === 0) {
+        const builtin = getBuiltinSemester3Complete(profile.id);
+        await store.saveSubjects(builtin.subjects);
+        await store.saveVersion(builtin.version);
+        await store.replaceSlots(semester.id, builtin.version.id, builtin.slots);
+        if (builtin.occurrences.length > 0) {
+          await store.saveOccurrences(builtin.occurrences);
+        }
+        subjects = builtin.subjects;
+        versions = [builtin.version];
+        slots = builtin.slots;
+        occurrences = builtin.occurrences;
+      }
+
+      const notifications = await store.listNotifications(profile.id);
 
       set({
         ready: true,

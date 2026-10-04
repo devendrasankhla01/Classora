@@ -44,7 +44,7 @@ export interface GenerationInput {
   from: DateKey;
   to: DateKey;
   /** Ids already stored — these are skipped entirely (history preserved). */
-  existingIds: ReadonlySet<string>;
+  existingIds?: ReadonlySet<string>;
   now?: Instant;
 }
 
@@ -91,7 +91,7 @@ export function slotsForDate(
  * Existing ids are skipped, so this is safe to call repeatedly.
  */
 export function generateOccurrences(input: GenerationInput): GenerationResult {
-  const { semester, slots, overrides, from, to, existingIds } = input;
+  const { semester, slots, overrides, from, to, existingIds = new Set() } = input;
   const now = input.now ?? new Date().toISOString();
   const occurrences: ClassOccurrence[] = [];
   const skippedDates: DateKey[] = [];

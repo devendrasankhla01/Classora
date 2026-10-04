@@ -2,7 +2,17 @@ import { parseCsvTimetable } from './timetable-ai/csvParser';
 import { ATTACHED_CSV_DATA } from '@/data/sampleTimetableCsv';
 import { createId } from '@/lib/id';
 import { nowInstant } from '@/lib/date';
-import type { ClassType, DayOfWeek, RecurringSlot, Subject, SubjectColorKey } from '@/types/domain';
+import { futureGenerationRange, generateOccurrences, normalizeSignature } from '@/lib/schedule';
+import type {
+  ClassOccurrence,
+  ClassType,
+  DayOfWeek,
+  RecurringSlot,
+  Semester,
+  Subject,
+  SubjectColorKey,
+  TimetableVersion,
+} from '@/types/domain';
 
 const COLOR_KEYS: SubjectColorKey[] = ['indigo', 'sky', 'emerald', 'amber', 'violet', 'rose'];
 
@@ -28,7 +38,7 @@ export interface BuiltinTimetableBundle {
  * Generates the complete Semester III Section A subjects & slots
  * from the official built-in CSV for USN batch 4PM25CS001 – 4PM25CS062.
  */
-export function generateBuiltinSemester3Data(semesterId: string = 'sem-current'): BuiltinTimetableBundle {
+export function generateBuiltinSemester3Data(semesterId: string = 'sem-iii-2026'): BuiltinTimetableBundle {
   const extracted = parseCsvTimetable(ATTACHED_CSV_DATA);
   const now = nowInstant();
 
@@ -44,7 +54,7 @@ export function generateBuiltinSemester3Data(semesterId: string = 'sem-current')
     }
 
     return {
-      id: createId('subj'),
+      id: subDraft.subjectCode ? `subj-${subDraft.subjectCode.toLowerCase()}` : createId('subj'),
       semesterId,
       name: subDraft.name,
       shortName: subDraft.shortName || subDraft.name.slice(0, 6),
@@ -102,7 +112,74 @@ export function generateBuiltinSemester3Data(semesterId: string = 'sem-current')
   return {
     subjects,
     slots,
-    notes: 'Official Semester III Section A Timetable (Auto-configured for USN 4PM25CS001 – 4PM25CS062)',
+    notes: 'Official Semester III Section A Timetable (Pre-saved default)',
     semesterName: 'Semester III (2026-27)',
+  };
+}
+
+export interface BuiltinSemester3Complete {
+  semester: Semester;
+  subjects: Subject[];
+  version: TimetableVersion;
+  slots: RecurringSlot[];
+  occurrences: ClassOccurrence[];
+}
+
+/**
+ * Complete pre-saved Semester III bundle ready to be seeded or loaded by default.
+ */
+export function getBuiltinSemester3Complete(userId: string = 'local'): BuiltinSemester3Complete {
+  const semesterId = 'sem-iii-2026';
+  const versionId = 'ver-1';
+  const now = nowInstant();
+
+  const semester: Semester = {
+    id: semesterId,
+    userId,
+    name: 'Semester III (Autumn 2026-27)',
+    startDate: '2026-09-15',
+    endDate: '2027-02-15',
+    isActive: true,
+    archived: false,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const data = generateBuiltinSemester3Data(semesterId);
+
+  const slots: RecurringSlot[] = data.slots.map((s, index) => ({
+    ...s,
+    id: `slot-sem3-${index + 1}`,
+    semesterId,
+    timetableVersionId: versionId,
+  }));
+
+  const version: TimetableVersion = {
+    id: versionId,
+    semesterId,
+    versionNumber: 1,
+    label: 'Official Semester III (Section A)',
+    notes: 'Official pre-saved Semester III Section A Timetable',
+    signature: normalizeSignature(slots),
+    isCurrent: true,
+    createdBy: 'seed',
+    createdAt: now,
+  };
+
+  const range = futureGenerationRange(semester, new Date(), 60);
+  const genResult = generateOccurrences({
+    semester,
+    slots: slots.filter((slot) => slot.kind === 'class'),
+    overrides: [],
+    from: range.from,
+    to: range.to,
+  });
+
+  return {
+    semester,
+    subjects: data.subjects,
+    version,
+    slots,
+    occurrences: genResult.occurrences,
   };
 }
