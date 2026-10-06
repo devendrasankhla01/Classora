@@ -16,9 +16,13 @@ export function readCloudConfig(): CloudConfig | null {
   const mode = import.meta.env.VITE_APP_MODE;
   if (mode === 'local') return null;
 
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  let url = import.meta.env.VITE_SUPABASE_URL;
+  let anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
+
+  url = url.trim().replace(/\/+$/, '');
+  anonKey = anonKey.trim();
+
   if (!/^https?:\/\//.test(url)) return null;
   // Supabase anon keys are JWT tokens starting with 'ey'
   if (!anonKey.startsWith('ey')) return null;

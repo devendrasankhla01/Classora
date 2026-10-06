@@ -59,10 +59,14 @@ export function createAuth(client: SupabaseClient) {
       password: string,
       name: string,
     ): Promise<AuthResult & { needsEmailConfirmation: boolean }> {
+      const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined;
       const { data, error } = await client.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: {
+          data: { full_name: name },
+          ...(redirectTo ? { emailRedirectTo: redirectTo } : {}),
+        },
       });
       if (error) return { ok: false, user: null, message: error.message, needsEmailConfirmation: false };
       // With email confirmation enabled Supabase returns a user but no session.
@@ -74,9 +78,13 @@ export function createAuth(client: SupabaseClient) {
     },
 
     async signInWithMagicLink(email: string): Promise<AuthResult> {
+      const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined;
       const { error } = await client.auth.signInWithOtp({
         email,
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          ...(redirectTo ? { emailRedirectTo: redirectTo } : {}),
+        },
       });
       if (error) return { ok: false, user: null, message: error.message };
       return { ok: true, user: null };
