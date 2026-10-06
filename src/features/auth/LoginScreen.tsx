@@ -9,6 +9,7 @@ import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/us
 import { Card } from '@/components/ui/Card';
 import { Button, Field, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 /**
  * Session storage key for the local/demo gate.
@@ -327,19 +328,7 @@ export function LoginScreen() {
       <div className="mx-auto flex w-full max-w-app flex-col justify-between">
         {/* Brand header ------------------------------------------------- */}
         <header className="flex flex-col items-center pt-4 text-center">
-          <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-[20px] bg-transparent">
-            <img
-              src="/branding/campusone-mark.png"
-              alt="CampusOne"
-              className="h-16 w-16 object-contain"
-            />
-          </div>
-
-          <img
-            src="/branding/campusone-wordmark.png"
-            alt="CampusOne"
-            className="mt-3.5 h-[28px] w-auto select-none object-contain"
-          />
+          <BrandLogo variant="horizontal" size="lg" className="mb-1" />
 
           <h1 className="mt-3 text-headline-md">
             {tab === 'signup'
