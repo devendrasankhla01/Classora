@@ -370,28 +370,40 @@ export class SupabaseStore implements DataStore {
 
   async listOccurrences(semesterId: string): Promise<ClassOccurrence[]> {
     const client = await this.client();
-    if (client) {
-      const { data, error } = await client
-        .from('class_occurrences')
-        .select('*')
-        .eq('semester_id', semesterId)
-        .order('date', { ascending: true });
-      if (!error) return ((data ?? []) as Row[]).map(occurrenceFrom);
+    if (client && this.userId) {
+      try {
+        const { data, error } = await client
+          .from('class_occurrences')
+          .select('*')
+          .eq('semester_id', semesterId)
+          .order('date', { ascending: true });
+        if (!error && data && data.length > 0) {
+          const mapped = (data as Row[]).map(occurrenceFrom);
+          await this.cache.saveOccurrences(mapped);
+          return mapped;
+        }
+      } catch {}
     }
     return this.cache.listOccurrences(semesterId);
   }
 
   async listOccurrencesBetween(semesterId: string, from: DateKey, to: DateKey): Promise<ClassOccurrence[]> {
     const client = await this.client();
-    if (client) {
-      const { data, error } = await client
-        .from('class_occurrences')
-        .select('*')
-        .eq('semester_id', semesterId)
-        .gte('date', from)
-        .lte('date', to)
-        .order('date', { ascending: true });
-      if (!error) return ((data ?? []) as Row[]).map(occurrenceFrom);
+    if (client && this.userId) {
+      try {
+        const { data, error } = await client
+          .from('class_occurrences')
+          .select('*')
+          .eq('semester_id', semesterId)
+          .gte('date', from)
+          .lte('date', to)
+          .order('date', { ascending: true });
+        if (!error && data && data.length > 0) {
+          const mapped = (data as Row[]).map(occurrenceFrom);
+          await this.cache.saveOccurrences(mapped);
+          return mapped;
+        }
+      } catch {}
     }
     return this.cache.listOccurrencesBetween(semesterId, from, to);
   }
@@ -448,9 +460,15 @@ export class SupabaseStore implements DataStore {
 
   async listAttendance(semesterId: string): Promise<AttendanceRecord[]> {
     const client = await this.client();
-    if (client) {
-      const { data, error } = await client.from('attendance_records').select('*').eq('semester_id', semesterId);
-      if (!error) return ((data ?? []) as Row[]).map(attendanceFrom);
+    if (client && this.userId) {
+      try {
+        const { data, error } = await client.from('attendance_records').select('*').eq('semester_id', semesterId);
+        if (!error && data && data.length > 0) {
+          const mapped = (data as Row[]).map(attendanceFrom);
+          for (const a of mapped) await this.cache.saveAttendanceRecord(a);
+          return mapped;
+        }
+      } catch {}
     }
     return this.cache.listAttendance(semesterId);
   }
@@ -487,9 +505,15 @@ export class SupabaseStore implements DataStore {
 
   async listOverrides(semesterId: string): Promise<CalendarOverride[]> {
     const client = await this.client();
-    if (client) {
-      const { data, error } = await client.from('calendar_overrides').select('*').eq('semester_id', semesterId);
-      if (!error) return ((data ?? []) as Row[]).map(overrideFrom);
+    if (client && this.userId) {
+      try {
+        const { data, error } = await client.from('calendar_overrides').select('*').eq('semester_id', semesterId);
+        if (!error && data && data.length > 0) {
+          const mapped = (data as Row[]).map(overrideFrom);
+          for (const o of mapped) await this.cache.saveOverride(o);
+          return mapped;
+        }
+      } catch {}
     }
     return this.cache.listOverrides(semesterId);
   }
@@ -509,14 +533,18 @@ export class SupabaseStore implements DataStore {
 
   async listAudit(semesterId: string): Promise<OccurrenceAudit[]> {
     const client = await this.client();
-    if (client) {
-      const { data, error } = await client
-        .from('occurrence_audit')
-        .select('*')
-        .eq('semester_id', semesterId)
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (!error) return ((data ?? []) as Row[]).map(auditFrom);
+    if (client && this.userId) {
+      try {
+        const { data, error } = await client
+          .from('occurrence_audit')
+          .select('*')
+          .eq('semester_id', semesterId)
+          .order('created_at', { ascending: false })
+          .limit(200);
+        if (!error && data && data.length > 0) {
+          return (data as Row[]).map(auditFrom);
+        }
+      } catch {}
     }
     return this.cache.listAudit(semesterId);
   }

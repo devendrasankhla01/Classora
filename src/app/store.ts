@@ -217,161 +217,166 @@ export const useClassora = create<ClassoraState>((set, get) => {
      * Lifecycle                                                         *
      * ---------------------------------------------------------------- */
     initialize: async () => {
-      await store.init();
-      const seeded = await store.isSeeded();
+      try {
+        await store.init();
+        const seeded = await store.isSeeded();
 
-      if (!seeded) {
-        const now = nowInstant();
-        const storedSession = readStoredSession();
-        const cleanProfile: Profile = {
-          id: createId('prof'),
-          name: storedSession?.name || (storedSession?.email ? storedSession.email.split('@')[0] : 'Devendra Sankhla'),
-          email: storedSession?.email ?? 'devendrasankhla8@gmail.com',
-          studentId: storedSession?.studentId ?? '4PM25CS043',
-          avatarUrl: null,
-          college: null,
-          department: 'Computer Science & Engineering',
-          departmentLabel: 'CSE • Section A',
-          semesterLabel: 'Semester III',
-          batchRoll: storedSession?.studentId ?? '4PM25CS043',
-          timezone: 'Asia/Kolkata',
-          attendanceTarget: 75,
-          safeMarginAlertClasses: 3,
-          defaultCountMode: 'period',
-          createdAt: now,
-          updatedAt: now,
-        };
-        const cleanPreferences: NotificationPreference = {
-          id: createId('pref'),
-          userId: cleanProfile.id,
-          afterClassReminder: true,
-          reminderDelayMinutes: 10,
-          missingAttendanceReminder: true,
-          attendanceRiskAlert: true,
-          timetableChangeAlert: true,
-          workingSaturdayAlert: true,
-          combineBackToBack: true,
-          updatedAt: now,
-        };
-        const cleanSettings: AppSettings = {
-          id: 'settings',
-          theme: 'light',
-          previewDate: null,
-          onboarded: true,
-        };
-        await store.saveProfile(cleanProfile);
-        await store.savePreferences(cleanPreferences);
-        await store.saveSettings(cleanSettings);
+        if (!seeded) {
+          const now = nowInstant();
+          const storedSession = readStoredSession();
+          const cleanProfile: Profile = {
+            id: createId('prof'),
+            name: storedSession?.name || (storedSession?.email ? storedSession.email.split('@')[0] : 'Devendra Sankhla'),
+            email: storedSession?.email ?? 'devendrasankhla8@gmail.com',
+            studentId: storedSession?.studentId ?? '4PM25CS043',
+            avatarUrl: null,
+            college: null,
+            department: 'Computer Science & Engineering',
+            departmentLabel: 'CSE • Section A',
+            semesterLabel: 'Semester III',
+            batchRoll: storedSession?.studentId ?? '4PM25CS043',
+            timezone: 'Asia/Kolkata',
+            attendanceTarget: 75,
+            safeMarginAlertClasses: 3,
+            defaultCountMode: 'period',
+            createdAt: now,
+            updatedAt: now,
+          };
+          const cleanPreferences: NotificationPreference = {
+            id: createId('pref'),
+            userId: cleanProfile.id,
+            afterClassReminder: true,
+            reminderDelayMinutes: 10,
+            missingAttendanceReminder: true,
+            attendanceRiskAlert: true,
+            timetableChangeAlert: true,
+            workingSaturdayAlert: true,
+            combineBackToBack: true,
+            updatedAt: now,
+          };
+          const cleanSettings: AppSettings = {
+            id: 'settings',
+            theme: 'light',
+            previewDate: null,
+            onboarded: true,
+          };
+          await store.saveProfile(cleanProfile);
+          await store.savePreferences(cleanPreferences);
+          await store.saveSettings(cleanSettings);
 
-        // Pre-save official Semester III timetable by default
-        const builtin = getBuiltinSemester3Complete(cleanProfile.id);
-        await store.saveSemester(builtin.semester);
-        await store.saveSubjects(builtin.subjects);
-        await store.saveVersion(builtin.version);
-        await store.replaceSlots(builtin.semester.id, builtin.version.id, builtin.slots);
-        if (builtin.occurrences.length > 0) {
-          await store.saveOccurrences(builtin.occurrences);
+          // Pre-save official Semester III timetable by default
+          const builtin = getBuiltinSemester3Complete(cleanProfile.id);
+          await store.saveSemester(builtin.semester);
+          await store.saveSubjects(builtin.subjects);
+          await store.saveVersion(builtin.version);
+          await store.replaceSlots(builtin.semester.id, builtin.version.id, builtin.slots);
+          if (builtin.occurrences.length > 0) {
+            await store.saveOccurrences(builtin.occurrences);
+          }
         }
-      }
 
-      let [profile, semesters, settings] = await Promise.all([
-        store.getProfile(),
-        store.listSemesters(),
-        store.getSettings(),
-      ]);
-
-      if (!profile) {
-        const now = nowInstant();
-        const defaultProfile: Profile = {
-          id: createId('prof'),
-          name: 'Devendra Sankhla',
-          email: 'devendrasankhla8@gmail.com',
-          studentId: '4PM25CS043',
-          avatarUrl: null,
-          college: null,
-          department: 'Computer Science & Engineering',
-          departmentLabel: 'CSE • Section A',
-          semesterLabel: 'Semester III',
-          batchRoll: '4PM25CS043',
-          timezone: 'Asia/Kolkata',
-          attendanceTarget: 75,
-          safeMarginAlertClasses: 3,
-          defaultCountMode: 'period',
-          createdAt: now,
-          updatedAt: now,
-        };
-        await store.saveProfile(defaultProfile);
-        profile = defaultProfile;
-      }
-
-      let semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
-      if (!semester) {
-        const builtin = getBuiltinSemester3Complete(profile.id);
-        await store.saveSemester(builtin.semester);
-        await store.saveSubjects(builtin.subjects);
-        await store.saveVersion(builtin.version);
-        await store.replaceSlots(builtin.semester.id, builtin.version.id, builtin.slots);
-        if (builtin.occurrences.length > 0) {
-          await store.saveOccurrences(builtin.occurrences);
-        }
-        semester = builtin.semester;
-        semesters = [semester];
-      }
-
-      let [subjects, versions, slots, occurrences, attendance, overrides, audit, preferences] =
-        await Promise.all([
-          store.listSubjects(semester.id),
-          store.listVersions(semester.id),
-          store.listSlots(semester.id),
-          store.listOccurrences(semester.id),
-          store.listAttendance(semester.id),
-          store.listOverrides(semester.id),
-          store.listAudit(semester.id),
-          store.getPreferences(profile.id),
+        let [profile, semesters, settings] = await Promise.all([
+          store.getProfile(),
+          store.listSemesters(),
+          store.getSettings(),
         ]);
 
-      if (slots.length === 0 || subjects.length === 0) {
-        const builtin = getBuiltinSemester3Complete(profile.id);
-        await store.saveSubjects(builtin.subjects);
-        await store.saveVersion(builtin.version);
-        await store.replaceSlots(semester.id, builtin.version.id, builtin.slots);
-        if (builtin.occurrences.length > 0) {
-          await store.saveOccurrences(builtin.occurrences);
+        if (!profile) {
+          const now = nowInstant();
+          const defaultProfile: Profile = {
+            id: createId('prof'),
+            name: 'Devendra Sankhla',
+            email: 'devendrasankhla8@gmail.com',
+            studentId: '4PM25CS043',
+            avatarUrl: null,
+            college: null,
+            department: 'Computer Science & Engineering',
+            departmentLabel: 'CSE • Section A',
+            semesterLabel: 'Semester III',
+            batchRoll: '4PM25CS043',
+            timezone: 'Asia/Kolkata',
+            attendanceTarget: 75,
+            safeMarginAlertClasses: 3,
+            defaultCountMode: 'period',
+            createdAt: now,
+            updatedAt: now,
+          };
+          await store.saveProfile(defaultProfile);
+          profile = defaultProfile;
         }
-        subjects = builtin.subjects;
-        versions = [builtin.version];
-        slots = builtin.slots;
-        occurrences = builtin.occurrences;
+
+        let semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
+        if (!semester) {
+          const builtin = getBuiltinSemester3Complete(profile.id);
+          await store.saveSemester(builtin.semester);
+          await store.saveSubjects(builtin.subjects);
+          await store.saveVersion(builtin.version);
+          await store.replaceSlots(builtin.semester.id, builtin.version.id, builtin.slots);
+          if (builtin.occurrences.length > 0) {
+            await store.saveOccurrences(builtin.occurrences);
+          }
+          semester = builtin.semester;
+          semesters = [semester];
+        }
+
+        let [subjects, versions, slots, occurrences, attendance, overrides, audit, preferences] =
+          await Promise.all([
+            store.listSubjects(semester.id),
+            store.listVersions(semester.id),
+            store.listSlots(semester.id),
+            store.listOccurrences(semester.id),
+            store.listAttendance(semester.id),
+            store.listOverrides(semester.id),
+            store.listAudit(semester.id),
+            store.getPreferences(profile.id),
+          ]);
+
+        if (slots.length === 0 || subjects.length === 0) {
+          const builtin = getBuiltinSemester3Complete(profile.id);
+          await store.saveSubjects(builtin.subjects);
+          await store.saveVersion(builtin.version);
+          await store.replaceSlots(semester.id, builtin.version.id, builtin.slots);
+          if (builtin.occurrences.length > 0) {
+            await store.saveOccurrences(builtin.occurrences);
+          }
+          subjects = builtin.subjects;
+          versions = [builtin.version];
+          slots = builtin.slots;
+          occurrences = builtin.occurrences;
+        }
+
+        const notifications = await store.listNotifications(profile.id);
+
+        set({
+          ready: true,
+          mode: store.mode,
+          profile,
+          semester,
+          subjects,
+          versions,
+          slots: (() => {
+            const currentVersion = versions.find((version) => version.isCurrent) ?? versions[0] ?? null;
+            if (!currentVersion) return slots;
+            const matching = slots.filter((slot) => slot.timetableVersionId === currentVersion.id);
+            return matching.length > 0 ? matching : slots;
+          })(),
+          occurrences,
+          attendance,
+          overrides,
+          audit,
+          notifications,
+          preferences,
+          settings,
+        });
+
+        // Materialise any missing future occurrences (idempotent).
+        await materializeFuture();
+        // Then derive today's alerts from the state we just loaded.
+        await get().syncNotifications();
+      } catch (error) {
+        console.error('Classora store init error:', error);
+        set({ ready: true });
       }
-
-      const notifications = await store.listNotifications(profile.id);
-
-      set({
-        ready: true,
-        mode: store.mode,
-        profile,
-        semester,
-        subjects,
-        versions,
-        slots: (() => {
-          const currentVersion = versions.find((version) => version.isCurrent) ?? versions[0] ?? null;
-          if (!currentVersion) return slots;
-          const matching = slots.filter((slot) => slot.timetableVersionId === currentVersion.id);
-          return matching.length > 0 ? matching : slots;
-        })(),
-        occurrences,
-        attendance,
-        overrides,
-        audit,
-        notifications,
-        preferences,
-        settings,
-      });
-
-      // Materialise any missing future occurrences (idempotent).
-      await materializeFuture();
-      // Then derive today's alerts from the state we just loaded.
-      await get().syncNotifications();
     },
 
     resetDemoData: async () => {
