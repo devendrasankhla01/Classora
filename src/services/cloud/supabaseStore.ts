@@ -206,8 +206,9 @@ export class SupabaseStore implements DataStore {
 
   async isSeeded(): Promise<boolean> {
     const client = await this.client();
-    if (client && this.userId) {
-      const { data, error } = await client.from('profiles').select('id').eq('id', this.userId).limit(1);
+    const userId = await this.getUserId();
+    if (client && userId) {
+      const { data, error } = await client.from('semesters').select('id').eq('user_id', userId).limit(1);
       if (!error && (data ?? []).length > 0) return true;
     }
     return this.cache.isSeeded();

@@ -481,6 +481,12 @@ export const useClassora = create<ClassoraState>((set, get) => {
       }));
 
       try {
+        const semester = get().semester;
+        if (semester) {
+          await store.saveSemester(semester);
+        }
+        await store.saveSubject(subject);
+        await store.saveOccurrences([occurrence]);
         await store.saveAttendanceRecord(record);
         await store.updateOccurrence(occurrenceId, { scheduleStatus: 'completed' });
         set({ syncState: 'synced', toast: toast(`Marked ${action}`, 'success') });
