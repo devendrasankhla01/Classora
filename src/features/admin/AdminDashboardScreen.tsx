@@ -150,7 +150,7 @@ export function AdminDashboardScreen() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `classora_students_roster_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `campusone_students_roster_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -321,62 +321,62 @@ export function AdminDashboardScreen() {
         ) : null}
 
         {/* Metrics Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-5 border border-slate-200 bg-white">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="p-3.5 sm:p-5 glass-card border border-white/80">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</span>
-              <div className="h-9 w-9 rounded-xl bg-indigo-50 grid place-items-center text-indigo-600">
-                <Icon name="group" size={20} />
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</span>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-indigo-50 grid place-items-center text-indigo-600">
+                <Icon name="group" size={18} />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">{students.length}</span>
-              <span className="text-xs font-semibold text-emerald-600">Registered</span>
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="text-2xl sm:text-3xl font-bold text-slate-900">{students.length}</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-emerald-600">Registered</span>
             </div>
           </Card>
 
-          <Card className="p-5 border border-slate-200 bg-white">
+          <Card className="p-3.5 sm:p-5 glass-card border border-white/80">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Sections</span>
-              <div className="h-9 w-9 rounded-xl bg-violet-50 grid place-items-center text-violet-600">
-                <Icon name="domain" size={20} />
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Sections</span>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-violet-50 grid place-items-center text-violet-600">
+                <Icon name="domain" size={18} />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">{sections.length || 1}</span>
-              <span className="text-xs font-semibold text-slate-500">Batches</span>
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="text-2xl sm:text-3xl font-bold text-slate-900">{sections.length || 1}</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500">Batches</span>
             </div>
           </Card>
 
-          <Card className="p-5 border border-slate-200 bg-white">
+          <Card className="p-3.5 sm:p-5 glass-card border border-white/80">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Target</span>
-              <div className="h-9 w-9 rounded-xl bg-blue-50 grid place-items-center text-blue-600">
-                <Icon name="track_changes" size={20} />
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Target</span>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-blue-50 grid place-items-center text-blue-600">
+                <Icon name="track_changes" size={18} />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="text-2xl sm:text-3xl font-bold text-slate-900">
                 {students.length > 0
                   ? Math.round(students.reduce((acc, s) => acc + s.attendanceTarget, 0) / students.length)
                   : 75}%
               </span>
-              <span className="text-xs font-semibold text-slate-500">Benchmark</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500">Target</span>
             </div>
           </Card>
 
-          <Card className="p-5 border border-slate-200 bg-white">
+          <Card className="p-3.5 sm:p-5 glass-card border border-white/80">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Database Status</span>
-              <div className="h-9 w-9 rounded-xl bg-emerald-50 grid place-items-center text-emerald-600">
-                <Icon name="cloud_done" size={20} />
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">DB Status</span>
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-emerald-50 grid place-items-center text-emerald-600">
+                <Icon name="cloud_done" size={18} />
               </div>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-base font-bold text-slate-900">
-                {isCloudModeEnabled() ? 'Supabase Cloud' : 'Local Storage'}
+            <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+              <span className="text-xs sm:text-base font-bold text-slate-900 truncate">
+                {isCloudModeEnabled() ? 'Supabase' : 'Local DB'}
               </span>
-              <span className="text-xs font-semibold text-emerald-600">Online</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-emerald-600">Online</span>
             </div>
           </Card>
         </div>

@@ -19,13 +19,15 @@ export function Card({ children, className, variant = 'elevated', as = 'div', on
   return (
     <Tag
       className={cn(
-        'relative',
-        // Level 1 dashboard card: pure white, 24px radius, 24px padding,
-        // hairline separation and ambient diffusion.
-        variant === 'elevated' && 'rounded-card bg-surface p-6 shadow-ambient ring-1 ring-hairline',
-        variant === 'inset' && 'rounded-block border border-divider bg-surface-muted p-4',
-        variant === 'plain' && 'rounded-block bg-surface-muted p-4',
-        onClick && 'cursor-pointer transition-transform duration-200 active:scale-[0.99]',
+        'relative transition-all duration-200',
+        // Level 1 dashboard card: glassmorphic surface, 16px padding on mobile -> 24px on desktop
+        variant === 'elevated' &&
+          'glass-card rounded-2xl sm:rounded-card p-4 sm:p-5.5 lg:p-6 shadow-ambient ring-1 ring-black/[0.04]',
+        variant === 'inset' &&
+          'rounded-xl sm:rounded-block border border-divider bg-surface-muted/90 backdrop-blur-sm p-3.5 sm:p-4',
+        variant === 'plain' &&
+          'rounded-xl sm:rounded-block bg-surface-muted/90 p-3.5 sm:p-4',
+        onClick && 'cursor-pointer active:scale-[0.985] hover:border-brand-500/30',
         className,
       )}
       onClick={onClick}

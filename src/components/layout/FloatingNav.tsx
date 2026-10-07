@@ -38,7 +38,7 @@ export function FloatingNav() {
       <div
         className={cn(
           'pointer-events-auto flex h-14 sm:h-16 w-full max-w-[390px] sm:max-w-app items-center justify-around sm:justify-center gap-1 sm:gap-1.5 rounded-pill px-2 py-1',
-          'border border-white/80 bg-white/95 shadow-floating backdrop-blur-dock',
+          'border border-white/90 bg-white/85 shadow-[0_12px_40px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,1)] backdrop-blur-xl',
         )}
       >
         {ITEMS.map((item) => {
@@ -55,15 +55,15 @@ export function FloatingNav() {
               aria-current={active ? 'page' : undefined}
               onClick={() => void haptics.impact('light')}
               className={cn(
-                'flex h-10 sm:h-12 flex-none items-center justify-center rounded-pill',
+                'flex h-10 sm:h-11 flex-none items-center justify-center rounded-pill',
                 'transition-all duration-300 ease-porcelain',
                 active
-                  ? 'gap-1.5 bg-ink px-3 sm:px-4 text-white shadow-elevated'
-                  : 'w-10 sm:w-12 text-ink-secondary hover:bg-[rgba(17,24,39,0.04)] active:bg-[rgba(17,24,39,0.04)]',
+                  ? 'gap-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 px-3 sm:px-4 text-white shadow-[0_4px_14px_rgba(79,70,229,0.4),inset_0_1px_0_rgba(255,255,255,0.3)]'
+                  : 'w-10 sm:w-11 text-ink-secondary hover:bg-[rgba(17,24,39,0.04)] active:bg-[rgba(17,24,39,0.04)]',
               )}
             >
               <Icon name={item.icon} size={active ? 17 : 20} filled={active} />
-              {active ? <span className="text-label-md sm:text-label-lg font-medium text-white">{item.label}</span> : null}
+              {active ? <span className="text-label-md sm:text-label-lg font-semibold text-white">{item.label}</span> : null}
             </NavLink>
           );
         })}

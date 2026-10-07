@@ -132,14 +132,15 @@ export function Button({
     <button
       {...rest}
       className={cn(
-        // DESIGN.md §Components 5: 48px tall pill, label-lg type, 0.98 tap scale.
-        'inline-flex min-h-12 items-center justify-center gap-2 rounded-pill px-5 text-label-lg transition-all duration-200 ease-porcelain active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-2 rounded-xl sm:rounded-pill px-4 sm:px-5 text-label-lg font-semibold transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
         block && 'w-full',
-        variant === 'primary' && 'bg-brand-600 text-white shadow-elevated hover:bg-brand-700',
+        variant === 'primary' &&
+          'bg-gradient-to-b from-indigo-500 via-indigo-600 to-indigo-700 text-white shadow-[0_6px_20px_rgba(79,70,229,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] hover:brightness-105 active:shadow-[0_2px_8px_rgba(79,70,229,0.3)]',
         variant === 'secondary' &&
-          'border border-edge bg-surface text-ink hover:bg-surface-muted',
-        variant === 'ghost' && 'text-brand-700 hover:bg-brand-50',
-        variant === 'danger' && 'bg-critical-500/[0.12] text-critical-700 hover:bg-critical-100',
+          'border border-slate-200/90 bg-gradient-to-b from-white to-slate-100/90 text-slate-800 shadow-[0_3px_10px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)] hover:bg-slate-50',
+        variant === 'ghost' && 'text-brand-700 hover:bg-brand-50/80',
+        variant === 'danger' &&
+          'bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[0_6px_18px_rgba(239,68,68,0.3),inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-105',
         className,
       )}
     >

@@ -23,17 +23,17 @@ export function AttendanceOverviewCard() {
   const safeMisses = useSafeMissTotal();
 
   return (
-    <section className="rounded-card bg-surface p-5 shadow-ambient ring-1 ring-hairline">
+    <section className="glass-card rounded-2xl sm:rounded-card p-4 sm:p-5 shadow-ambient">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <IconTile icon="analytics" tone="indigo" size={38} iconSize={19} />
-          <h2 className="text-headline-sm">Attendance Overview</h2>
+        <div className="flex items-center gap-2.5">
+          <IconTile icon="analytics" tone="indigo" size={36} iconSize={18} />
+          <h2 className="text-headline-sm font-bold">Attendance Overview</h2>
         </div>
         <Pill>Target: {target}%</Pill>
       </div>
 
-      <div className="mt-4">
-        <AttendanceGauge value={stats.percentage} caption="Overall attendance" size={204} target={target} />
+      <div className="mt-3 flex justify-center">
+        <AttendanceGauge value={stats.percentage} caption="Overall attendance" size={176} target={target} />
       </div>
 
       <div className="mt-5 flex items-start gap-3 rounded-block bg-safe-50 p-3.5">

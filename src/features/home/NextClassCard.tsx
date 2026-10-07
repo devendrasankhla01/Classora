@@ -45,13 +45,13 @@ className="inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-brand-600
   const quick = (action: AttendanceAction) => () => void markAttendance(occurrence.id, action);
 
   return (
-    <section className="overflow-hidden rounded-card bg-surface p-5 shadow-ambient ring-1 ring-hairline">
-      <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-2 rounded-pill bg-brand-50 px-3 py-1.5 text-label-sm uppercase text-brand-700">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand-600" />
-          {state === 'in_progress' ? 'Now • In Progress' : `Next Class • ${formatCountdown(secondsUntilStart)}`}
+    <section className="overflow-hidden glass-card rounded-2xl sm:rounded-card p-4 sm:p-5 shadow-ambient">
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50/90 border border-indigo-200/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700">
+          <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 animate-pulse" />
+          {state === 'in_progress' ? 'Now • In Progress' : `Next • ${formatCountdown(secondsUntilStart)}`}
         </span>
-        <span className="rounded-pill bg-surface-sunken px-3 py-1.5 text-label-sm font-semibold text-ink-secondary">
+        <span className="rounded-full bg-slate-100/90 px-2.5 py-1 text-[11px] font-bold text-slate-600">
           Lecture {indexInDay} of {dayCount}
         </span>
       </div>

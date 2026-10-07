@@ -28,7 +28,7 @@ export function SegmentedControl<T extends string>({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        'flex w-full items-center gap-1 rounded-pill bg-surface-sunken p-1',
+        'flex w-full items-center gap-1 rounded-pill bg-slate-200/70 backdrop-blur-md p-1 border border-slate-300/40 shadow-inner',
         className,
       )}
     >
@@ -43,9 +43,9 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             className={cn(
               'flex-1 rounded-pill font-semibold transition-all duration-200 ease-porcelain',
-              size === 'md' ? 'px-3 py-2.5 text-body-md' : 'px-3 py-2 text-body-sm',
+              size === 'md' ? 'px-3 py-2 text-label-lg' : 'px-3 py-1.5 text-label-md',
               selected
-                ? 'bg-surface text-brand-700 shadow-ambient'
+                ? 'bg-gradient-to-b from-white to-slate-50 text-indigo-700 shadow-[0_3px_12px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,1)]'
                 : 'text-ink-secondary hover:text-ink',
             )}
           >

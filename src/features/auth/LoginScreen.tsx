@@ -528,7 +528,7 @@ export function LoginScreen() {
             <span>Attendance data is stored on your device first</span>
           </div>
           <div className="flex items-center justify-center gap-3 text-label-sm text-ink-muted">
-            <span>Classora • Build 1.0</span>
+            <span>CampusOne • Build 1.0</span>
             <span>•</span>
             <a href="/admin" className="font-medium text-brand-600 hover:underline">
               Admin Portal

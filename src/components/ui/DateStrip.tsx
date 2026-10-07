@@ -16,8 +16,8 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
   const today = todayKey();
 
   return (
-    <div className={cn('w-full', className)}>
-      <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
+    <div className={cn('w-full overflow-hidden', className)}>
+      <div className="flex w-full items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar snap-x py-1 px-0.5">
         {dates.map((date) => {
           const selected = date === value;
           const isToday = date === today;
@@ -31,16 +31,16 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
               aria-pressed={selected}
               aria-label={`${formatWeekdayShort(date)} ${formatDayNumber(date)}`}
               className={cn(
-                'relative flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-[14px] sm:rounded-[18px] py-2 sm:py-2.5 transition-all duration-200 ease-porcelain',
+                'relative flex flex-1 min-w-[50px] sm:min-w-[56px] snap-center flex-col items-center justify-center gap-0.5 rounded-[14px] sm:rounded-[18px] py-2 sm:py-2.5 transition-all duration-200',
                 selected
-                  ? 'bg-brand-600 text-white shadow-elevated'
-                  : 'bg-surface text-ink-secondary shadow-ambient ring-1 ring-hairline',
+                  ? 'bg-gradient-to-b from-indigo-500 via-indigo-600 to-indigo-700 text-white shadow-[0_4px_14px_rgba(79,70,229,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] scale-[1.03]'
+                  : 'bg-white/80 backdrop-blur-md text-ink-secondary border border-white/60 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:bg-white',
               )}
             >
-              <span className={cn('text-[10px] sm:text-label-sm font-semibold uppercase tracking-wider', selected ? 'text-white/80' : 'text-ink-muted')}>
+              <span className={cn('text-[10px] sm:text-label-sm font-semibold uppercase tracking-wider', selected ? 'text-white/90' : 'text-ink-muted')}>
                 {formatWeekdayShort(date)}
               </span>
-              <span className={cn('text-[15px] sm:text-headline-sm font-bold', selected ? 'text-white' : 'text-ink')}>
+              <span className={cn('text-[14px] sm:text-headline-sm font-bold', selected ? 'text-white' : 'text-ink')}>
                 {formatDayNumber(date)}
               </span>
               <span
@@ -54,7 +54,7 @@ export function DateStrip({ dates, value, onChange, activeDates, className }: Da
                 )}
               />
               {isToday && !selected ? (
-                <span className="absolute inset-x-2 bottom-0.5 h-[2px] rounded-full bg-brand-400/60" aria-hidden />
+                <span className="absolute inset-x-2 bottom-0.5 h-[2px] rounded-full bg-brand-500" aria-hidden />
               ) : null}
             </button>
           );
