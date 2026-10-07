@@ -254,10 +254,10 @@ export function LoginScreen() {
   async function handleGuestContinue() {
     resetFeedback();
     const guestStudent = findStudentByUsn(usnInput) || {
-      usn: '4PM25CS043',
-      name: 'DEVENDRA SANKHLA',
-      batch: 'A2' as const,
-      section: 'CSE • Section A (Batch A-2)',
+      usn: '4PM25CS001',
+      name: 'ABHILASHA BASANAGOUDA PATIL',
+      batch: 'A1' as const,
+      section: 'CSE • Section A (Batch A-1)',
     };
 
     await finishStudentSession({
@@ -323,13 +323,13 @@ export function LoginScreen() {
           <form onSubmit={(event) => void handleSubmit(event)} className="mt-5 space-y-4" noValidate>
             <Field
               label={tab === 'signup' ? 'University Serial Number (USN)' : 'USN or Email'}
-              hint="e.g. 4PM25CS043 or 4PM25CS001"
+              hint="e.g. 4PM25CS001 or 4PM25CS010"
             >
               <TextInput
                 type="text"
                 name="usn"
                 autoComplete="username"
-                placeholder="4PM25CS043"
+                placeholder="4PM25CS001"
                 value={usnInput}
                 onChange={(event) => setUsnInput(event.target.value.toUpperCase())}
                 required
@@ -408,30 +408,10 @@ export function LoginScreen() {
               </Button>
             </div>
           </form>
-
-          <div className="my-4 flex items-center gap-3">
-            <span className="h-px flex-1 bg-divider" />
-            <span className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">or</span>
-            <span className="h-px flex-1 bg-divider" />
-          </div>
-
-          <Button
-            type="button"
-            variant="secondary"
-            block
-            icon="smartphone"
-            onClick={() => void handleGuestContinue()}
-          >
-            Skip for now • Use on this device
-          </Button>
         </Card>
 
         {/* Footer */}
         <footer className="mt-6 space-y-2 text-center">
-          <div className="inline-flex items-center gap-1.5 text-label-md text-ink-secondary">
-            <Icon name="verified_user" size={16} className="text-emerald-600" />
-            <span>Official Section A 3rd Sem Roster Integrated</span>
-          </div>
           <div className="flex items-center justify-center gap-3 text-label-sm text-ink-muted">
             <span>CampusOne • Build 1.0</span>
             <span>•</span>

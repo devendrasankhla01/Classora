@@ -121,11 +121,11 @@ describe('screens render with real data', () => {
     expect(screen.getAllByText(/notifications/i).length).toBeGreaterThan(0);
   });
 
-  it('Login renders the sign-in tabs and guest continue action', () => {
+  it('Login renders the sign-in tabs and submission button', () => {
     writeStoredSession(null);
     renderScreen(<LoginScreen />, '/login');
     expect(screen.getByRole('tab', { name: /sign in/i })).toBeTruthy();
     expect(screen.getByRole('tab', { name: /create account/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /skip for now/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeTruthy();
   });
 });
