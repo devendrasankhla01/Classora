@@ -139,10 +139,25 @@ className="mt-3 flex items-center gap-3 text-label-lg text-brand-700"
           </p>
         </Card>
 
+        <Card>
+          <SectionHeader title="Administrator" subtitle="Developer & institution dashboard" />
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 rounded-block bg-surface-muted px-3.5 py-3.5 transition active:scale-[0.995]"
+          >
+            <Icon name="admin_panel_settings" size={19} className="text-brand-600" />
+            <span className="min-w-0 flex-1">
+              <span className="block text-label-lg font-semibold text-ink">Admin Dashboard</span>
+              <span className="block text-label-md text-ink-secondary">View student count, USNs, and active rosters</span>
+            </span>
+            <Icon name="chevron_right" size={19} className="text-ink-muted" />
+          </Link>
+        </Card>
+
         <button
           type="button"
           onClick={() =>
-            announce({ tone: 'info', message: 'CampusOne is up to date — build 1.0.0' })
+            announce({ tone: 'info', message: 'Classora is up to date — build 1.0.0' })
           }
           className="w-full rounded-pill py-3 text-label-md text-ink-muted"
         >
@@ -150,7 +165,7 @@ className="mt-3 flex items-center gap-3 text-label-lg text-brand-700"
         </button>
 
         <p className="pb-2 text-center text-label-sm text-ink-muted">
-          CampusOne • Build 1.0.0 • Offline first, built for students
+          Classora • Build 1.0.0 • Offline first, built for students
         </p>
       </div>
     </>

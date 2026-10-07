@@ -527,9 +527,13 @@ export function LoginScreen() {
             <Icon name="verified_user" size={16} className="text-safe-600" />
             <span>Attendance data is stored on your device first</span>
           </div>
-          <p className="text-label-sm text-ink-muted">
-            Classora • Porcelain Minimalist • Build 1.0
-          </p>
+          <div className="flex items-center justify-center gap-3 text-label-sm text-ink-muted">
+            <span>Classora • Build 1.0</span>
+            <span>•</span>
+            <a href="/admin" className="font-medium text-brand-600 hover:underline">
+              Admin Portal
+            </a>
+          </div>
         </footer>
       </div>
     </div>

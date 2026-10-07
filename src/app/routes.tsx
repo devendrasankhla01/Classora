@@ -70,6 +70,11 @@ const SettingsScreen = lazy(() =>
 const ExportScreen = lazy(() =>
   import('@/features/profile/ExportScreen').then((module) => ({ default: module.ExportScreen })),
 );
+const AdminDashboardScreen = lazy(() =>
+  import('@/features/admin/AdminDashboardScreen').then((module) => ({
+    default: module.AdminDashboardScreen,
+  })),
+);
 
 /** The review step is part of the import flow; keep the URL working. */
 function TimetableReviewRedirect() {
@@ -117,6 +122,7 @@ export function AppRoutes() {
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/admin" element={<AdminDashboardScreen />} />
         <Route element={<ProtectedAppShell />}>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/timetable" element={<TimetableScreen />} />
