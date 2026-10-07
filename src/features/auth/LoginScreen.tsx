@@ -204,6 +204,7 @@ export function LoginScreen() {
       studentId: finalStudentId,
       signedInAt: new Date().toISOString(),
     });
+    await useClassora.getState().initialize();
     announce({
       message: isMatch
         ? `Welcome! Semester III timetable loaded for ${finalStudentId}`

@@ -14,7 +14,7 @@ export interface CloudConfig {
 
 export function readCloudConfig(): CloudConfig | null {
   const mode = import.meta.env.VITE_APP_MODE;
-  if (mode === 'local') return null;
+  if (mode === 'off' || mode === 'local-only') return null;
 
   let rawUrl = import.meta.env.VITE_SUPABASE_URL;
   let anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;

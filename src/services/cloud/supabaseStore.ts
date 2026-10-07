@@ -112,6 +112,18 @@ export class SupabaseStore implements DataStore {
     return getSupabaseClient();
   }
 
+  private async getUserId(): Promise<string | null> {
+    const client = await this.client();
+    if (!client) return null;
+    try {
+      const { data } = await client.auth.getUser();
+      this.userId = data.user?.id ?? null;
+      return this.userId;
+    } catch {
+      return this.userId;
+    }
+  }
+
   private async queue(entry: Omit<OutboxEntry, 'id' | 'createdAt' | 'attempts'>): Promise<void> {
     const db = getDatabase();
     await db.outbox.put({
@@ -128,7 +140,8 @@ export class SupabaseStore implements DataStore {
    */
   async flushOutbox(): Promise<{ flushed: number; remaining: number }> {
     const client = await this.client();
-    if (!client || !this.userId) return { flushed: 0, remaining: 0 };
+    const userId = await this.getUserId();
+    if (!client || !userId) return { flushed: 0, remaining: 0 };
 
     const db = getDatabase();
     const entries = (await db.outbox.toArray()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -141,7 +154,7 @@ export class SupabaseStore implements DataStore {
       const result =
         entry.op === 'delete'
           ? await client.from(table).delete().eq('id', entry.entityId)
-          : await client.from(table).upsert(withUser({ ...payload, id: entry.entityId }, this.userId));
+          : await client.from(table).upsert(withUser({ ...payload, id: entry.entityId }, userId));
 
       if (result.error) {
         await db.outbox.put({ ...entry, attempts: entry.attempts + 1 });
@@ -164,15 +177,16 @@ export class SupabaseStore implements DataStore {
     await local();
 
     const client = await this.client();
-    if (!client || !this.userId) return;
+    const userId = await this.getUserId();
+    if (!client || !userId) return;
 
     const table = OUTBOX_TABLE[entity];
     if (!table) return;
-    const payload = entity === 'profile' ? { ...row, id: this.userId } : row;
+    const payload = entity === 'profile' ? { ...row, id: userId } : row;
     const request =
       op === 'delete'
         ? client.from(table).delete().eq('id', String(payload.id))
-        : client.from(table).upsert(withUser(payload, this.userId));
+        : client.from(table).upsert(withUser(payload, userId));
 
     const { error } = await request;
     if (error) {
@@ -186,12 +200,8 @@ export class SupabaseStore implements DataStore {
 
   async init(): Promise<void> {
     await this.cache.init();
-    const client = await this.client();
-    if (!client) return;
-
-    const { data } = await client.auth.getUser();
-    this.userId = data.user?.id ?? null;
-    if (this.userId) await this.flushOutbox();
+    const userId = await this.getUserId();
+    if (userId) await this.flushOutbox();
   }
 
   async isSeeded(): Promise<boolean> {
