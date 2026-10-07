@@ -21,6 +21,7 @@ import { addDaysToKey, nowInstant, toInstant, todayKey } from '@/lib/date';
 import { buildNotifications, newNotificationsOnly } from '@/lib/notifications';
 import { createId } from '@/lib/id';
 import {
+  findStudentByUsn,
   generateBuiltinSemester3Data,
   getBuiltinSemester3Complete,
   isUsnInBuiltinRange,
@@ -343,6 +344,26 @@ export const useClassora = create<ClassoraState>((set, get) => {
           versions = [builtin.version];
           slots = builtin.slots;
           occurrences = builtin.occurrences;
+        } else {
+          // Auto-resync timetable for official Section A student batches
+          const MIGRATION_KEY = 'classora_sec_a_resync_v5';
+          if (typeof window !== 'undefined' && window.localStorage.getItem(MIGRATION_KEY) !== 'true') {
+            const studentInfo = findStudentByUsn(profile.studentId || profile.batchRoll);
+            const batch = studentInfo ? studentInfo.batch : 'A2';
+            const builtin = getBuiltinSemester3Complete(profile.id, batch);
+
+            await store.saveSubjects(builtin.subjects);
+            await store.saveVersion(builtin.version);
+            await store.replaceSlots(semester.id, builtin.version.id, builtin.slots);
+            if (builtin.occurrences.length > 0) {
+              await store.saveOccurrences(builtin.occurrences);
+            }
+            subjects = builtin.subjects;
+            versions = [builtin.version];
+            slots = builtin.slots;
+            occurrences = builtin.occurrences;
+            window.localStorage.setItem(MIGRATION_KEY, 'true');
+          }
         }
 
         const notifications = await store.listNotifications(profile.id);

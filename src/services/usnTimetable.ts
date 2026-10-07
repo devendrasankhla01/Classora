@@ -211,9 +211,7 @@ export function generateBuiltinSemester3Data(
     { day: 3, start: '10:30', end: '11:30', code: 'OOPS' },
     { day: 3, start: '11:30', end: '12:30', code: 'DDCO' },
     { day: 3, start: '12:30', end: '13:30', isBreak: true, label: 'Lunch Break' },
-    batch === 'A1'
-      ? { day: 3, start: '13:30', end: '14:30', code: 'GIT-LAB', periodCount: 1 }
-      : { day: 3, start: '13:30', end: '15:30', code: 'OOPS-LAB', periodCount: 2 },
+    { day: 3, start: '13:30', end: '15:30', code: batch === 'A1' ? 'GIT-LAB' : 'OOPS-LAB', periodCount: 2 },
 
     // --- Thursday ---
     { day: 4, start: '08:00', end: '09:00', code: 'M3' },

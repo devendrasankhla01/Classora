@@ -40,10 +40,10 @@ describe('usnTimetable', () => {
     expect(monFirst).toBeDefined();
     expect(monFirst?.subjectId).toBe(oops?.id);
 
-    // Batch A1 GIT LAB on Wednesday 13:30 - 14:30
+    // Batch A1 GIT LAB on Wednesday 13:30 - 15:30
     const dataA1 = generateBuiltinSemester3Data('sem-test', 'A1');
     const gitLabA1 = dataA1.slots.find((slot) => slot.dayOfWeek === 3 && slot.startTime === '13:30');
-    expect(gitLabA1?.endTime).toBe('14:30');
+    expect(gitLabA1?.endTime).toBe('15:30');
 
     // Batch A2 GIT LAB on Thursday 10:30 - 12:30
     const gitLabA2 = dataA2.slots.find((slot) => slot.dayOfWeek === 4 && slot.startTime === '10:30');
