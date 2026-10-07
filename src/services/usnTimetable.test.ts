@@ -39,5 +39,14 @@ describe('usnTimetable', () => {
     const monFirst = dataA2.slots.find((slot) => slot.dayOfWeek === 1 && slot.startTime === '08:00');
     expect(monFirst).toBeDefined();
     expect(monFirst?.subjectId).toBe(oops?.id);
+
+    // Batch A1 GIT LAB on Wednesday 13:30 - 14:30
+    const dataA1 = generateBuiltinSemester3Data('sem-test', 'A1');
+    const gitLabA1 = dataA1.slots.find((slot) => slot.dayOfWeek === 3 && slot.startTime === '13:30');
+    expect(gitLabA1?.endTime).toBe('14:30');
+
+    // Batch A2 GIT LAB on Thursday 10:30 - 12:30
+    const gitLabA2 = dataA2.slots.find((slot) => slot.dayOfWeek === 4 && slot.startTime === '10:30');
+    expect(gitLabA2?.endTime).toBe('12:30');
   });
 });
