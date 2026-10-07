@@ -125,8 +125,7 @@ describe('screens render with real data', () => {
     writeStoredSession(null);
     renderScreen(<LoginScreen />, '/login');
     expect(screen.getByRole('tab', { name: /sign in/i })).toBeTruthy();
-    expect(screen.getByRole('tab', { name: /create/i })).toBeTruthy();
-    expect(screen.getByRole('tab', { name: /magic link/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /create account/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /skip for now/i })).toBeTruthy();
   });
 });

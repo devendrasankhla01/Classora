@@ -4,23 +4,15 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
 import { loadAuth, type AuthResult } from '@/services/cloud/auth';
-import { isCloudModeEnabled } from '@/services/cloud/client';
-import { generateBuiltinSemester3Data, isUsnInBuiltinRange } from '@/services/usnTimetable';
+import {
+  findStudentByUsn,
+  generateBuiltinSemester3Data,
+} from '@/services/usnTimetable';
 import { Card } from '@/components/ui/Card';
 import { Button, Field, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 
-/**
- * Session storage key for the local/demo gate.
- *
- * When Supabase credentials are configured (`VITE_SUPABASE_URL` +
- * `VITE_SUPABASE_ANON_KEY`), the real Supabase session is the source of truth
- * and this key is only used if the student explicitly chooses "Skip for now".
- * When credentials are absent, signing in creates a local session record here
- * and patches the local profile so the student's name and email appear across
- * the app.
- */
 export const AUTH_STORAGE_KEY = 'classora.auth.session.v1';
 
 export interface StoredAuthSession {
@@ -60,11 +52,10 @@ export function writeStoredSession(session: StoredAuthSession | null): void {
     }
     window.dispatchEvent(new CustomEvent('classora:auth-change'));
   } catch {
-    // Storage quota or private-mode restriction — ignore cleanly.
+    // Storage restriction — ignore cleanly.
   }
 }
 
-/** Clear both any Supabase session and the local session record. */
 export async function signOutEverywhere(): Promise<void> {
   const auth = await loadAuth();
   if (auth) {
@@ -73,32 +64,16 @@ export async function signOutEverywhere(): Promise<void> {
   writeStoredSession(null);
 }
 
-type AuthTab = 'signin' | 'signup' | 'magic';
+type AuthTab = 'signin' | 'signup';
 
-/**
- * Compulsory entry gate (Option B).
- *
- * Supports:
- *   - Sign in with email + password
- *   - Create an account (name, college email, optional roll/ID, password)
- *   - Passwordless magic link
- *   - "Skip for now · Continue on this device" so a student without credentials
- *     is never locked out of their timetable
- *
- * When Supabase is configured (`isCloudModeEnabled()`), calls go through
- * `loadAuth()` (real Supabase Auth). Otherwise the form completes locally,
- * updates the active `Profile`, and persists the session in `localStorage`.
- */
 export function LoginScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const profile = useClassora((state) => state.profile);
   const updateProfile = useClassora((state) => state.updateProfile);
   const applyImportedTimetable = useClassora((state) => state.applyImportedTimetable);
-  const slots = useClassora((state) => state.slots);
   const announce = useClassora((state) => state.announce);
 
-  const cloudEnabled = isCloudModeEnabled();
   const redirectTo =
     (location.state as { from?: string } | null)?.from &&
     (location.state as { from?: string }).from !== '/login'
@@ -106,17 +81,17 @@ export function LoginScreen() {
       : '/';
 
   const [tab, setTab] = useState<AuthTab>('signin');
-  const [email, setEmail] = useState(profile?.email ?? '');
+  const [usnInput, setUsnInput] = useState(profile?.studentId ?? '');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(profile?.name ?? '');
-  const [studentId, setStudentId] = useState(profile?.studentId ?? '');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [alreadySignedIn, setAlreadySignedIn] = useState< boolean >(() => readStoredSession() !== null);
+  const [alreadySignedIn, setAlreadySignedIn] = useState<boolean>(() => readStoredSession() !== null);
 
-  // If a real Supabase session already exists, mirror it and move on.
+  // Real-time student lookup by USN
+  const detectedStudent = findStudentByUsn(usnInput);
+
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -153,62 +128,46 @@ export function LoginScreen() {
     resetFeedback();
   }
 
-  function deriveDisplayName(rawEmail: string, explicitName: string): string {
-    const trimmed = explicitName.trim();
-    if (trimmed.length > 0) return trimmed;
-    const local = rawEmail.split('@')[0] ?? 'Student';
-    return local
-      .replace(/[._-]+/g, ' ')
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  }
-
-  async function finishLocalSignIn(opts: {
+  async function finishStudentSession(opts: {
     mode: StoredAuthSession['mode'];
-    email: string | null;
-    name?: string;
-    studentId?: string;
+    email: string;
+    name: string;
+    studentId: string;
+    batch: 'A1' | 'A2';
+    section: string;
     greeting: string;
   }) {
-    const finalStudentId =
-      opts.studentId && opts.studentId.trim().length > 0
-        ? opts.studentId.trim().toUpperCase()
-        : profile?.studentId ?? null;
+    // 1. Update Profile in Store / Database
+    await updateProfile({
+      email: opts.email,
+      name: opts.name,
+      studentId: opts.studentId,
+      department: 'Computer Science & Engineering',
+      departmentLabel: opts.section,
+      semesterLabel: 'Semester III',
+      batchRoll: opts.studentId,
+    });
 
-    const isMatch = isUsnInBuiltinRange(finalStudentId);
+    // 2. Automatically generate & apply Batch A1 or Batch A2 timetable
+    const builtinData = generateBuiltinSemester3Data('sem-iii-2026', opts.batch);
+    await applyImportedTimetable({
+      subjects: builtinData.subjects,
+      slots: builtinData.slots,
+      notes: builtinData.notes,
+    });
 
-    if (opts.email || opts.name || opts.studentId) {
-      await updateProfile({
-        email: opts.email ?? profile?.email ?? null,
-        name: opts.name && opts.name.trim().length > 0 ? opts.name.trim() : profile?.name ?? 'Student',
-        studentId: finalStudentId,
-        department: isMatch ? 'Computer Science & Engineering' : profile?.department ?? null,
-        departmentLabel: isMatch ? 'CSE • Section A' : profile?.departmentLabel ?? null,
-        semesterLabel: isMatch ? 'Semester III' : profile?.semesterLabel ?? null,
-        batchRoll: isMatch ? finalStudentId : profile?.batchRoll ?? null,
-      });
-    }
-
-    if (isMatch && slots.length === 0) {
-      const builtinData = generateBuiltinSemester3Data();
-      await applyImportedTimetable({
-        subjects: builtinData.subjects,
-        slots: builtinData.slots,
-        notes: builtinData.notes,
-      });
-    }
-
+    // 3. Write Session
     writeStoredSession({
       mode: opts.mode,
       email: opts.email,
-      name: opts.name ?? profile?.name ?? null,
-      studentId: finalStudentId,
+      name: opts.name,
+      studentId: opts.studentId,
       signedInAt: new Date().toISOString(),
     });
+
     await useClassora.getState().initialize();
     announce({
-      message: isMatch
-        ? `Welcome! Semester III timetable loaded for ${finalStudentId}`
-        : opts.greeting,
+      message: `Welcome ${opts.name.split(' ')[0]}! Timetable auto-loaded for ${opts.section}`,
       tone: 'success',
     });
     navigate(redirectTo, { replace: true });
@@ -218,97 +177,74 @@ export function LoginScreen() {
     event.preventDefault();
     resetFeedback();
 
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setError('Enter a valid email address.');
+    const cleanInput = usnInput.trim().toUpperCase();
+    if (!cleanInput) {
+      setError('Please enter your University Serial Number (USN).');
       return;
     }
 
-    if (tab !== 'magic' && password.length < 6) {
+    if (password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
     }
 
-    if (tab === 'signup' && name.trim().length < 2) {
-      setError('Enter your full name so your attendance report stays labelled.');
-      return;
-    }
-
     setBusy(true);
+
     try {
+      const student = findStudentByUsn(cleanInput);
+      const studentUsn = student ? student.usn : cleanInput;
+      const studentName = student ? student.name : `Student ${cleanInput}`;
+      const studentBatch = student ? student.batch : 'A2';
+      const studentSection = student ? student.section : 'CSE • Section A';
+
+      // Auto-derived clean email format for Supabase auth
+      const derivedEmail = cleanInput.includes('@')
+        ? cleanInput.toLowerCase()
+        : `${cleanInput.toLowerCase().replace(/[^a-z0-9]/g, '')}@college.edu`;
+
       const auth = await loadAuth();
 
-      // 1. Real Supabase flow when configured.
+      // 1. Cloud Mode (Supabase Auth)
       if (auth) {
-        const displayName = deriveDisplayName(cleanEmail, name);
         let result: AuthResult & { needsEmailConfirmation?: boolean };
         if (tab === 'signin') {
-          result = await auth.signIn(cleanEmail, password);
-        } else if (tab === 'signup') {
-          result = await auth.signUp(cleanEmail, password, displayName);
+          result = await auth.signIn(derivedEmail, password);
         } else {
-          result = await auth.signInWithMagicLink(cleanEmail);
+          result = await auth.signUp(derivedEmail, password, studentName);
         }
 
         if (!result.ok) {
-          setError(result.message ?? 'Could not sign in. Check your details and try again.');
-          return;
-        }
-
-        if (tab === 'magic') {
-          setNotice(`Sign-in link sent to ${cleanEmail}. Open it on this device to finish.`);
+          setError(result.message ?? 'Could not authenticate. Check your USN & password and try again.');
           return;
         }
 
         if (result.needsEmailConfirmation) {
-          setNotice(
-            `Check ${cleanEmail} to confirm your account, then sign in with your password.`,
-          );
+          setNotice(`Confirmation link sent to ${derivedEmail}. Confirm to finish, or sign in below.`);
           setTab('signin');
           return;
         }
 
-        const resolvedName =
-          result.user?.name && result.user.name.trim().length > 0
-            ? result.user.name.trim()
-            : tab === 'signup' && displayName
-              ? displayName
-              : profile?.name && profile.name !== 'Student'
-                ? profile.name
-                : deriveDisplayName(cleanEmail, '');
-
-        await finishLocalSignIn({
+        await finishStudentSession({
           mode: 'cloud',
-          email: cleanEmail,
-          name: resolvedName,
-          studentId: tab === 'signup' && studentId ? studentId : profile?.studentId ?? undefined,
-          greeting: `Signed in as ${resolvedName}`,
+          email: derivedEmail,
+          name: studentName,
+          studentId: studentUsn,
+          batch: studentBatch,
+          section: studentSection,
+          greeting: `Welcome back ${studentName}!`,
         });
         return;
       }
 
-      // 2. Device-local flow when Supabase isn't wired yet.
-      if (tab === 'magic') {
-        const displayName = deriveDisplayName(cleanEmail, name);
-        await finishLocalSignIn({
-          mode: 'local',
-          email: cleanEmail,
-          name: displayName,
-          greeting: `Signed in as ${displayName}`,
-        });
-        return;
-      }
-
-      const displayName = deriveDisplayName(cleanEmail, name);
-      await finishLocalSignIn({
+      // 2. Local Mode (Device Local Auth)
+      await finishStudentSession({
         mode: 'local',
-        email: cleanEmail,
-        name: displayName,
-        studentId: tab === 'signup' ? studentId : undefined,
-        greeting:
-          tab === 'signup'
-            ? `Welcome to CampusOne, ${displayName.split(' ')[0]}`
-            : `Welcome back, ${displayName.split(' ')[0]}`,
+        email: derivedEmail,
+        name: studentName,
+        studentId: studentUsn,
+        batch: studentBatch,
+        section: studentSection,
+        greeting: `Welcome ${studentName}!`,
       });
     } finally {
       setBusy(false);
@@ -317,45 +253,50 @@ export function LoginScreen() {
 
   async function handleGuestContinue() {
     resetFeedback();
-    await finishLocalSignIn({
+    const guestStudent = findStudentByUsn(usnInput) || {
+      usn: '4PM25CS043',
+      name: 'DEVENDRA SANKHLA',
+      batch: 'A2' as const,
+      section: 'CSE • Section A (Batch A-2)',
+    };
+
+    await finishStudentSession({
       mode: 'guest',
-      email: profile?.email ?? null,
+      email: `${guestStudent.usn.toLowerCase()}@college.edu`,
+      name: guestStudent.name,
+      studentId: guestStudent.usn,
+      batch: guestStudent.batch,
+      section: guestStudent.section,
       greeting: 'Continuing on this device',
     });
   }
 
   return (
-    <div className="min-h-dvh bg-canvas px-5 pb-12 pt-safe-plus-4">
+    <div className="min-h-dvh bg-canvas px-4 pb-12 pt-safe-plus-4 flex flex-col justify-between items-center">
       <div className="mx-auto flex w-full max-w-app flex-col justify-between">
-        {/* Brand header ------------------------------------------------- */}
+        {/* Brand header */}
         <header className="flex flex-col items-center pt-4 text-center">
-          <BrandLogo variant="horizontal" size="lg" className="mb-1" />
-
-          <h1 className="mt-3 text-headline-md">
-            {tab === 'signup'
-              ? 'Create your student account'
-              : tab === 'magic'
-                ? 'Sign in with a magic link'
-                : 'Welcome back'}
+          <BrandLogo variant="horizontal" size="lg" className="mb-2" />
+          <h1 className="mt-2 text-headline-md font-bold text-slate-900">
+            {tab === 'signup' ? 'Create Student Account' : 'Student Sign In'}
           </h1>
-          <p className="mt-1 max-w-[30ch] text-body-md text-ink-secondary">
-            Track every lecture, guard your 75% benchmark, and know cleanly when you can skip.
+          <p className="mt-1 max-w-[32ch] text-body-sm text-ink-secondary">
+            Section A CSE Timetable & Attendance Assistant
           </p>
         </header>
 
-        {/* Auth card ---------------------------------------------------- */}
-        <Card className="mt-6">
-          {/* Segmented mode switcher */}
+        {/* Auth card */}
+        <Card className="mt-6 glass-card-elevated p-5 sm:p-6 shadow-xl border border-white/80">
+          {/* Segmented switcher: Sign In vs Create Account */}
           <div
             role="tablist"
             aria-label="Sign-in method"
-            className="grid grid-cols-3 rounded-pill bg-surface-sunken p-1"
+            className="grid grid-cols-2 rounded-full bg-slate-200/70 p-1 border border-slate-300/40"
           >
             {(
               [
                 { id: 'signin', label: 'Sign In' },
-                { id: 'signup', label: 'Create' },
-                { id: 'magic', label: 'Magic Link' },
+                { id: 'signup', label: 'Create Account' },
               ] as const
             ).map((item) => {
               const active = tab === item.id;
@@ -367,9 +308,9 @@ export function LoginScreen() {
                   aria-selected={active}
                   onClick={() => switchTab(item.id)}
                   className={cn(
-                    'min-h-9 rounded-pill text-label-md transition-all duration-200 ease-porcelain',
+                    'min-h-9 rounded-full text-label-md font-bold transition-all duration-200',
                     active
-                      ? 'bg-ink text-white shadow-ambient'
+                      ? 'bg-gradient-to-b from-indigo-600 to-indigo-700 text-white shadow-md'
                       : 'text-ink-secondary hover:text-ink',
                   )}
                 >
@@ -379,95 +320,64 @@ export function LoginScreen() {
             })}
           </div>
 
-          <form onSubmit={(event) => void handleSubmit(event)} className="mt-5 space-y-3.5" noValidate>
-            {tab === 'signup' ? (
-              <Field label="Full name">
-                <TextInput
-                  type="text"
-                  name="name"
-                  autoComplete="name"
-                  placeholder="Aarav Sharma"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
-              </Field>
-            ) : null}
-
-            <Field label="College or personal email">
+          <form onSubmit={(event) => void handleSubmit(event)} className="mt-5 space-y-4" noValidate>
+            <Field
+              label={tab === 'signup' ? 'University Serial Number (USN)' : 'USN or Email'}
+              hint="e.g. 4PM25CS043 or 4PM25CS001"
+            >
               <TextInput
-                type="email"
-                name="email"
-                autoComplete="email"
-                inputMode="email"
-                placeholder="you@college.edu"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                type="text"
+                name="usn"
+                autoComplete="username"
+                placeholder="4PM25CS043"
+                value={usnInput}
+                onChange={(event) => setUsnInput(event.target.value.toUpperCase())}
                 required
               />
+
+              {/* Real-time student recognition badge */}
+              {detectedStudent ? (
+                <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-emerald-300/80 bg-emerald-50/90 p-3 text-label-sm font-semibold text-emerald-900 shadow-sm animate-fade-in">
+                  <Icon name="check_circle" size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+                  <div>
+                    <span className="block font-bold text-emerald-950">{detectedStudent.name}</span>
+                    <span className="block text-[11px] text-emerald-800 font-medium mt-0.5">
+                      {detectedStudent.section} • Timetable ready to auto-allocate
+                    </span>
+                  </div>
+                </div>
+              ) : null}
             </Field>
 
-            {tab === 'signup' ? (
-              <Field
-                label="USN / Roll Number"
-                hint={isUsnInBuiltinRange(studentId) ? 'Sem III Section A' : 'e.g. 4PM25CS043'}
-              >
+            <Field label="Password" hint={tab === 'signup' ? 'At least 6 characters' : undefined}>
+              <div className="relative">
                 <TextInput
-                  type="text"
-                  name="studentId"
-                  placeholder="4PM25CS043"
-                  value={studentId}
-                  onChange={(event) => setStudentId(event.target.value.toUpperCase())}
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="pr-11"
+                  required
                 />
-                {isUsnInBuiltinRange(studentId) ? (
-                  <div className="mt-2 flex items-center gap-2 rounded-card border border-emerald-200 bg-emerald-50 px-3 py-2 text-label-sm font-medium text-emerald-800">
-                    <Icon name="check_circle" size={16} className="text-emerald-600" />
-                    <span>Batch 4PM25CS detected: Semester III Section A timetable will load automatically!</span>
-                  </div>
-                ) : null}
-              </Field>
-            ) : null}
-
-            {tab !== 'magic' ? (
-              <Field
-                label="Password"
-                hint={tab === 'signup' ? '6+ chars' : undefined}
-              >
-                <div className="relative">
-                  <TextInput
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    className="pr-11"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((current) => !current)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-1 grid w-10 place-items-center rounded-pill text-ink-secondary hover:text-ink"
-                  >
-                    <Icon name={showPassword ? 'visibility_off' : 'visibility'} size={18} />
-                  </button>
-                </div>
-              </Field>
-            ) : (
-              <p className="rounded-block bg-surface-muted px-3.5 py-2.5 text-body-sm text-ink-secondary">
-                {cloudEnabled
-                  ? 'We will email a one-tap sign-in link. No password needed.'
-                  : 'Instant passwordless sign-in for this device. Add Supabase keys anytime to enable email links.'}
-              </p>
-            )}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute inset-y-0 right-1 grid w-10 place-items-center rounded-full text-slate-400 hover:text-slate-600"
+                >
+                  <Icon name={showPassword ? 'visibility_off' : 'visibility'} size={18} />
+                </button>
+              </div>
+            </Field>
 
             {error ? (
               <div
                 role="alert"
-                className="flex items-start gap-2.5 rounded-block bg-critical-500/[0.12] px-3.5 py-2.5 text-body-sm text-critical-700"
+                className="flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-200 px-3.5 py-2.5 text-body-sm font-medium text-red-700"
               >
-                <Icon name="error" size={18} className="mt-0.5 shrink-0" />
+                <Icon name="error" size={18} className="mt-0.5 shrink-0 text-red-500" />
                 <span>{error}</span>
               </div>
             ) : null}
@@ -475,9 +385,9 @@ export function LoginScreen() {
             {notice ? (
               <div
                 role="status"
-                className="flex items-start gap-2.5 rounded-block bg-safe-500/[0.12] px-3.5 py-2.5 text-body-sm text-safe-700"
+                className="flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 text-body-sm font-medium text-emerald-700"
               >
-                <Icon name="check_circle" size={18} className="mt-0.5 shrink-0" />
+                <Icon name="check_circle" size={18} className="mt-0.5 shrink-0 text-emerald-600" />
                 <span>{notice}</span>
               </div>
             ) : null}
@@ -491,19 +401,14 @@ export function LoginScreen() {
                 trailingIcon="arrow_forward"
               >
                 {busy
-                  ? 'Signing in…'
+                  ? 'Verifying…'
                   : tab === 'signup'
-                    ? 'Create Account'
-                    : tab === 'magic'
-                      ? cloudEnabled
-                        ? 'Send Magic Link'
-                        : 'Continue with Email'
-                      : 'Sign In'}
+                    ? 'Create Account & Auto-Load Schedule'
+                    : 'Sign In'}
               </Button>
             </div>
           </form>
 
-          {/* Divider */}
           <div className="my-4 flex items-center gap-3">
             <span className="h-px flex-1 bg-divider" />
             <span className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">or</span>
@@ -521,16 +426,16 @@ export function LoginScreen() {
           </Button>
         </Card>
 
-        {/* Footer reassurance ------------------------------------------ */}
+        {/* Footer */}
         <footer className="mt-6 space-y-2 text-center">
           <div className="inline-flex items-center gap-1.5 text-label-md text-ink-secondary">
-            <Icon name="verified_user" size={16} className="text-safe-600" />
-            <span>Attendance data is stored on your device first</span>
+            <Icon name="verified_user" size={16} className="text-emerald-600" />
+            <span>Official Section A 3rd Sem Roster Integrated</span>
           </div>
           <div className="flex items-center justify-center gap-3 text-label-sm text-ink-muted">
             <span>CampusOne • Build 1.0</span>
             <span>•</span>
-            <a href="/admin" className="font-medium text-brand-600 hover:underline">
+            <a href="/admin" className="font-semibold text-brand-600 hover:underline">
               Admin Portal
             </a>
           </div>

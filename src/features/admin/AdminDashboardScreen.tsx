@@ -6,7 +6,7 @@ import { Button, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { getSupabaseClient, isCloudModeEnabled } from '@/services/cloud/client';
-import { useClassora } from '@/app/store';
+import { MASTER_STUDENT_ROSTER } from '@/services/usnTimetable';
 
 const ADMIN_SESSION_KEY = 'classora_admin_auth_v1';
 
@@ -40,8 +40,6 @@ export function AdminDashboardScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
   const [fetchError, setFetchError] = useState<string | null>(null);
-
-  const localProfile = useClassora((state) => state.profile);
 
   /* Load data whenever authenticated */
   useEffect(() => {
@@ -82,24 +80,20 @@ export function AdminDashboardScreen() {
         }
       }
 
-      // Fallback to local profile if cloud profiles empty or unconfigured
-      if (localProfile) {
-        setStudents([
-          {
-            id: localProfile.id,
-            name: localProfile.name,
-            email: localProfile.email,
-            studentId: localProfile.studentId,
-            department: localProfile.department,
-            departmentLabel: localProfile.departmentLabel,
-            semesterLabel: localProfile.semesterLabel,
-            attendanceTarget: localProfile.attendanceTarget,
-            createdAt: localProfile.createdAt,
-          },
-        ]);
-      } else {
-        setStudents([]);
-      }
+      // Fallback: Populate official 64 Section A student roster if cloud database empty
+      const officialMaster: StudentData[] = Object.values(MASTER_STUDENT_ROSTER).map((st, idx) => ({
+        id: `master-${st.usn}`,
+        name: st.name,
+        email: `${st.usn.toLowerCase()}@college.edu`,
+        studentId: st.usn,
+        department: st.department,
+        departmentLabel: st.section,
+        semesterLabel: 'Semester III',
+        attendanceTarget: 75,
+        createdAt: new Date(Date.now() - idx * 3600000).toISOString(),
+      }));
+
+      setStudents(officialMaster);
     } catch (err) {
       console.error('Failed to load admin student roster:', err);
       setFetchError('Could not connect to database. Showing cached records.');
