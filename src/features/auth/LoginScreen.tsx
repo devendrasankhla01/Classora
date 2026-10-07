@@ -307,7 +307,7 @@ export function LoginScreen() {
         studentId: tab === 'signup' ? studentId : undefined,
         greeting:
           tab === 'signup'
-            ? `Welcome to Classora, ${displayName.split(' ')[0]}`
+            ? `Welcome to CampusOne, ${displayName.split(' ')[0]}`
             : `Welcome back, ${displayName.split(' ')[0]}`,
       });
     } finally {

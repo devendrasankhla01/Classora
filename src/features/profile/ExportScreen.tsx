@@ -109,7 +109,7 @@ export function ExportScreen() {
     );
 
     const meta = [
-      ['Classora attendance statement'],
+      ['CampusOne attendance statement'],
       ['Student', profile?.name ?? ''],
       ['Student ID', profile?.studentId ?? ''],
       ['Semester', semester?.name ?? ''],
@@ -126,7 +126,7 @@ export function ExportScreen() {
   const buildJson = (): string =>
     JSON.stringify(
       {
-        app: 'Classora',
+        app: 'CampusOne',
         exportVersion: 1,
         exportedAt: new Date().toISOString(),
         profile,
@@ -143,7 +143,7 @@ export function ExportScreen() {
     );
 
   const filename = (extension: string, suffix: string) =>
-    `classora-${suffix}-${new Date().toISOString().slice(0, 10)}.${extension}`;
+    `campusone-${suffix}-${new Date().toISOString().slice(0, 10)}.${extension}`;
 
   const runExport = async (mode: 'download' | 'share') => {
     setBusy(true);
@@ -162,7 +162,7 @@ export function ExportScreen() {
           filename: name,
           contents,
           mimeType,
-          title: 'Classora attendance',
+          title: 'CampusOne attendance',
         });
         announce({
           tone: result ? 'success' : 'warning',
