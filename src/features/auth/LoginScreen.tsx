@@ -251,26 +251,6 @@ export function LoginScreen() {
     }
   }
 
-  async function handleGuestContinue() {
-    resetFeedback();
-    const guestStudent = findStudentByUsn(usnInput) || {
-      usn: '4PM25CS001',
-      name: 'ABHILASHA BASANAGOUDA PATIL',
-      batch: 'A1' as const,
-      section: 'CSE • Section A (Batch A-1)',
-    };
-
-    await finishStudentSession({
-      mode: 'guest',
-      email: `${guestStudent.usn.toLowerCase()}@college.edu`,
-      name: guestStudent.name,
-      studentId: guestStudent.usn,
-      batch: guestStudent.batch,
-      section: guestStudent.section,
-      greeting: 'Continuing on this device',
-    });
-  }
-
   return (
     <div className="min-h-dvh bg-canvas px-4 pb-12 pt-safe-plus-4 flex flex-col justify-between items-center">
       <div className="mx-auto flex w-full max-w-app flex-col justify-between">
