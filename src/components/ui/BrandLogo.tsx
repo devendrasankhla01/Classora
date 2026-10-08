@@ -15,7 +15,7 @@ export function BrandLogo({ variant = 'horizontal', size = 'md', className = '' 
     <img
       src="/branding/campusone-mark.png"
       alt="CampusOne Logo"
-      className={`shrink-0 object-contain drop-shadow-sm transition-transform hover:scale-105 ${sizeConfig.mark}`}
+      className={`shrink-0 object-contain drop-shadow-sm transition-transform hover:scale-105 ${sizeConfig.mark} ${className}`}
     />
   );
 

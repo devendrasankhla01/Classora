@@ -67,9 +67,9 @@ export function AppHeader({
               <Link
                 to="/profile"
                 aria-label="Profile"
-                className="grid h-10 w-10 shrink-0 place-items-center transition-transform"
+                className="grid h-12 w-12 sm:h-14 sm:w-14 shrink-0 place-items-center transition-transform"
               >
-                <BrandLogo variant="mark" size="md" />
+                <BrandLogo variant="mark" size="lg" className="w-12 h-12 sm:w-14 sm:h-14" />
               </Link>
             </motion.div>
           )}
