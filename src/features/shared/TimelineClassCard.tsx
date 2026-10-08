@@ -64,9 +64,7 @@ export function TimelineClassCard({
       <p className="mt-1 text-[13px] text-ink-secondary">
         {occurrence.notes && occurrence.occurrenceType !== 'regular'
           ? occurrence.notes
-          : occurrence.classType === 'lab'
-            ? `Double Block • ${occurrence.periodCount} Periods`
-            : (subject?.faculty ?? 'Faculty to be announced')}
+          : (occurrence.facultyOverride ?? subject?.faculty ?? 'Faculty to be announced')}
       </p>
 
       <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px] font-medium text-ink-secondary">
