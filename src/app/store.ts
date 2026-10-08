@@ -391,10 +391,12 @@ export const useClassora = create<ClassoraState>((set, get) => {
           settings,
         });
 
-        // Materialise any missing future occurrences (idempotent).
-        await materializeFuture();
-        // Then derive today's alerts from the state we just loaded.
-        await get().syncNotifications();
+        // Render UI immediately so page reload is instant (<50ms).
+        // Materialise future occurrences and sync notifications in non-blocking background task.
+        setTimeout(() => {
+          void materializeFuture();
+          void get().syncNotifications();
+        }, 50);
       } catch (error) {
         console.error('Classora store init error:', error);
         set({ ready: true });
@@ -1013,9 +1015,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
         ),
       }));
 
-      for (const notification of created) {
-        await store.saveNotification(notification);
-      }
+      await Promise.all(created.map((notification) => store.saveNotification(notification)));
 
       return created.length;
     },

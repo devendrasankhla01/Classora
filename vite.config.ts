@@ -96,6 +96,23 @@ export default defineConfig({
     target: 'es2020',
     sourcemap: false,
     chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('zustand')) {
+              return 'vendor-core';
+            }
+            if (id.includes('dexie')) {
+              return 'vendor-db';
+            }
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts';
+            }
+          }
+        },
+      },
+    },
   },
   test: {
     globals: true,
