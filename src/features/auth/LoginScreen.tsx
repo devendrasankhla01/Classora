@@ -613,30 +613,7 @@ export function LoginScreen() {
             </div>
           </form>
 
-          {/* Quick Demo Pre-fill Toolbar */}
-          <div className="mt-5 pt-3 border-t border-slate-200/70 text-left">
-            <p className="text-label-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Quick Role Test Credentials:
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {ROLES.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => handleRoleChange(r.id)}
-                  className={cn(
-                    'py-1.5 px-2.5 rounded-xl text-[11px] font-bold text-left transition flex items-center justify-between border',
-                    role === r.id
-                      ? 'bg-slate-900 text-white border-slate-900'
-                      : 'bg-slate-100/80 text-slate-700 border-slate-200 hover:bg-slate-200/60',
-                  )}
-                >
-                  <span className="truncate">{r.label}: {r.demoId}</span>
-                  <Icon name="bolt" size={12} className="shrink-0 text-amber-500 ml-1" />
-                </button>
-              ))}
-            </div>
-          </div>
+
         </Card>
 
         {/* Footer */}
