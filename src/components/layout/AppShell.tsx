@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
+import { PageTransition } from '@/components/ui/AnimatedContainer';
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
 import { FloatingNav } from './FloatingNav';
@@ -38,7 +40,15 @@ export function AppShell() {
             'mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6',
           )}
         >
-          {ready ? <Outlet /> : <BootSkeleton />}
+          {ready ? (
+            <AnimatePresence mode="wait">
+              <PageTransition key={location.pathname}>
+                <Outlet />
+              </PageTransition>
+            </AnimatePresence>
+          ) : (
+            <BootSkeleton />
+          )}
           <InstallPrompt />
         </div>
       </main>

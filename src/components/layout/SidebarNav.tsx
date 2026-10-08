@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/components/ui/Icon';
 import { BrandLogo } from '@/components/ui/BrandLogo';
@@ -39,7 +40,10 @@ export function SidebarNav() {
 
           {/* User Mini Card matching Reference Profile style */}
           {profile ? (
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl neu-sunken">
+            <motion.div
+              whileHover={{ scale: 1.01, y: -2 }}
+              className="flex items-center gap-3 p-3.5 rounded-2xl neu-sunken cursor-pointer"
+            >
               <div className="relative p-0.5 rounded-full ring-2 ring-[#38B6FF] shadow-sm">
                 <Avatar name={profile.name} size={40} />
               </div>
@@ -50,18 +54,21 @@ export function SidebarNav() {
                   <span className="text-xs text-slate-500 font-bold">{stats.percentage}% Target</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ) : null}
 
           {/* Quick Action (+) Button for Tablet/Desktop */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             type="button"
             onClick={() => setModalOpen(true)}
-            className="neu-pill-btn w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-xs flex items-center justify-center gap-2 active:scale-98"
+            className="neu-pill-btn w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-xs flex items-center justify-center gap-2"
           >
             <Icon name="add" size={18} weight={700} />
             Quick Mark / Action
-          </button>
+          </motion.button>
 
           {/* Navigation Section */}
           <nav aria-label="Sidebar navigation" className="space-y-1.5">
@@ -75,18 +82,21 @@ export function SidebarNav() {
                   : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
 
               return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-extrabold transition-all duration-200',
-                    active
-                      ? 'neu-pill-btn text-white scale-[1.01]'
-                      : 'text-slate-500 hover:bg-[#F4F6FA] hover:text-slate-900',
-                  )}
-                >
-                  <Icon name={item.icon} size={20} filled={active} className={active ? 'text-white' : 'text-slate-400'} />
-                  <span>{item.label}</span>
+                <NavLink key={item.to} to={item.to}>
+                  <motion.div
+                    whileHover={{ scale: 1.01, x: 2 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className={cn(
+                      'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-extrabold transition-colors',
+                      active
+                        ? 'neu-pill-btn text-white'
+                        : 'text-slate-500 hover:bg-[#F4F6FA] hover:text-slate-900',
+                    )}
+                  >
+                    <Icon name={item.icon} size={20} filled={active} className={active ? 'text-white' : 'text-slate-400'} />
+                    <span>{item.label}</span>
+                  </motion.div>
                 </NavLink>
               );
             })}

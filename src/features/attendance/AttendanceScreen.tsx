@@ -10,6 +10,7 @@ import { IconTile } from '@/components/ui/controls';
 import { Pill } from '@/components/ui/chips';
 import { EmptyState } from '@/components/ui/feedback';
 import { SubjectAttendanceCard } from './SubjectAttendanceCard';
+import { StaggerContainer, StaggerItem } from '@/components/ui/AnimatedContainer';
 import type { AttendanceHealth } from '@/lib/attendance';
 
 type Filter = 'all' | 'safe' | 'warning' | 'critical';
@@ -149,11 +150,13 @@ export function AttendanceScreen() {
             />
           </div>
         ) : (
-          <div className="space-y-3">
+          <StaggerContainer className="space-y-3">
             {filtered.map((insight) => (
-              <SubjectAttendanceCard key={insight.subject.id} insight={insight} />
+              <StaggerItem key={insight.subject.id}>
+                <SubjectAttendanceCard insight={insight} />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
 
         {planner ? (

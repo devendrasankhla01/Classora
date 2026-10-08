@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 import { cn } from '@/lib/cn';
@@ -63,9 +64,12 @@ export function TimelineClassCard({
   }
 
   return (
-    <article
+    <motion.article
+      whileHover={{ y: -3, scale: 1.01 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'neu-card rounded-3xl p-5 transition-all duration-200 hover:-translate-y-0.5 space-y-3.5 flex flex-col justify-between',
+        'neu-card rounded-3xl p-5 space-y-3.5 flex flex-col justify-between cursor-pointer',
       )}
     >
       <div className="space-y-3">
@@ -134,9 +138,11 @@ export function TimelineClassCard({
             <span className={progressTextColor}>{progressPercent}%</span>
           </div>
           <div className="h-2.5 w-full overflow-hidden rounded-full neu-sunken p-0.5">
-            <div
-              className={`h-full rounded-full bg-gradient-to-r ${barGradient} transition-all duration-500 shadow-sm`}
-              style={{ width: `${progressPercent}%` }}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className={`h-full rounded-full bg-gradient-to-r ${barGradient} shadow-sm`}
             />
           </div>
         </div>
@@ -166,7 +172,7 @@ export function TimelineClassCard({
           </div>
         ) : null}
       </div>
-    </article>
+    </motion.article>
   );
 }
 

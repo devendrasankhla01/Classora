@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/feedback';
 import { Icon } from '@/components/ui/Icon';
 import { TimelineClassCard } from '@/features/shared/TimelineClassCard';
 import { formatLongDate, todayKey } from '@/lib/date';
+import { AnimatedCounter, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedContainer';
 import { NextClassCard } from './NextClassCard';
 import { AttendanceOverviewCard } from './AttendanceOverviewCard';
 import { SmartInsightCard } from './SmartInsightCard';
@@ -126,9 +127,9 @@ export function HomeScreen() {
               <span className="text-xs font-extrabold text-[#38B6FF] bg-sky-50 px-3 py-1 rounded-full border border-sky-100">Active Term</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Sky Blue Highlight Card (Ongoing Projects / Attendance Rate) */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/25 border border-white/40 flex flex-col justify-between min-h-[140px] transition hover:scale-[1.01]">
+              <StaggerItem className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/25 border border-white/40 flex flex-col justify-between min-h-[140px]">
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
                     <Icon name="auto_stories" size={20} />
@@ -144,7 +145,7 @@ export function HomeScreen() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-bold text-white/90">
                       <span>Progress</span>
-                      <span>{stats.percentage}%</span>
+                      <AnimatedCounter value={stats.percentage} suffix="%" />
                     </div>
                     <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
                       <div
@@ -154,10 +155,10 @@ export function HomeScreen() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </StaggerItem>
 
               {/* Electric Purple Highlight Card (Completed Projects / Timetable) */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/25 border border-white/40 flex flex-col justify-between min-h-[140px] transition hover:scale-[1.01]">
+              <StaggerItem className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/25 border border-white/40 flex flex-col justify-between min-h-[140px]">
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
                     <Icon name="event_note" size={20} />
@@ -173,7 +174,7 @@ export function HomeScreen() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-bold text-white/90">
                       <span>Progress</span>
-                      <span>{stats.conducted > 0 ? Math.round((stats.attended / stats.conducted) * 100) : 100}%</span>
+                      <AnimatedCounter value={stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100} suffix="%" />
                     </div>
                     <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
                       <div
@@ -183,8 +184,8 @@ export function HomeScreen() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </StaggerItem>
+            </StaggerContainer>
           </section>
 
           {/* Important Task / Today's Schedule Section */}
@@ -224,11 +225,13 @@ export function HomeScreen() {
                       <h3 className={`text-xs font-extrabold ${groupColorClass} uppercase tracking-wider`}>
                         {groupLabel}
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {groupItems.map((occurrence) => (
-                          <TimelineClassCard key={occurrence.id} occurrence={occurrence} now={now} />
+                          <StaggerItem key={occurrence.id}>
+                            <TimelineClassCard occurrence={occurrence} now={now} />
+                          </StaggerItem>
                         ))}
-                      </div>
+                      </StaggerContainer>
                     </div>
                   );
                 })}

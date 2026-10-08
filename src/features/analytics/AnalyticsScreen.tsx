@@ -18,6 +18,7 @@ import { AppHeader } from '@/components/layout/AppHeader';
 import { Icon } from '@/components/ui/Icon';
 import { EmptyState } from '@/components/ui/feedback';
 import { AttendanceHeatmap } from './AttendanceHeatmap';
+import { AnimatedCounter, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedContainer';
 
 /**
  * Analytics Screen — Crafted after Reference Screenshots 2 & 5 (Tasknur Analytics & Task Details)
@@ -79,15 +80,15 @@ export function AnalyticsScreen() {
       {/* Overview Cards (Exact match to Reference Screenshots 2 & 5) */}
       <div className="space-y-3">
         <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Project overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Sky Blue Card */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/20 space-y-4">
+          <StaggerItem className="rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/20 space-y-4">
             <div className="flex items-center justify-between">
               <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md">
                 <Icon name="topic" size={20} />
               </span>
               <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
-                Progress {stats.percentage}%
+                Progress <AnimatedCounter value={stats.percentage} suffix="%" />
               </span>
             </div>
             <div>
@@ -103,10 +104,10 @@ export function AnalyticsScreen() {
                 <div className="h-full bg-white rounded-full w-[40%]" />
               </div>
             </div>
-          </div>
+          </StaggerItem>
 
           {/* Purple Card */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/20 space-y-4">
+          <StaggerItem className="rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/20 space-y-4">
             <div className="flex items-center justify-between">
               <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md">
                 <Icon name="check_circle" size={20} />
@@ -128,8 +129,8 @@ export function AnalyticsScreen() {
                 <div className="h-full bg-white rounded-full w-full" />
               </div>
             </div>
-          </div>
-        </div>
+          </StaggerItem>
+        </StaggerContainer>
       </div>
 
       {/* Project Statistics Bar Chart Section matching Screenshot 5 */}

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 import { useClassora, type AttendanceAction } from '@/app/store';
@@ -5,6 +6,7 @@ import { useNextClass, useAggregateStats } from '@/hooks/useScheduleData';
 import { formatCountdown, formatTimeRange } from '@/lib/date';
 import { Icon } from '@/components/ui/Icon';
 import { StatusChip } from '@/components/ui/chips';
+import { AnimatedCounter } from '@/components/ui/AnimatedContainer';
 
 /**
  * Dark Hero Summary Card — Inspired by Reference Screenshot 4
@@ -20,10 +22,15 @@ export function NextClassCard() {
 
   if (!occurrence || !subject) {
     return (
-      <section className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-xl border border-slate-800">
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-xl border border-slate-800"
+      >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-3 text-center sm:text-left">
-            <span className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 px-3 py-1 text-xs font-bold text-sky-400 border border-sky-500/30">
+            <span className="inline-flex items-center gap-2 rounded-full bg-sky-500/20 px-3 py-1 text-xs font-bold text-sky-400 border border-sky-500/30 animate-float">
               <span className="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
               Schedule Clear Today
             </span>
@@ -34,13 +41,15 @@ export function NextClassCard() {
               No more classes scheduled for today. Enjoy your day or review upcoming timetable.
             </p>
             <div className="pt-2">
-              <Link
-                to="/timetable"
-                className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition"
-              >
-                <Icon name="calendar_month" size={18} />
-                View Timetable
-              </Link>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Link
+                  to="/timetable"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition"
+                >
+                  <Icon name="calendar_month" size={18} />
+                  View Timetable
+                </Link>
+              </motion.div>
             </div>
           </div>
 
@@ -56,26 +65,28 @@ export function NextClassCard() {
                 className="text-slate-800"
                 fill="transparent"
               />
-              <circle
+              <motion.circle
                 cx="56"
                 cy="56"
                 r="46"
                 stroke="currentColor"
                 strokeWidth="10"
                 strokeDasharray={289}
-                strokeDashoffset={289 - (289 * (stats.percentage ?? 95)) / 100}
+                initial={{ strokeDashoffset: 289 }}
+                animate={{ strokeDashoffset: 289 - (289 * (stats.percentage ?? 95)) / 100 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                 strokeLinecap="round"
-                className="text-sky-400 transition-all duration-1000 ease-out"
+                className="text-sky-400"
                 fill="transparent"
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center text-center">
-              <span className="text-2xl font-black text-white">{stats.percentage}%</span>
+              <AnimatedCounter value={stats.percentage ?? 95} suffix="%" className="text-2xl font-black text-white" />
               <span className="text-[10px] font-semibold text-slate-400">Target</span>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     );
   }
 
@@ -84,7 +95,12 @@ export function NextClassCard() {
   const quick = (action: AttendanceAction) => () => void markAttendance(occurrence.id, action);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-5 sm:p-6 shadow-xl border border-slate-800">
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-5 sm:p-6 shadow-xl border border-slate-800"
+    >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         
         {/* Left Column Info */}
@@ -135,29 +151,35 @@ export function NextClassCard() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.95 }}
                     type="button"
                     onClick={quick('present')}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition active:scale-95"
+                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition"
                   >
                     Mark Present
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.95 }}
                     type="button"
                     onClick={quick('absent')}
-                    className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition active:scale-95"
+                    className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition"
                   >
                     Mark Absent
-                  </button>
+                  </motion.button>
                 </div>
               )
             ) : (
-              <Link
-                to="/timetable"
-                className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition"
-              >
-                View Lecture Details
-              </Link>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Link
+                  to="/timetable"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition"
+                >
+                  View Lecture Details
+                </Link>
+              </motion.div>
             )}
           </div>
         </div>
@@ -174,26 +196,27 @@ export function NextClassCard() {
               className="text-slate-800"
               fill="transparent"
             />
-            <circle
+            <motion.circle
               cx="56"
               cy="56"
               r="46"
               stroke="currentColor"
               strokeWidth="10"
               strokeDasharray={289}
-              strokeDashoffset={289 - (289 * (stats.percentage ?? 85)) / 100}
+              initial={{ strokeDashoffset: 289 }}
+              animate={{ strokeDashoffset: 289 - (289 * (stats.percentage ?? 85)) / 100 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               strokeLinecap="round"
-              className="text-sky-400 transition-all duration-1000 ease-out"
+              className="text-sky-400"
               fill="transparent"
             />
           </svg>
           <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="text-2xl font-black text-white">{stats.percentage}%</span>
+            <AnimatedCounter value={stats.percentage ?? 85} suffix="%" className="text-2xl font-black text-white" />
             <span className="text-[10px] font-semibold text-slate-400">Target</span>
           </div>
         </div>
-
       </div>
-    </section>
+    </motion.section>
   );
 }

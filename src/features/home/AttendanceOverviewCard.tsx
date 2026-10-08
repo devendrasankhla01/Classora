@@ -1,9 +1,11 @@
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 import { useClassora } from '@/app/store';
 import { useAggregateStats, useConfidence, useSafeMissTotal } from '@/hooks/useScheduleData';
 import { AttendanceGauge } from '@/components/attendance/AttendanceGauge';
 import { Icon } from '@/components/ui/Icon';
+import { AnimatedCounter } from '@/components/ui/AnimatedContainer';
 
 export function AttendanceOverviewCard() {
   const stats = useAggregateStats();
@@ -13,7 +15,12 @@ export function AttendanceOverviewCard() {
   const safeMisses = useSafeMissTotal();
 
   return (
-    <section className="neu-card rounded-3xl p-5 sm:p-6 space-y-5">
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="neu-card rounded-3xl p-5 sm:p-6 space-y-5"
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-50 text-[#38B6FF] font-bold neu-btn-soft">
@@ -68,7 +75,7 @@ export function AttendanceOverviewCard() {
       <div className="flex items-center justify-between text-xs font-semibold text-slate-400 pt-1">
         <span className="inline-flex items-center gap-1.5">
           <Icon name="verified" size={15} className="text-[#38B6FF]" />
-          Data confidence {confidence.percent}%
+          Data confidence <AnimatedCounter value={confidence.percent} suffix="%" />
         </span>
         {confidence.missingClasses > 0 ? (
           <Link to="/attendance/review" className="font-bold text-[#38B6FF] hover:underline">
@@ -78,19 +85,21 @@ export function AttendanceOverviewCard() {
           <span className="text-slate-400">All updated</span>
         )}
       </div>
-    </section>
+    </motion.section>
   );
 }
 
 function StatColumn({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="px-2 text-center">
+    <motion.div whileHover={{ scale: 1.03 }} className="px-2 text-center transition-transform">
       <p className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
         <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
         {label}
       </p>
-      <p className="mt-1 text-lg font-extrabold text-slate-900 tabular-nums">{value}</p>
-    </div>
+      <p className="mt-1 text-lg font-extrabold text-slate-900 tabular-nums">
+        <AnimatedCounter value={value} />
+      </p>
+    </motion.div>
   );
 }
 
