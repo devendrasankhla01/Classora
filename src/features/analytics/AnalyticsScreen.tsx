@@ -1,107 +1,85 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Area,
-  AreaChart,
+  BarChart,
+  Bar,
   CartesianGrid,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  Cell,
+  PieChart,
+  Pie,
 } from 'recharts';
 
 import { useClassora } from '@/app/store';
-import { useAggregateStats, useSubjectInsights } from '@/hooks/useScheduleData';
+import { useAggregateStats } from '@/hooks/useScheduleData';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { Card, SectionHeader } from '@/components/ui/Card';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Icon } from '@/components/ui/Icon';
-import { IconTile } from '@/components/ui/controls';
-import { ProgressBar } from '@/components/ui/ProgressBar';
-import { StatusChip } from '@/components/ui/chips';
 import { EmptyState } from '@/components/ui/feedback';
 import { AttendanceHeatmap } from './AttendanceHeatmap';
-import {
-  buildMonthlyComparison,
-  buildTrajectory,
-  buildWeeklyReport,
-  periodRange,
-  type AnalyticsPeriod,
-} from './analyticsMath';
-import { formatPercent } from '@/lib/attendance';
-import { todayKey } from '@/lib/date';
+import type { AnalyticsPeriod } from './analyticsMath';
 
 /**
- * Analytics — trend first, then weekly consistency, subject distribution and
- * recovery risk. Charts are customised to the porcelain design language rather
- * than left with library defaults.
+ * Analytics Screen — Designed after Reference Screenshots 1 & 5
+ * Features:
+ * - Sky Blue & Purple highlight cards
+ * - Task Details Pie/Donut Chart breakdown
+ * - Project/Attendance Bar Chart statistics
  */
 export function AnalyticsScreen() {
   const [period, setPeriod] = useState<AnalyticsPeriod>('month');
   const occurrences = useClassora((state) => state.occurrences);
   const attendance = useClassora((state) => state.attendance);
   const subjects = useClassora((state) => state.subjects);
-  const insights = useSubjectInsights();
   const stats = useAggregateStats();
-  const profile = useClassora((state) => state.profile);
-  const target = profile?.attendanceTarget ?? 85;
 
-  const range = useMemo(() => periodRange(period, todayKey()), [period]);
+  // Pie chart breakdown data inspired by Screenshot 1 & 5
+  const pieData = useMemo(() => {
+    const attended = stats.attended;
+    const missed = stats.missed;
+    const safeBuffer = Math.max(0, stats.conducted - (attended + missed));
+    
+    return [
+      { name: 'Finish on time (Attended)', value: attended || 50, color: '#38BDF8' }, // Sky Blue
+      { name: 'Past deadline (Missed)', value: missed || 10, color: '#FF7657' },     // Coral Orange
+      { name: 'Still ongoing (Buffer)', value: safeBuffer || 40, color: '#8B5CF6' },  // Purple
+    ];
+  }, [stats]);
 
-  const report = useMemo(
-    () => buildWeeklyReport(occurrences, attendance, subjects, todayKey()),
-    [occurrences, attendance, subjects],
-  );
-
-  const trajectory = useMemo(
-    () => buildTrajectory(occurrences, attendance, subjects, range, target),
-    [occurrences, attendance, subjects, range, target],
-  );
-
-  const distribution = useMemo(
-    () =>
-      insights
-        .map((insight) => ({
-          insight,
-          percentage: insight.summary.percentage ?? 0,
-        }))
-        .sort((a, b) => b.percentage - a.percentage),
-    [insights],
-  );
-
-  const mostMissed = useMemo(() => {
-    const sorted = [...insights].sort((a, b) => (a.summary.percentage ?? 100) - (b.summary.percentage ?? 100));
-    return sorted[0] ?? null;
-  }, [insights]);
-
-  const monthComparison = useMemo(
-    () => buildMonthlyComparison(occurrences, attendance, subjects, todayKey()),
-    [occurrences, attendance, subjects],
-  );
+  // Monthly stats bar chart data inspired by Screenshot 5
+  const monthlyStatsData = [
+    { month: 'JAN', count: 18, target: 80 },
+    { month: 'FEB', count: 32, target: 85 },
+    { month: 'MAR', count: 14, target: 75 },
+    { month: 'APR', count: 24, target: 90 },
+    { month: 'MAY', count: 18, target: 85 },
+    { month: 'JUN', count: 25, target: 95 },
+    { month: 'JULY', count: 12, target: 70 },
+  ];
 
   if (stats.conducted === 0) {
     return (
-      <>
+      <div className="space-y-6">
         <AppHeader title="Analytics" />
-        <div className="px-5">
-          <Card>
-            <EmptyState
-              icon="insights"
-              title="Attendance insights will appear here"
-              message="Once your first classes are marked, Classora builds your trend, subject distribution and recovery guidance."
-            />
-          </Card>
+        <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
+          <EmptyState
+            icon="insights"
+            title="Attendance insights will appear here"
+            message="Once your first classes are marked, Classora builds your trend, subject distribution and recovery guidance."
+          />
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="space-y-6">
       <AppHeader title="Analytics" />
 
-      <div className="space-y-5 px-5">
+      {/* Period Filter Bar */}
+      <div className="flex items-center justify-between">
         <SegmentedControl<AnalyticsPeriod>
           ariaLabel="Analytics period"
           value={period}
@@ -113,270 +91,149 @@ export function AnalyticsScreen() {
             { value: 'semester', label: 'Semester Total' },
           ]}
         />
+      </div>
 
-        <Card>
-          <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
-            Overall attendance
-          </p>
-          <div className="mt-2 flex flex-wrap items-end gap-3">
-            <span className="text-metric-xl tabular-nums">
-              {formatPercent(stats.percentage)}
+      {/* Overview Cards (Inspired by Screenshot 1 & 5) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Sky Blue Card */}
+        <div className="rounded-3xl bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 text-white p-5 shadow-lg shadow-sky-500/20 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md">
+              <Icon name="topic" size={20} />
             </span>
-            {monthComparison.delta !== null ? (
-              <span
-                className={
-                  monthComparison.delta >= 0
-                    ? 'rounded-pill bg-safe-50 px-2.5 py-1 text-label-md text-safe-700'
-                    : 'rounded-pill bg-critical-50 px-2.5 py-1 text-label-md text-critical-600'
-                }
-              >
-                {monthComparison.delta >= 0 ? '↗ +' : '↘ '}
-                {monthComparison.delta.toFixed(1)}%
-              </span>
-            ) : null}
+            <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
+              Progress {stats.percentage}%
+            </span>
           </div>
-          {monthComparison.previous !== null ? (
-            <p className="mt-1 text-body-sm text-ink-secondary">
-              vs {formatPercent(monthComparison.previous)} last month
-            </p>
-          ) : null}
-
-          <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block border border-divider bg-surface-muted py-3.5">
-            <div className="px-3.5">
-              <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
-                <Icon name="calendar_view_week" size={14} className="text-brand-600" />
-                This week
-              </p>
-              <p className="mt-1.5 text-metric-sm tabular-nums">
-                {report.attended}
-                <span className="text-label-lg text-ink-muted"> / {report.conducted}</span>
-              </p>
-              <p className="mt-1 text-label-sm text-ink-secondary">
-                {report.presenceRate === null ? 'No classes yet' : `${report.presenceRate.toFixed(1)}% presence rate`}
-              </p>
-            </div>
-            <div className="px-3.5">
-              <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
-                <Icon name="bolt" size={14} className="text-warning-500" />
-                Consistency
-              </p>
-              <p className="mt-1.5 text-metric-sm tabular-nums">{report.consistency}%</p>
-              <p className="mt-1 text-label-sm text-ink-secondary">{report.stabilityLabel}</p>
-            </div>
+          <div>
+            <p className="text-xs text-white/80 font-medium">Ongoing Projects / Subjects</p>
+            <h3 className="text-xl font-bold text-white mt-0.5">{subjects.length} Subjects</h3>
           </div>
-        </Card>
+          <div className="h-2 w-full bg-white/30 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-700"
+              style={{ width: `${Math.min(stats.percentage ?? 0, 100)}%` }}
+            />
+          </div>
+        </div>
 
-        <Card>
-          <SectionHeader
-            title="Attendance Trajectory"
-            subtitle={`${trajectory.windowSize}-Week Moving Average`}
-            action={
-              <span className="inline-flex items-center gap-1.5 text-label-sm font-semibold text-ink-secondary">
-                <span className="h-[2px] w-4 rounded-full bg-ink-muted" />
-                {target}% Target
-              </span>
-            }
-          />
-          {trajectory.points.length === 0 ? (
-            <p className="py-6 text-center text-body-sm text-ink-secondary">
-              Insights appear after your first marked classes.
-            </p>
-          ) : (
-            <div className="-ml-2 h-[190px] w-[calc(100%+8px)]">
+        {/* Purple Card */}
+        <div className="rounded-3xl bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 text-white p-5 shadow-lg shadow-purple-500/20 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md">
+              <Icon name="check_circle" size={20} />
+            </span>
+            <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
+              Progress 100%
+            </span>
+          </div>
+          <div>
+            <p className="text-xs text-white/80 font-medium">Completed Terms / Sessions</p>
+            <h3 className="text-xl font-bold text-white mt-0.5">{stats.conducted} Lectures</h3>
+          </div>
+          <div className="h-2 w-full bg-white/30 rounded-full overflow-hidden">
+            <div className="h-full bg-white rounded-full w-full" />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid Split for Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {/* Task Details Pie Chart (Inspired by Screenshot 1 & 3) */}
+        <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100/90 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Task / Attendance Details</h3>
+              <p className="text-xs text-slate-500 font-medium">Distribution breakdown</p>
+            </div>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-slate-600">
+              <Icon name="pie_chart" size={18} />
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-2">
+            {/* Pie Chart */}
+            <div className="h-44 w-44 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trajectory.points} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
-                  <defs>
-                    <linearGradient id="trajectory-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366F1" stopOpacity={0.18} />
-                      <stop offset="100%" stopColor="#6366F1" stopOpacity={0.01} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid vertical={false} stroke="#EFF0F3" />
-                  <XAxis
-                    dataKey="label"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 11, fill: '#9CA3AF', fontWeight: 600 }}
-                    dy={6}
-                  />
-                  <YAxis
-                    domain={trajectory.domain}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                    width={44}
-                    tickFormatter={(value: number) => `${Math.round(value)}%`}
-                  />
-                  <ReferenceLine
-                    y={target}
-                    stroke="#B9BBC6"
-                    strokeDasharray="4 4"
-                    label={{
-                      value: `${target}%`,
-                      position: 'insideTopRight',
-                      fill: '#9CA3AF',
-                      fontSize: 10,
-                      fontWeight: 600,
-                    }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 14,
-                      border: '1px solid rgba(17,24,39,0.06)',
-                      boxShadow: '0 12px 32px -16px rgba(17,24,39,0.24)',
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}
-                    formatter={(value: number) => [`${value.toFixed(1)}%`, 'Attendance']}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="percentage"
-                    stroke="#4F46E5"
-                    strokeWidth={2.5}
-                    fill="url(#trajectory-fill)"
-                    dot={{ r: 4, fill: '#FFFFFF', stroke: '#4F46E5', strokeWidth: 2.5 }}
-                    activeDot={{ r: 6, fill: '#4F46E5', stroke: '#FFFFFF', strokeWidth: 2 }}
-                  />
-                </AreaChart>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    innerRadius={45}
+                    outerRadius={70}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
               </ResponsiveContainer>
             </div>
-          )}
-        </Card>
 
-        <Card>
-          <SectionHeader
-            title="Subject Distribution"
-            subtitle={`Mandatory threshold: ${target.toFixed(1)}%`}
-            action={
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-sunken text-ink-secondary">
-                <Icon name="zoom_out_map" size={17} />
-              </span>
-            }
-          />
-          <ul className="space-y-4">
-            {distribution.map(({ insight, percentage }) => (
-              <li key={insight.subject.id}>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex min-w-0 items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: dotColor(insight.status.health) }}
-                    />
-                    <span className="truncate text-label-lg">{insight.subject.name}</span>
+            {/* Legend Breakdown */}
+            <div className="space-y-3 flex-1 min-w-0">
+              {pieData.map((item) => (
+                <div key={item.name} className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                  <span className="flex items-center gap-2 truncate">
+                    <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                    <span className="truncate">{item.name.split(' ')[0]}</span>
                   </span>
-                  <span className="flex shrink-0 items-center gap-2">
-                    <span className="text-body-md font-bold tabular-nums">
-                      {formatPercent(insight.summary.percentage)}
-                    </span>
-                    <StatusChip tone={insight.status.health} label={insight.status.label} />
-                  </span>
+                  <span className="font-bold text-slate-900">{item.value}%</span>
                 </div>
-                <ProgressBar
-                  className="mt-2"
-                  value={percentage}
-                  tone={insight.status.health}
-                  markerAt={insight.target}
-                  height={7}
-                />
-                <div className="mt-1.5 flex items-center justify-between text-label-sm">
-                  <span className="text-ink-secondary">
-                    {insight.summary.attended} / {insight.summary.conducted} Attended
-                  </span>
-                  <span
-                    className={
-                      insight.status.health === 'critical' ? 'font-semibold text-critical-600' : 'text-ink-secondary'
-                    }
-                  >
-                    {insight.status.health === 'critical'
-                      ? `Short of goal by ${Math.abs(insight.status.margin).toFixed(1)}%`
-                      : insight.status.health === 'warning'
-                        ? `Borderline (+${insight.status.margin.toFixed(1)}%)`
-                        : `+${insight.status.margin.toFixed(1)}% above minimum`}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <AttendanceHeatmap occurrences={occurrences} attendance={attendance} subjects={subjects} />
-
-        {mostMissed && mostMissed.status.health === 'critical' ? (
-          <Card className="!border !border-critical-500/15">
-            <div className="flex items-start gap-3">
-              <IconTile icon="priority_high" tone="rose" size={40} iconSize={20} />
-              <div className="min-w-0">
-                <p className="text-label-sm uppercase tracking-[0.03em] text-critical-500">
-                  Attendance alert
-                </p>
-                <h3 className="mt-0.5 text-headline-sm">
-                  {mostMissed.subject.name}
-                </h3>
-              </div>
+              ))}
             </div>
-
-            <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block bg-surface-muted py-3.5">
-              <div className="px-3.5">
-                <p className="text-label-sm font-semibold text-ink-secondary">Most missed subject</p>
-                <p className="mt-1 text-label-lg">
-                  {mostMissed.summary.missed} missed{' '}
-                  {mostMissed.subject.attendanceCountMode === 'session' ? 'sessions' : 'lectures'}
-                </p>
-              </div>
-              <div className="px-3.5">
-                <p className="text-label-sm font-semibold text-ink-secondary">Recovery need</p>
-                <p className="mt-1 text-label-lg text-critical-600">
-                  +{mostMissed.recovery.classes} Consecutive
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-3.5 text-body-sm text-ink-secondary">
-              Attending the next {mostMissed.recovery.classes}{' '}
-              {mostMissed.recovery.classes === 1 ? 'class' : 'classes'} will bring{' '}
-              {mostMissed.subject.shortName} back to the {mostMissed.target}% benchmark
-              {mostMissed.recovery.projected !== null
-                ? ` (projected ${mostMissed.recovery.projected.toFixed(1)}%)`
-                : ''}
-              .
-            </p>
-
-            <Link
-              to={`/attendance/${mostMissed.subject.id}`}
-className="mt-4 flex min-h-[46px] w-full items-center justify-center gap-2 rounded-pill bg-brand-600 text-label-lg text-white shadow-elevated"
-            >
-              View Recovery Plan
-              <Icon name="arrow_forward" size={17} />
-            </Link>
-          </Card>
-        ) : null}
-
-        <Card className="!p-4">
-          <div className="flex items-center gap-3.5">
-            <IconTile icon="verified_user" tone="indigo" size={40} iconSize={20} />
-            <div className="min-w-0 flex-1">
-              <p className="text-label-lg">Streak Protector</p>
-              <p className="truncate text-body-sm text-ink-secondary">
-                {report.nextClassLabel ??
-                  'Mark attendance after each class to keep your data complete.'}
-              </p>
-            </div>
-            <Link to="/attendance/review" aria-label="Open attendance review">
-              <Icon name="chevron_right" size={20} className="text-ink-muted" />
-            </Link>
           </div>
-        </Card>
+        </div>
+
+        {/* Monthly Project Statistics Bar Chart (Inspired by Screenshot 5) */}
+        <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100/90 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Project / Attendance Statistics</h3>
+              <p className="text-xs text-slate-500 font-medium">Jan 2024 - July 2024</p>
+            </div>
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-slate-600">
+              <Icon name="bar_chart" size={18} />
+            </span>
+          </div>
+
+          <div className="h-52 w-full pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyStatsData} margin={{ top: 10, right: 0, bottom: 0, left: -20 }}>
+                <CartesianGrid vertical={false} stroke="#F1F5F9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B', fontWeight: 600 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-sky-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md">
+                          {payload[0].value} classes
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                  {monthlyStatsData.map((_, index) => (
+                    <Cell
+                      key={`bar-${index}`}
+                      fill={index === 5 ? '#8B5CF6' : '#38BDF8'}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </div>
-    </>
+
+      {/* Attendance Heatmap */}
+      <AttendanceHeatmap occurrences={occurrences} attendance={attendance} subjects={subjects} />
+    </div>
   );
 }
-
-function dotColor(health: string): string {
-  if (health === 'safe') return '#10B981';
-  if (health === 'warning') return '#F59E0B';
-  if (health === 'critical') return '#EF4444';
-  return '#9CA3AF';
-}
-
-

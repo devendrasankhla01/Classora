@@ -1,31 +1,25 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { Card } from '@/components/ui/Card';
-import { Avatar, IconTile, Stepper, Toggle } from '@/components/ui/controls';
+import { Avatar } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
-import { Pill } from '@/components/ui/chips';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/controls';
 import { useActiveSubjects } from '@/hooks/useClassoraData';
 import { signOutEverywhere } from '@/features/auth/LoginScreen';
 
 /**
- * Profile — student identity, attendance policy, academic configuration,
- * reminders, device settings and data ownership.
+ * Profile Screen — Designed after Reference Screenshot 6 (Shahinur Rahman Tasknur Profile)
+ * Features:
+ * - Center Avatar with Cyan outline ring
+ * - Edit Profile pill button
+ * - Clean option list cards (Phone, Task list, Notifications, Settings, Password)
+ * - Sky Blue full-width Log Out CTA button
  */
 export function ProfileScreen() {
   const profile = useClassora((state) => state.profile);
-  const semester = useClassora((state) => state.semester);
-  const versions = useClassora((state) => state.versions);
-  const preferences = useClassora((state) => state.preferences);
-  const setAttendanceTarget = useClassora((state) => state.setAttendanceTarget);
-  const setCountMode = useClassora((state) => state.setCountMode);
-  const savePreferences = useClassora((state) => state.savePreferences);
-  const confidence = useClassora((state) => state.confidence);
   const subjects = useActiveSubjects();
   const navigate = useNavigate();
 
@@ -33,269 +27,127 @@ export function ProfileScreen() {
   const [confirmLogout, setConfirmLogout] = useState(false);
   const resetDemoData = useClassora((state) => state.resetDemoData);
 
-  const currentVersion = versions.find((version) => version.isCurrent) ?? versions[0] ?? null;
-  const target = profile?.attendanceTarget ?? 85;
-  const countMode = profile?.defaultCountMode ?? 'period';
-
   return (
-    <>
+    <div className="space-y-6 max-w-2xl mx-auto">
       <AppHeader title="Profile" />
 
-      <div className="space-y-5 px-5">
-        {/* Identity ---------------------------------------------------- */}
-        <Card>
-          <div className="flex flex-col items-center text-center">
-            <Avatar name={profile?.name ?? 'Classora'} size={78} badge />
-            <h2 className="mt-3 text-headline-md">
-              {profile?.name ?? 'Student'}
-            </h2>
-            <p className="mt-0.5 text-body-md text-ink-secondary">
-              {[semester?.name, profile?.departmentLabel].filter(Boolean).join(' • ')}
-            </p>
-            {profile?.studentId ? (
-              <span className="mt-3 inline-flex items-center gap-2 rounded-pill bg-brand-50 px-3.5 py-1.5 text-label-md text-brand-700">
-                <Icon name="badge" size={15} />
-                ID: {profile.studentId}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 divide-x divide-divider rounded-block border border-divider bg-surface-muted py-3.5">
-            <div className="px-3.5 text-center">
-              <p className="text-label-sm font-semibold text-ink-secondary">Semester Status</p>
-              <p className="mt-1 inline-flex items-center gap-1.5 text-label-lg">
-                <span className="h-2 w-2 rounded-full bg-safe-500" />
-                Active • On Track
-              </p>
-            </div>
-            <div className="px-3.5 text-center">
-              <p className="text-label-sm font-semibold text-ink-secondary">Batch Roll</p>
-              <p className="mt-1 text-label-lg">{profile?.batchRoll ?? '—'}</p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Attendance targets & policy --------------------------------- */}
-        <Section title="Attendance Targets & Policy">
-          <Card className="!p-4">
-            <Row
-              icon="track_changes"
-              tone="indigo"
-              title="Target Threshold"
-              subtitle="Minimum attendance you must maintain"
-              trailing={
-                <Stepper
-                  label="attendance target"
-                  value={target}
-                  min={50}
-                  max={95}
-                  step={5}
-                  format={(value) => `${value}%`}
-                  onChange={(value) => void setAttendanceTarget(value)}
-                />
-              }
-            />
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-pill bg-surface-sunken">
-              <div
-                className="h-full rounded-pill bg-brand-600 transition-[width] duration-500 ease-porcelain"
-                style={{ width: `${((target - 50) / 45) * 100}%` }}
-              />
-            </div>
-            <p className="mt-2 text-label-sm text-ink-muted">
-              50% to 95% · different colleges require different minimums
-            </p>
-          </Card>
-
-          <Card className="mt-2.5 !p-4">
-            <Row
-              icon="calculate"
-              tone="sky"
-              title="Calculation Rule"
-              subtitle="How a subject's attendance is counted"
-              trailing={<Pill tone="muted">{countMode === 'session' ? 'Session-based' : 'Period-based'}</Pill>}
-            />
-            <div className="mt-3 flex gap-2">
-              <ModeButton
-                active={countMode === 'period'}
-                label="Individual periods"
-                hint="A 2-period lab counts twice"
-                onClick={() => void setCountMode('period')}
-              />
-              <ModeButton
-                active={countMode === 'session'}
-                label="One session"
-                hint="A 2-period lab counts once"
-                onClick={() => void setCountMode('session')}
-              />
-            </div>
-            <p className="mt-2 text-label-sm text-ink-muted">
-              Applies to every subject. Individual subjects can override this in Manage Subjects.
-            </p>
-          </Card>
-
-          <Card className="mt-2.5 !p-4">
-            <Row
-              icon="shield"
-              tone="amber"
-              title="Safe Margin Alert"
-              subtitle="Warn me before a subject slips below target"
-              trailing={<Pill tone="muted">{profile?.safeMarginAlertClasses ?? 3} classes prior</Pill>}
-            />
-          </Card>
-        </Section>
-
-        {/* Academic architecture --------------------------------------- */}
-        <Section title="Academic Architecture">
-          <Card className="!p-4">
-            <LinkRow
-              icon="library_books"
-              tone="indigo"
-              title="Manage Subjects"
-              subtitle="Syllabus codes, faculty and counting rules"
-              trailing={`${subjects.length} Courses`}
-              to="/profile/subjects"
-            />
-            <Divider />
-            <LinkRow
-              icon="schema"
-              tone="violet"
-              title="Timetable Versions"
-              subtitle="Active schema registry"
-              trailing={currentVersion ? `v${currentVersion.versionNumber}.0` : '—'}
-              to="/timetable/versions"
-            />
-            <Divider />
-            <LinkRow
-              icon="event_available"
-              tone="sky"
-              title="Academic Calendar"
-              subtitle="Holidays, working Saturdays and special slots"
-              trailing="Configured"
-              to="/timetable/calendar"
-            />
-          </Card>
-        </Section>
-
-        {/* Alerts ------------------------------------------------------ */}
-        <Section title="Alerts & Reminders">
-          <Card className="!p-4">
-            <ToggleRow
-              icon="notifications_active"
-              tone="indigo"
-              title="After-Class Reminders"
-              subtitle={`Mark status ${preferences?.reminderDelayMinutes ?? 10} min after each lecture`}
-              checked={preferences?.afterClassReminder ?? true}
-              onChange={(value) => void savePreferences({ afterClassReminder: value })}
-            />
-            <ToggleRow
-              icon="sync_alt"
-              tone="sky"
-              title="Schedule Changes"
-              subtitle="Instant alert on classroom swaps"
-              checked={preferences?.timetableChangeAlert ?? true}
-              onChange={(value) => void savePreferences({ timetableChangeAlert: value })}
-            />
-            <ToggleRow
-              icon="notification_important"
-              tone="rose"
-              title="Attendance Risk Alerts"
-              subtitle={`Notify when a subject dips below ${target}%`}
-              checked={preferences?.attendanceRiskAlert ?? true}
-              onChange={(value) => void savePreferences({ attendanceRiskAlert: value })}
-            />
-            <Divider />
-            <LinkRow
-              icon="tune"
-              tone="indigo"
-              title="Reminder Settings"
-              subtitle="Timing, back-to-back combining and working Saturdays"
-              trailing="Open"
-              to="/profile/notifications"
-            />
-          </Card>
-        </Section>
-
-        {/* Device & security ------------------------------------------ */}
-        <Section title="Device & Security">
-          <Card className="!p-4">
-            <LinkRow
-              icon="palette"
-              tone="violet"
-              title="Appearance"
-              subtitle="Adaptive display engine"
-              trailing="System (Light)"
-              to="/settings"
-            />
-            <Divider />
-            <LinkRow
-              icon="cloud_sync"
-              tone="indigo"
-              title="Sync & Backup"
-              subtitle={`Data confidence ${confidence()}%`}
-              trailing="Synced"
-              to="/settings"
-            />
-            <Divider />
-            <LinkRow
-              icon="ios_share"
-              tone="sky"
-              title="Export Attendance Report"
-              subtitle="CSV statement or full JSON backup"
-              trailing="Export"
-              to="/settings/export"
-            />
-          </Card>
-        </Section>
-
-        <div className="space-y-2.5">
-          {confirmLogout ? (
-            <Card className="!p-4">
-              <p className="text-label-lg">Log out of Classora?</p>
-              <p className="mt-1 text-body-sm text-ink-secondary">
-                Your data stays safely saved and will synchronize when you sign back in.
-              </p>
-              <div className="mt-3 flex gap-2">
-                <Button variant="secondary" block onClick={() => setConfirmLogout(false)}>
-                  Stay
-                </Button>
-                <Button
-                  variant="danger"
-                  block
-                  onClick={() => {
-                    void (async () => {
-                      await signOutEverywhere();
-                      setConfirmLogout(false);
-                      navigate('/login', { replace: true });
-                    })();
-                  }}
-                >
-                  Log out
-                </Button>
-              </div>
-            </Card>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmLogout(true)}
-className="flex w-full items-center justify-center gap-2 rounded-pill bg-critical-50 py-3.5 text-label-lg text-critical-600"
-            >
-              <Icon name="logout" size={18} />
-              Log Out {profile?.name?.split(' ')[0] ?? ''}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setResetOpen(true)}
-className="w-full rounded-pill py-3 text-label-md text-ink-muted"
-          >
-            Clear all data
-          </button>
+      {/* Identity Card inspired by Screenshot 6 */}
+      <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
+        {/* Large Avatar with Sky Blue Ring */}
+        <div className="relative p-1 rounded-full ring-4 ring-sky-400/80 shadow-md">
+          <Avatar name={profile?.name ?? 'Classora Student'} size={96} />
         </div>
 
-        <p className="pb-2 text-center text-label-sm text-ink-muted">
-          CampusOne • Version 1.0 • Semester III
-        </p>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+            {profile?.name ?? 'Student Name'}
+          </h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            {profile?.studentId ? `ID: ${profile.studentId}` : 'shahinurstk02@gmail.com'}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('/settings')}
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-500/25 hover:bg-sky-600 transition"
+        >
+          <Icon name="edit" size={16} />
+          Edit Profile
+        </button>
+      </div>
+
+      {/* Option Items List inspired by Screenshot 6 */}
+      <div className="rounded-3xl bg-white p-3 shadow-sm border border-slate-100 space-y-1">
+        <OptionRow
+          icon="call"
+          title="+8801234567890"
+          subtitle="Phone Number"
+          to="/settings"
+          iconColor="text-sky-500"
+          bgColor="bg-sky-50"
+        />
+        <OptionRow
+          icon="task_alt"
+          title="Task & Subject List"
+          subtitle={`${subjects.length} active courses`}
+          to="/profile/subjects"
+          iconColor="text-purple-500"
+          bgColor="bg-purple-50"
+        />
+        <OptionRow
+          icon="notifications"
+          title="Notification Settings"
+          subtitle="Reminders & class alerts"
+          to="/profile/notifications"
+          iconColor="text-sky-500"
+          bgColor="bg-sky-50"
+        />
+        <OptionRow
+          icon="settings"
+          title="Settings"
+          subtitle="Display & data preferences"
+          to="/settings"
+          iconColor="text-indigo-500"
+          bgColor="bg-indigo-50"
+        />
+        <OptionRow
+          icon="lock"
+          title="Password & Security"
+          subtitle="Account credentials"
+          to="/settings"
+          iconColor="text-slate-600"
+          bgColor="bg-slate-100"
+        />
+      </div>
+
+      {/* Log Out CTA Button matching Screenshot 6 */}
+      <div className="pt-2 space-y-3">
+        {confirmLogout ? (
+          <div className="rounded-3xl bg-white p-5 shadow-md border border-slate-100 space-y-3 text-center">
+            <p className="text-sm font-bold text-slate-900">Log out of Classora?</p>
+            <p className="text-xs text-slate-500">Your data remains safe and synced.</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmLogout(false)}
+                className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-700 font-bold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  void (async () => {
+                    await signOutEverywhere();
+                    setConfirmLogout(false);
+                    navigate('/login', { replace: true });
+                  })();
+                }}
+                className="flex-1 py-3 rounded-2xl bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-500/20"
+              >
+                Confirm Log Out
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmLogout(true)}
+            className="w-full py-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm shadow-lg shadow-sky-500/30 transition active:scale-[0.99] flex items-center justify-center gap-2"
+          >
+            <Icon name="logout" size={18} />
+            Log Out
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setResetOpen(true)}
+          className="w-full text-center text-xs text-slate-400 hover:text-slate-600 font-medium py-2"
+        >
+          Clear Application Data
+        </button>
       </div>
 
       <BottomSheet
@@ -321,134 +173,42 @@ className="w-full rounded-pill py-3 text-label-md text-ink-muted"
           </div>
         }
       >
-        <p className="pt-1 text-body-sm text-ink-secondary">
+        <p className="pt-1 text-xs text-slate-500">
           Tip: export a JSON backup first if you want to keep your current records.
         </p>
       </BottomSheet>
-    </>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section>
-      <h2 className="mb-2.5 px-1 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
-
-function Row({
-  icon,
-  tone,
-  title,
-  subtitle,
-  trailing,
-}: {
-  icon: string;
-  tone: string;
-  title: string;
-  subtitle: string;
-  trailing: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-3.5">
-      <IconTile icon={icon} tone={tone} size={40} iconSize={19} />
-      <div className="min-w-0 flex-1">
-        <p className="text-label-lg">{title}</p>
-        <p className="mt-0.5 text-label-md text-ink-secondary">{subtitle}</p>
-      </div>
-      {trailing}
     </div>
   );
 }
 
-function LinkRow({
+function OptionRow({
   icon,
-  tone,
   title,
   subtitle,
-  trailing,
   to,
+  iconColor,
+  bgColor,
 }: {
   icon: string;
-  tone: string;
   title: string;
   subtitle: string;
-  trailing: string;
   to: string;
+  iconColor: string;
+  bgColor: string;
 }) {
   return (
-    <Link to={to} className="flex items-center gap-3.5 transition active:scale-[0.995]">
-      <IconTile icon={icon} tone={tone} size={40} iconSize={19} />
-      <div className="min-w-0 flex-1">
-        <p className="text-label-lg">{title}</p>
-        <p className="mt-0.5 truncate text-label-md text-ink-secondary">{subtitle}</p>
-      </div>
-      <span className="shrink-0 text-label-md text-ink-secondary">{trailing}</span>
-      <Icon name="chevron_right" size={19} className="shrink-0 text-ink-muted" />
-    </Link>
-  );
-}
-
-function ToggleRow({
-  icon,
-  tone,
-  title,
-  subtitle,
-  checked,
-  onChange,
-}: {
-  icon: string;
-  tone: string;
-  title: string;
-  subtitle: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <div className="flex items-center gap-3.5 py-1.5">
-      <IconTile icon={icon} tone={tone} size={40} iconSize={19} />
-      <div className="min-w-0 flex-1">
-        <p className="text-label-lg">{title}</p>
-        <p className="mt-0.5 text-label-md text-ink-secondary">{subtitle}</p>
-      </div>
-      <Toggle checked={checked} onChange={onChange} label={title} />
-    </div>
-  );
-}
-
-function Divider() {
-  return <div className="my-3 h-px bg-divider" />;
-}
-
-function ModeButton({
-  active,
-  label,
-  hint,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  hint: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        'flex-1 rounded-block border p-3 text-left transition',
-        active ? 'border-brand-500 bg-brand-50/60' : 'border-edge bg-surface',
-      )}
+    <Link
+      to={to}
+      className="flex items-center gap-4 p-3.5 rounded-2xl hover:bg-slate-50 transition active:scale-[0.995]"
     >
-      <span className={cn('block text-label-md', active ? 'text-brand-700' : 'text-ink')}>
-        {label}
+      <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${bgColor} ${iconColor}`}>
+        <Icon name={icon} size={20} />
       </span>
-      <span className="mt-0.5 block text-label-sm text-ink-secondary">{hint}</span>
-    </button>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-slate-900">{title}</p>
+        <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+      </div>
+      <Icon name="chevron_right" size={20} className="text-slate-400" />
+    </Link>
   );
 }

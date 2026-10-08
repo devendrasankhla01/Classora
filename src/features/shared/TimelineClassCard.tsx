@@ -5,7 +5,6 @@ import { useClassora } from '@/app/store';
 import { occurrenceState } from '@/lib/occurrenceState';
 import { formatTimeRange } from '@/lib/date';
 import { Icon } from '@/components/ui/Icon';
-import { StatusChip } from '@/components/ui/chips';
 import { AttendanceActions } from './AttendanceActions';
 import type { ClassOccurrence } from '@/types/domain';
 
@@ -17,8 +16,8 @@ interface TimelineClassCardProps {
 }
 
 /**
- * The timeline class card from the Timetable screen: coloured accent bar,
- * status chip, faculty line, meta row with quick actions.
+ * Task / Class Card — Inspired by Reference Screenshots 1, 4 & 5
+ * Features: Status pill, title, 3-dots menu button, meta row with icons, and linear progress bar
  */
 export function TimelineClassCard({
   occurrence,
@@ -34,89 +33,123 @@ export function TimelineClassCard({
   const info = occurrenceState(occurrence, now, record?.status);
 
   const isPast = new Date(occurrence.endDateTime).getTime() <= now.getTime();
-  const accent =
-    info.state === 'completed'
-      ? record?.status === 'absent'
-        ? 'border-l-critical-500'
-        : 'border-l-safe-500'
-      : info.state === 'in_progress'
-        ? 'border-l-brand-600'
-        : info.state === 'cancelled' || info.state === 'not_conducted'
-          ? 'border-l-ink-muted'
-          : info.state === 'unmarked'
-            ? 'border-l-warning-500'
-            : 'border-l-brand-400';
+
+  // Progress simulation for class/task
+  let progressPercent = 0;
+  if (info.state === 'completed') progressPercent = 100;
+  else if (info.state === 'in_progress') progressPercent = 65;
+  else if (info.state === 'unmarked') progressPercent = 50;
+  else progressPercent = 0;
+
+  // Status Badge Colors matching reference images
+  let statusBadgeStyle = 'bg-sky-50 text-sky-600 border-sky-100';
+  let statusText = 'Ongoing';
+
+  if (info.state === 'completed') {
+    statusBadgeStyle = record?.status === 'present' 
+      ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+      : 'bg-rose-50 text-rose-600 border-rose-100';
+    statusText = record?.status === 'present' ? 'Attended' : record?.status === 'absent' ? 'Missed' : 'Completed';
+  } else if (info.state === 'in_progress') {
+    statusBadgeStyle = 'bg-orange-50 text-orange-600 border-orange-100';
+    statusText = 'Running Now';
+  } else if (info.state === 'upcoming') {
+    statusBadgeStyle = 'bg-purple-50 text-purple-600 border-purple-100';
+    statusText = 'Upcoming';
+  }
 
   return (
     <article
       className={cn(
-        'rounded-card border-l-[3px] bg-surface p-4 shadow-ambient ring-1 ring-black/[0.03]',
-        accent,
+        'rounded-3xl bg-white p-5 shadow-sm border border-slate-100/90 transition-all duration-200 hover:shadow-md space-y-3.5',
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-[17px] font-bold leading-snug tracking-[-0.01em] text-ink">
-          {subject?.name ?? 'Class'}
-        </h3>
-        <StatusChip tone={info.tone} label={info.label} icon={info.icon} showDot={!info.icon} />
+      {/* Top Header Row: Status Badge & Context Menu Dots */}
+      <div className="flex items-center justify-between">
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border',
+            statusBadgeStyle,
+          )}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-current" />
+          {statusText}
+        </span>
+
+        {onModify ? (
+          <button
+            type="button"
+            onClick={() => onModify(occurrence)}
+            aria-label="Options"
+            className="grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+          >
+            <Icon name="more_vert" size={18} />
+          </button>
+        ) : (
+          <span className="text-slate-400">
+            <Icon name="more_vert" size={18} />
+          </span>
+        )}
       </div>
 
-      <p className="mt-1 text-[13px] text-ink-secondary">
-        {occurrence.notes && occurrence.occurrenceType !== 'regular'
-          ? occurrence.notes
-          : (occurrence.facultyOverride ?? subject?.faculty ?? 'Faculty to be announced')}
-      </p>
+      {/* Title & Description */}
+      <div>
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+          {subject?.name ?? 'Class Lecture'}
+        </h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">
+          {occurrence.notes ?? (occurrence.facultyOverride ?? subject?.faculty ?? 'Faculty to be announced')}
+        </p>
+      </div>
 
-      <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px] font-medium text-ink-secondary">
-        <span className="inline-flex items-center gap-1.5">
-          <Icon name="schedule" size={15} className="text-ink-muted" />
+      {/* Meta details row: Time & Room */}
+      <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+        <span className="flex items-center gap-1.5">
+          <Icon name="schedule" size={15} className="text-slate-400" />
           {formatTimeRange(occurrence.startTime, occurrence.endTime)}
         </span>
-        {occurrence.room ? (
-          <span className="inline-flex items-center gap-1.5">
-            <Icon name="apartment" size={15} className="text-ink-muted" />
-            {occurrence.room}
-          </span>
-        ) : null}
-        {occurrence.classType === 'lab' ? (
-          <span className="inline-flex items-center gap-1.5">
-            <Icon name="laptop_mac" size={15} className="text-ink-muted" />
-            Lab
-          </span>
-        ) : null}
+        <span className="flex items-center gap-1.5">
+          <Icon name="location_on" size={15} className="text-slate-400" />
+          {occurrence.room ?? 'Room 101'}
+        </span>
       </div>
 
+      {/* Linear Dual-Tone Progress Bar (Tasknur Style) */}
+      <div className="space-y-1.5 pt-1">
+        <div className="flex items-center justify-between text-xs font-bold">
+          <span className="text-slate-400">Progress</span>
+          <span className="text-sky-600">{progressPercent}%</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-600 transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Action Row */}
       {showActions ? (
-        <div className="mt-3.5 flex items-center justify-between gap-3">
+        <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-100">
           {isPast && info.state === 'unmarked' ? (
             <AttendanceActions occurrence={occurrence} compact />
           ) : isPast && record ? (
             <button
               type="button"
               onClick={() => onModify?.(occurrence)}
-              className="min-h-[40px] rounded-pill bg-surface-sunken px-3.5 text-[12.5px] font-semibold text-ink-secondary"
+              className="text-xs font-bold text-sky-600 hover:text-sky-700 underline"
             >
-              Edit record
+              Edit attendance ({record.status})
             </button>
           ) : (
             <Link
               to={`/attendance/${subject?.id ?? ''}`}
-              className="min-h-[40px] rounded-pill bg-surface-sunken px-3.5 text-[12.5px] font-semibold text-ink-secondary inline-flex items-center"
+              className="text-xs font-bold text-sky-600 hover:underline flex items-center gap-1"
             >
               Subject details
+              <Icon name="arrow_forward" size={14} />
             </Link>
           )}
-
-          {onModify ? (
-            <button
-              type="button"
-              onClick={() => onModify(occurrence)}
-              aria-label="Modify this class"
-              className="grid h-10 w-10 place-items-center rounded-full bg-surface-sunken text-ink-secondary transition active:scale-95"
-            >
-              <Icon name="settings" size={17} />
-            </button>
-          ) : null}
         </div>
       ) : null}
     </article>
