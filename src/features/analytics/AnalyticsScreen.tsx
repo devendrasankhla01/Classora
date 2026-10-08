@@ -133,120 +133,123 @@ export function AnalyticsScreen() {
         </StaggerContainer>
       </div>
 
-      {/* Project Statistics Bar Chart Section matching Screenshot 5 */}
-      <div className="neu-card rounded-3xl p-6 space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Project statistics</h3>
-          
-          {/* Calendar Month Selector matching Screenshot 5 */}
-          <div className="flex items-center gap-3 neu-sunken px-3.5 py-1.5 rounded-2xl text-slate-700">
-            <span className="text-xs font-extrabold text-slate-900">{monthsList[activeMonthIdx]}</span>
-            <Icon name="calendar_today" size={16} className="text-slate-500" />
-            <div className="flex items-center gap-1 border-l border-slate-300/60 pl-2">
-              <button
-                type="button"
-                onClick={() => setActiveMonthIdx((prev) => Math.max(0, prev - 1))}
-                aria-label="Previous Month"
-                className="text-slate-400 hover:text-slate-700"
-              >
-                <Icon name="chevron_left" size={18} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveMonthIdx((prev) => Math.min(monthsList.length - 1, prev + 1))}
-                aria-label="Next Month"
-                className="text-slate-400 hover:text-slate-700"
-              >
-                <Icon name="chevron_right" size={18} />
-              </button>
+      {/* Charts Section: Side-by-Side on Laptop/Desktop, Stacked on Mobile/Tablet */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Project Statistics Bar Chart Section matching Screenshot 5 */}
+        <div className="neu-card rounded-3xl p-6 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Project statistics</h3>
+            
+            {/* Calendar Month Selector matching Screenshot 5 */}
+            <div className="flex items-center gap-3 neu-sunken px-3.5 py-1.5 rounded-2xl text-slate-700">
+              <span className="text-xs font-extrabold text-slate-900">{monthsList[activeMonthIdx]}</span>
+              <Icon name="calendar_today" size={16} className="text-slate-500" />
+              <div className="flex items-center gap-1 border-l border-slate-300/60 pl-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveMonthIdx((prev) => Math.max(0, prev - 1))}
+                  aria-label="Previous Month"
+                  className="text-slate-400 hover:text-slate-700"
+                >
+                  <Icon name="chevron_left" size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveMonthIdx((prev) => Math.min(monthsList.length - 1, prev + 1))}
+                  aria-label="Next Month"
+                  className="text-slate-400 hover:text-slate-700"
+                >
+                  <Icon name="chevron_right" size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bar Chart matching Screenshot 5 styling */}
+          <div className="h-56 w-full pt-2 relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyStatsData} margin={{ top: 25, right: 0, bottom: 0, left: -25 }}>
+                <CartesianGrid vertical={false} stroke="#F1F5F9" strokeDasharray="3 3" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B', fontWeight: 700 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
+                <Tooltip
+                  cursor={{ fill: 'transparent' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="relative bg-[#38B6FF] text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-lg shadow-sky-500/30">
+                          {payload[0].value} tasks
+                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#38B6FF]" />
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="count" radius={[10, 10, 0, 0]}>
+                  {monthlyStatsData.map((_, index) => (
+                    <Cell
+                      key={`bar-${index}`}
+                      fill={index === 5 ? '#9B51E0' : '#38B6FF'}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Legend row matching Screenshot 5 */}
+          <div className="flex items-center justify-center gap-6 pt-2 border-t border-slate-100 text-xs font-extrabold text-slate-600">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#38B6FF]" />
+              <span>On-Target</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#9B51E0]" />
+              <span>Task-Target</span>
             </div>
           </div>
         </div>
 
-        {/* Bar Chart matching Screenshot 5 styling */}
-        <div className="h-56 w-full pt-2 relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyStatsData} margin={{ top: 25, right: 0, bottom: 0, left: -25 }}>
-              <CartesianGrid vertical={false} stroke="#F1F5F9" strokeDasharray="3 3" />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B', fontWeight: 700 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
-              <Tooltip
-                cursor={{ fill: 'transparent' }}
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="relative bg-[#38B6FF] text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-lg shadow-sky-500/30">
-                        {payload[0].value} tasks
-                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-[#38B6FF]" />
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar dataKey="count" radius={[10, 10, 0, 0]}>
-                {monthlyStatsData.map((_, index) => (
-                  <Cell
-                    key={`bar-${index}`}
-                    fill={index === 5 ? '#9B51E0' : '#38B6FF'}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Legend row matching Screenshot 5 */}
-        <div className="flex items-center justify-center gap-6 pt-2 border-t border-slate-100 text-xs font-extrabold text-slate-600">
-          <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#38B6FF]" />
-            <span>On-Target</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#9B51E0]" />
-            <span>Task-Target</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Task Details Pie / Donut Chart (Exact match to Screenshot 1 & 3) */}
-      <div className="neu-card rounded-3xl p-6 space-y-5">
-        <div>
-          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Grocery app design / Task breakdown</h3>
-          <p className="text-xs text-slate-400 font-semibold">Distribution status metrics</p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-2">
-          {/* Donut Chart with percentage labels inside */}
-          <div className="h-48 w-48 shrink-0 relative flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  innerRadius={50}
-                  outerRadius={75}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+        {/* Task Details Pie / Donut Chart (Exact match to Screenshot 1 & 3) */}
+        <div className="neu-card rounded-3xl p-6 space-y-5">
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Grocery app design / Task breakdown</h3>
+            <p className="text-xs text-slate-400 font-semibold">Distribution status metrics</p>
           </div>
 
-          {/* Legend Items matching Screenshot 1 & 3 */}
-          <div className="space-y-3 flex-1 min-w-0">
-            {pieData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between text-xs font-extrabold text-slate-700">
-                <span className="flex items-center gap-2.5 truncate">
-                  <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                  <span className="text-slate-500 font-semibold truncate">{item.name}</span>
-                </span>
-                <span className="font-extrabold text-slate-900 ml-2">{item.value}%</span>
-              </div>
-            ))}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-2">
+            {/* Donut Chart with percentage labels inside */}
+            <div className="h-48 w-48 shrink-0 relative flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Legend Items matching Screenshot 1 & 3 */}
+            <div className="space-y-3 flex-1 min-w-0">
+              {pieData.map((item) => (
+                <div key={item.name} className="flex items-center justify-between text-xs font-extrabold text-slate-700">
+                  <span className="flex items-center gap-2.5 truncate">
+                    <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                    <span className="text-slate-500 font-semibold truncate">{item.name}</span>
+                  </span>
+                  <span className="font-extrabold text-slate-900 ml-2">{item.value}%</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
