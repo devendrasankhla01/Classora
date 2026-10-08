@@ -30,7 +30,7 @@ export function SidebarNav() {
 
   return (
     <>
-      <aside className="hidden md:flex flex-col w-72 border-r border-slate-100 bg-white/90 backdrop-blur-xl shrink-0 h-dvh sticky top-0 p-6 justify-between shadow-sm z-30">
+      <aside className="hidden md:flex flex-col w-72 border-r border-slate-200/80 bg-white/95 backdrop-blur-xl shrink-0 h-dvh sticky top-0 p-6 justify-between shadow-sm z-30">
         <div className="space-y-6">
           {/* Brand Header */}
           <div className="flex items-center justify-between px-1 pt-1">
@@ -39,15 +39,15 @@ export function SidebarNav() {
 
           {/* User Mini Card matching Reference Profile style */}
           {profile ? (
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-[#F6F8FA] border border-slate-100/90 shadow-2xs">
-              <div className="relative p-0.5 rounded-full ring-2 ring-[#38B6FF]">
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl neu-sunken">
+              <div className="relative p-0.5 rounded-full ring-2 ring-[#38B6FF] shadow-sm">
                 <Avatar name={profile.name} size={40} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-extrabold text-slate-900 truncate">{profile.name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs text-slate-400 font-bold">{stats.percentage}% Target</span>
+                  <span className="text-xs text-slate-500 font-bold">{stats.percentage}% Target</span>
                 </div>
               </div>
             </div>
@@ -57,7 +57,7 @@ export function SidebarNav() {
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white font-extrabold text-xs shadow-md shadow-sky-500/25 flex items-center justify-center gap-2 hover:opacity-95 transition active:scale-98"
+            className="neu-pill-btn w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-xs flex items-center justify-center gap-2 active:scale-98"
           >
             <Icon name="add" size={18} weight={700} />
             Quick Mark / Action
@@ -79,10 +79,10 @@ export function SidebarNav() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200',
+                    'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-extrabold transition-all duration-200',
                     active
-                      ? 'bg-gradient-to-r from-[#38b6ff] to-[#0094e8] text-white shadow-md shadow-sky-500/25 scale-[1.01]'
-                      : 'text-slate-500 hover:bg-[#F6F8FA] hover:text-slate-900',
+                      ? 'neu-pill-btn text-white scale-[1.01]'
+                      : 'text-slate-500 hover:bg-[#F4F6FA] hover:text-slate-900',
                   )}
                 >
                   <Icon name={item.icon} size={20} filled={active} className={active ? 'text-white' : 'text-slate-400'} />

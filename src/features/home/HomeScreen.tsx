@@ -102,7 +102,7 @@ export function HomeScreen() {
           {yesterdayMissing.length > 0 ? (
             <Link
               to="/attendance/review"
-              className="flex items-center gap-3.5 rounded-3xl bg-amber-50 p-4 border border-amber-200/80 shadow-sm transition active:scale-[0.99] hover:bg-amber-100/60"
+              className="neu-card flex items-center gap-3.5 rounded-3xl bg-amber-50/90 p-4 border border-amber-200/80 transition active:scale-[0.99] hover:bg-amber-100/70"
             >
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-500 text-white shadow-sm">
                 <Icon name="pending_actions" size={20} />
@@ -123,32 +123,32 @@ export function HomeScreen() {
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Project overview</h2>
-              <span className="text-xs font-bold text-[#38B6FF]">Active Term</span>
+              <span className="text-xs font-extrabold text-[#38B6FF] bg-sky-50 px-3 py-1 rounded-full border border-sky-100">Active Term</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Sky Blue Highlight Card (Ongoing Projects / Attendance Rate) */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/20 flex flex-col justify-between min-h-[140px]">
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/25 border border-white/40 flex flex-col justify-between min-h-[140px] transition hover:scale-[1.01]">
                 <div className="flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white">
+                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
                     <Icon name="auto_stories" size={20} />
                   </span>
-                  <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
                     Target: {profile?.attendanceTarget ?? 85}%
                   </span>
                 </div>
                 <div className="mt-4 space-y-2">
-                  <h3 className="text-sm font-bold text-white/95">
+                  <h3 className="text-sm font-extrabold text-white/95">
                     Ongoing Projects: {subjects.length}
                   </h3>
                   <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold text-white/90">
+                    <div className="flex justify-between text-xs font-bold text-white/90">
                       <span>Progress</span>
                       <span>{stats.percentage}%</span>
                     </div>
-                    <div className="h-2 w-full bg-white/30 rounded-full overflow-hidden">
+                    <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
                       <div
-                        className="h-full bg-white rounded-full transition-all duration-700"
+                        className="h-full bg-white rounded-full transition-all duration-700 shadow-sm"
                         style={{ width: `${Math.min(stats.percentage ?? 0, 100)}%` }}
                       />
                     </div>
@@ -157,27 +157,27 @@ export function HomeScreen() {
               </div>
 
               {/* Electric Purple Highlight Card (Completed Projects / Timetable) */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/20 flex flex-col justify-between min-h-[140px]">
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/25 border border-white/40 flex flex-col justify-between min-h-[140px] transition hover:scale-[1.01]">
                 <div className="flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white">
+                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
                     <Icon name="event_note" size={20} />
                   </span>
-                  <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
                     {today.length} Classes Today
                   </span>
                 </div>
                 <div className="mt-4 space-y-2">
-                  <h3 className="text-sm font-bold text-white/95">
+                  <h3 className="text-sm font-extrabold text-white/95">
                     Completed Projects: {stats.conducted}
                   </h3>
                   <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold text-white/90">
+                    <div className="flex justify-between text-xs font-bold text-white/90">
                       <span>Progress</span>
                       <span>{stats.conducted > 0 ? Math.round((stats.attended / stats.conducted) * 100) : 100}%</span>
                     </div>
-                    <div className="h-2 w-full bg-white/30 rounded-full overflow-hidden">
+                    <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
                       <div
-                        className="h-full bg-white rounded-full transition-all duration-700"
+                        className="h-full bg-white rounded-full transition-all duration-700 shadow-sm"
                         style={{ width: `${stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100}%` }}
                       />
                     </div>
@@ -191,13 +191,13 @@ export function HomeScreen() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Important task</h2>
-              <Link to="/timetable" className="text-xs font-bold text-[#38B6FF] hover:underline">
+              <Link to="/timetable" className="text-xs font-extrabold text-[#38B6FF] hover:underline">
                 See all
               </Link>
             </div>
 
             {filteredToday.length === 0 ? (
-              <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
+              <div className="neu-card rounded-3xl p-6 text-center">
                 <EmptyState
                   icon="beach_access"
                   title="No tasks or classes found"

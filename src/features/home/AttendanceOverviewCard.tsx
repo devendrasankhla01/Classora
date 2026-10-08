@@ -13,10 +13,10 @@ export function AttendanceOverviewCard() {
   const safeMisses = useSafeMissTotal();
 
   return (
-    <section className="rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-slate-100/90 space-y-5">
+    <section className="neu-card rounded-3xl p-5 sm:p-6 space-y-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-50 text-[#38B6FF] font-bold">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-50 text-[#38B6FF] font-bold neu-btn-soft">
             <Icon name="insights" size={22} />
           </span>
           <div>
@@ -24,7 +24,7 @@ export function AttendanceOverviewCard() {
             <p className="text-xs text-slate-400 font-semibold">Real-time attendance calculations</p>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+        <span className="px-3.5 py-1 rounded-full neu-sunken text-xs font-bold text-slate-700">
           Target {target}%
         </span>
       </div>
@@ -34,8 +34,8 @@ export function AttendanceOverviewCard() {
       </div>
 
       {/* Safe Zone Alert */}
-      <div className="flex items-start gap-3 rounded-2xl bg-sky-50/80 p-4 border border-sky-100">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#38B6FF] text-white shadow-sm">
+      <div className="flex items-start gap-3 rounded-2xl bg-sky-50/80 p-4 border border-sky-100/90 neu-sunken">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full neu-pill-btn text-white shadow-sm">
           <Icon name="check" size={18} weight={700} />
         </span>
         <p className="text-xs font-bold text-sky-900 leading-relaxed">
@@ -59,7 +59,7 @@ export function AttendanceOverviewCard() {
       </div>
 
       {/* 3 Stat columns */}
-      <div className="grid grid-cols-3 divide-x divide-slate-100 rounded-2xl border border-slate-100 bg-[#F6F8FA] py-4">
+      <div className="grid grid-cols-3 divide-x divide-slate-200/60 rounded-2xl neu-sunken py-4">
         <StatColumn label="Attended" value={stats.attended} color="#10B981" />
         <StatColumn label="Missed" value={stats.missed} color="#EF4444" />
         <StatColumn label="Conducted" value={stats.conducted} color="#6B7280" />

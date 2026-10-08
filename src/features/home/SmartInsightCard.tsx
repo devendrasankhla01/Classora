@@ -34,7 +34,7 @@ export function SmartInsightCard() {
 
   if (!focus) {
     return (
-      <section className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-sm border border-slate-100">
+      <section className="neu-card flex items-start gap-3 rounded-3xl p-5">
         <IconTile icon="verified" tone="emerald" size={38} iconSize={19} />
         <div className="min-w-0">
           <p className="text-sm font-extrabold text-slate-900">You’re in the safe zone everywhere</p>
@@ -53,7 +53,7 @@ export function SmartInsightCard() {
   const forecastDate = focus.recovery.classes > 0 ? focus.upcoming[focus.recovery.classes - 1]?.date : null;
 
   return (
-    <section className="rounded-3xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
+    <section className="neu-card rounded-3xl p-5 space-y-4">
       <div className="flex items-center gap-3">
         <IconTile icon={isRecovery ? 'trending_up' : 'shield'} tone={isRecovery ? 'rose' : 'amber'} size={38} iconSize={19} />
         <div>
@@ -92,17 +92,17 @@ export function SmartInsightCard() {
         )}
       </p>
 
-      <div className="flex flex-wrap items-center gap-2 pt-1">
+      <div className="flex flex-wrap items-center gap-2.5 pt-1">
         <Link
           to={`/can-i-skip?subject=${subject.id}`}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#38B6FF] hover:bg-[#0094e8] px-4 py-2 text-xs font-extrabold text-white shadow-md shadow-sky-500/25 transition active:scale-95"
+          className="neu-pill-btn inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-extrabold text-white active:scale-95"
         >
           <Icon name="bolt" size={17} />
           Can I skip?
         </Link>
         <Link
           to={`/attendance/${subject.id}`}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#F6F8FA] hover:bg-slate-100 px-4 py-2 text-xs font-extrabold text-slate-600 transition"
+          className="neu-btn-soft inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-extrabold text-slate-700 active:scale-95"
         >
           Subject details
         </Link>

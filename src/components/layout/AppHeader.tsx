@@ -53,7 +53,7 @@ export function AppHeader({
               type="button"
               onClick={() => navigate(-1)}
               aria-label="Go Back"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm border border-slate-100 hover:bg-slate-50 transition active:scale-95"
+              className="neu-btn-soft grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-slate-700 active:scale-95"
             >
               <Icon name="arrow_back" size={20} />
             </button>
@@ -61,7 +61,7 @@ export function AppHeader({
             <Link
               to="/profile"
               aria-label="Profile"
-              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full ring-4 ring-[#38B6FF]/80 shadow-md shadow-sky-500/15 transition active:scale-95"
+              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full ring-4 ring-[#38B6FF]/80 shadow-[0_6px_20px_rgba(56,182,255,0.25)] transition active:scale-95"
             >
               {profile ? (
                 <Avatar name={profile.name} size={48} />
@@ -77,7 +77,7 @@ export function AppHeader({
             <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 truncate tracking-tight">
               {title || `Hi, ${firstName}`}
             </h1>
-            <p className="text-xs font-semibold text-slate-400 mt-0.5">
+            <p className="text-xs font-bold text-slate-400 mt-0.5">
               {overline ?? '01 Jan 2024'}
             </p>
           </div>
@@ -85,13 +85,13 @@ export function AppHeader({
 
         {/* Right Section: Actions (Search & Notification Bell) */}
         {showActions ? (
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2.5">
             {showSearch ? (
               <button
                 type="button"
                 onClick={onSearchClick}
                 aria-label="Search"
-                className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-slate-600 shadow-sm border border-slate-100 hover:bg-slate-50 transition active:scale-95"
+                className="neu-btn-soft grid h-11 w-11 place-items-center rounded-2xl text-slate-600 active:scale-95"
               >
                 <Icon name="search" size={20} />
               </button>
@@ -100,7 +100,7 @@ export function AppHeader({
             <Link
               to="/notifications"
               aria-label="Notifications"
-              className="relative grid h-11 w-11 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm border border-slate-100 hover:bg-slate-50 transition active:scale-95"
+              className="neu-btn-soft relative grid h-11 w-11 place-items-center rounded-2xl text-slate-700 active:scale-95"
             >
               <Icon name="notifications" size={20} />
               {unreadCount > 0 ? (
@@ -112,14 +112,14 @@ export function AppHeader({
       </div>
 
       {subtitle ? (
-        <p className="mt-2 text-xs sm:text-sm text-slate-500 font-medium">
+        <p className="mt-2 text-xs sm:text-sm text-slate-500 font-semibold">
           {subtitle}
         </p>
       ) : null}
 
-      {/* Filter Tabs bar matching Reference Screenshots */}
+      {/* Neumorphic Soft UI Filter Tabs bar */}
       {onFilterChange && filterTab ? (
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto p-1.5 rounded-2xl neu-sunken no-scrollbar">
           {(['all', 'ongoing', 'completed'] as const).map((tab) => {
             const active = filterTab === tab;
             return (
@@ -128,10 +128,10 @@ export function AppHeader({
                 type="button"
                 onClick={() => onFilterChange(tab)}
                 className={cn(
-                  'px-5 py-2 rounded-xl text-xs font-bold capitalize transition-all duration-200',
+                  'flex-1 min-w-[90px] py-2 rounded-xl text-xs font-extrabold capitalize transition-all duration-200 text-center',
                   active
-                    ? 'bg-[#38B6FF] text-white shadow-md shadow-sky-500/30'
-                    : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50',
+                    ? 'neu-pill-btn text-white'
+                    : 'text-slate-500 hover:text-slate-900',
                 )}
               >
                 {tab}

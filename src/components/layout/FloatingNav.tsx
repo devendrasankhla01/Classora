@@ -28,7 +28,7 @@ export function FloatingNav() {
       <div
         className={cn(
           'pointer-events-auto flex h-16 w-full max-w-[380px] items-center justify-around rounded-full px-3 py-1.5',
-          'border border-white/90 bg-white/95 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-2xl',
+          'neu-card glass-card-elevated backdrop-blur-2xl border border-white/90 shadow-[0_14px_36px_rgba(163,177,198,0.3)]',
         )}
       >
         {NAV_ITEMS.map((item) => {
@@ -46,7 +46,7 @@ export function FloatingNav() {
               className={cn(
                 'flex h-11 items-center justify-center rounded-full transition-all duration-300',
                 active
-                  ? 'gap-1.5 bg-gradient-to-r from-[#38b6ff] to-[#0094e8] px-4 text-white shadow-md shadow-sky-500/30'
+                  ? 'gap-1.5 neu-pill-btn px-4 text-white'
                   : 'w-11 text-slate-400 hover:bg-slate-100 hover:text-slate-700',
               )}
             >

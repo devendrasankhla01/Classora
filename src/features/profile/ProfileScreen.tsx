@@ -31,10 +31,10 @@ export function ProfileScreen() {
     <div className="space-y-6 max-w-2xl mx-auto">
       <AppHeader title="Profile" showBack />
 
-      {/* Identity Card matching Screenshot 6 */}
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
+      {/* Identity Card matching Neumorphic Soft UI */}
+      <div className="neu-card rounded-3xl p-6 flex flex-col items-center text-center space-y-3.5">
         {/* Large Avatar with Bright Sky Blue Ring */}
-        <div className="relative p-1 rounded-full ring-4 ring-[#38B6FF] shadow-md shadow-sky-500/20">
+        <div className="relative p-1 rounded-full ring-4 ring-[#38B6FF] shadow-[0_8px_24px_rgba(56,182,255,0.3)]">
           <Avatar name={profile?.name ?? 'Shahinur Rahman'} size={96} />
         </div>
 
@@ -42,7 +42,7 @@ export function ProfileScreen() {
           <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
             {profile?.name ?? 'Shahinur Rahman'}
           </h2>
-          <p className="text-xs text-slate-400 font-semibold mt-0.5">
+          <p className="text-xs text-slate-400 font-bold mt-0.5">
             {profile?.studentId ? `ID: ${profile.studentId}` : 'shahinurstk02@gmail.com'} • Target: {profile?.attendanceTarget ?? 85}%
           </p>
         </div>
@@ -50,15 +50,15 @@ export function ProfileScreen() {
         <button
           type="button"
           onClick={() => navigate('/settings')}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#38B6FF] text-white font-bold text-xs shadow-md shadow-sky-500/25 hover:bg-sky-500 transition active:scale-95"
+          className="neu-pill-btn inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white font-extrabold text-xs active:scale-95"
         >
           <Icon name="edit" size={16} />
           Edit Profile
         </button>
       </div>
 
-      {/* Option Items List matching Screenshot 6 */}
-      <div className="rounded-3xl bg-white p-3 shadow-sm border border-slate-100 space-y-1">
+      {/* Option Items List matching Neumorphic Soft UI */}
+      <div className="neu-card rounded-3xl p-3 space-y-1.5">
         <OptionRow
           icon="call"
           title="+8801234567890"
@@ -101,17 +101,17 @@ export function ProfileScreen() {
         />
       </div>
 
-      {/* Log Out CTA Button matching Screenshot 6 */}
+      {/* Log Out CTA Button matching Neumorphic Fintech Style */}
       <div className="pt-2 space-y-3">
         {confirmLogout ? (
-          <div className="rounded-3xl bg-white p-5 shadow-md border border-slate-100 space-y-3 text-center">
-            <p className="text-sm font-bold text-slate-900">Log out of Classora?</p>
-            <p className="text-xs text-slate-500">Your data remains safe and synced.</p>
-            <div className="flex gap-2">
+          <div className="neu-card rounded-3xl p-5 space-y-3 text-center">
+            <p className="text-sm font-extrabold text-slate-900">Log out of Classora?</p>
+            <p className="text-xs text-slate-400 font-semibold">Your data remains safe and synced.</p>
+            <div className="flex gap-2.5">
               <button
                 type="button"
                 onClick={() => setConfirmLogout(false)}
-                className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-700 font-bold text-xs"
+                className="neu-btn-soft flex-1 py-3 rounded-2xl text-slate-700 font-extrabold text-xs"
               >
                 Cancel
               </button>
@@ -124,7 +124,7 @@ export function ProfileScreen() {
                     navigate('/login', { replace: true });
                   })();
                 }}
-                className="flex-1 py-3 rounded-2xl bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-500/20"
+                className="flex-1 py-3 rounded-2xl bg-rose-500 text-white font-extrabold text-xs shadow-md shadow-rose-500/25 active:scale-95"
               >
                 Confirm Log Out
               </button>
@@ -134,7 +134,7 @@ export function ProfileScreen() {
           <button
             type="button"
             onClick={() => setConfirmLogout(true)}
-            className="w-full py-4 rounded-2xl bg-[#38B6FF] hover:bg-[#0094e8] text-white font-bold text-sm shadow-lg shadow-sky-500/30 transition active:scale-[0.99] flex items-center justify-center gap-2"
+            className="neu-pill-btn w-full py-4 rounded-2xl text-white font-extrabold text-sm active:scale-[0.99] flex items-center justify-center gap-2"
           >
             <Icon name="logout" size={18} />
             Log out
@@ -199,14 +199,14 @@ function OptionRow({
   return (
     <Link
       to={to}
-      className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#F6F8FA] hover:bg-slate-100 transition active:scale-[0.995]"
+      className="flex items-center gap-4 p-3.5 rounded-2xl neu-sunken hover:bg-slate-100/90 transition active:scale-[0.995]"
     >
-      <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${bgColor} ${iconColor}`}>
+      <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl neu-card ${bgColor} ${iconColor}`}>
         <Icon name={icon} size={20} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-extrabold text-slate-900">{title}</p>
-        <p className="text-xs text-slate-400 font-semibold">{subtitle}</p>
+        <p className="text-xs text-slate-400 font-bold">{subtitle}</p>
       </div>
       <Icon name="chevron_right" size={20} className="text-slate-400" />
     </Link>

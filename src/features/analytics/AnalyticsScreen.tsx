@@ -133,15 +133,15 @@ export function AnalyticsScreen() {
       </div>
 
       {/* Project Statistics Bar Chart Section matching Screenshot 5 */}
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100/90 space-y-5">
+      <div className="neu-card rounded-3xl p-6 space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Project statistics</h3>
           
           {/* Calendar Month Selector matching Screenshot 5 */}
-          <div className="flex items-center gap-3 bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-100 text-slate-700">
+          <div className="flex items-center gap-3 neu-sunken px-3.5 py-1.5 rounded-2xl text-slate-700">
             <span className="text-xs font-extrabold text-slate-900">{monthsList[activeMonthIdx]}</span>
             <Icon name="calendar_today" size={16} className="text-slate-500" />
-            <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
+            <div className="flex items-center gap-1 border-l border-slate-300/60 pl-2">
               <button
                 type="button"
                 onClick={() => setActiveMonthIdx((prev) => Math.max(0, prev - 1))}
@@ -209,7 +209,7 @@ export function AnalyticsScreen() {
       </div>
 
       {/* Task Details Pie / Donut Chart (Exact match to Screenshot 1 & 3) */}
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100/90 space-y-5">
+      <div className="neu-card rounded-3xl p-6 space-y-5">
         <div>
           <h3 className="text-base font-extrabold text-slate-900 tracking-tight">Grocery app design / Task breakdown</h3>
           <p className="text-xs text-slate-400 font-semibold">Distribution status metrics</p>

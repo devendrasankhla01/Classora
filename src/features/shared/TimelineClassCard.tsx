@@ -65,7 +65,7 @@ export function TimelineClassCard({
   return (
     <article
       className={cn(
-        'rounded-3xl bg-white p-5 shadow-sm border border-slate-100/90 transition-all duration-200 hover:shadow-md space-y-3.5 flex flex-col justify-between',
+        'neu-card rounded-3xl p-5 transition-all duration-200 hover:-translate-y-0.5 space-y-3.5 flex flex-col justify-between',
       )}
     >
       <div className="space-y-3">
@@ -100,7 +100,7 @@ export function TimelineClassCard({
           )}
         </div>
 
-        {/* Sub-info Row matching Screenshots 1 & 3: Time + Avatars "04 Persons" */}
+        {/* Sub-info Row matching Screenshots: Time + Avatars "04 Persons" */}
         <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-1">
           <span className="flex items-center gap-1.5 text-slate-400">
             <Icon name="schedule" size={15} />
@@ -110,13 +110,13 @@ export function TimelineClassCard({
           <div className="flex items-center gap-1.5">
             {/* Overlapping mini avatar circles */}
             <div className="flex -space-x-1.5 overflow-hidden">
-              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-sky-200 text-[9px] font-bold text-sky-800 flex items-center justify-center">
+              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-sky-200 text-[9px] font-bold text-sky-800 flex items-center justify-center shadow-2xs">
                 A
               </span>
-              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-purple-200 text-[9px] font-bold text-purple-800 flex items-center justify-center">
+              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-purple-200 text-[9px] font-bold text-purple-800 flex items-center justify-center shadow-2xs">
                 B
               </span>
-              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-orange-200 text-[9px] font-bold text-orange-800 flex items-center justify-center">
+              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-orange-200 text-[9px] font-bold text-orange-800 flex items-center justify-center shadow-2xs">
                 C
               </span>
             </div>
@@ -127,15 +127,15 @@ export function TimelineClassCard({
 
       {/* Progress Bar & Actions */}
       <div className="space-y-3 pt-1">
-        {/* Progress Bar matching Reference UI */}
+        {/* Neumorphic Inset Progress Track with 3D gradient fill */}
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs font-bold">
             <span className="text-slate-400 font-semibold">Progress</span>
             <span className={progressTextColor}>{progressPercent}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-2.5 w-full overflow-hidden rounded-full neu-sunken p-0.5">
             <div
-              className={`h-full rounded-full bg-gradient-to-r ${barGradient} transition-all duration-500`}
+              className={`h-full rounded-full bg-gradient-to-r ${barGradient} transition-all duration-500 shadow-sm`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -143,21 +143,21 @@ export function TimelineClassCard({
 
         {/* Action Row */}
         {showActions ? (
-          <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-100">
+          <div className="pt-2.5 flex items-center justify-between gap-3 border-t border-slate-100/80">
             {isPast && info.state === 'unmarked' ? (
               <AttendanceActions occurrence={occurrence} compact />
             ) : isPast && record ? (
               <button
                 type="button"
                 onClick={() => onModify?.(occurrence)}
-                className="text-xs font-bold text-[#38B6FF] hover:text-sky-700 underline"
+                className="text-xs font-extrabold text-[#38B6FF] hover:text-sky-700 underline"
               >
                 Edit ({record.status})
               </button>
             ) : (
               <Link
                 to={`/attendance/${subject?.id ?? ''}`}
-                className="text-xs font-bold text-[#38B6FF] hover:underline flex items-center gap-1"
+                className="text-xs font-extrabold text-[#38B6FF] hover:underline flex items-center gap-1"
               >
                 Details
                 <Icon name="arrow_forward" size={14} />

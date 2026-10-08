@@ -124,7 +124,7 @@ export function TimetableScreen() {
               />
 
               {dayOccurrences.length === 0 ? (
-                <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
+                <div className="neu-card rounded-3xl p-6 text-center">
                   <EmptyState
                     icon="event_available"
                     title="Your schedule is clear"
@@ -133,7 +133,7 @@ export function TimetableScreen() {
                       <button
                         type="button"
                         onClick={() => openModify()}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#38B6FF] text-white font-extrabold text-xs shadow-md shadow-sky-500/25 hover:bg-[#0094e8] transition"
+                        className="neu-pill-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-white font-extrabold text-xs active:scale-95"
                       >
                         <Icon name="add" size={18} />
                         Add Custom Lecture
@@ -153,7 +153,7 @@ export function TimetableScreen() {
                     <button
                       type="button"
                       onClick={() => openModify()}
-                      className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl bg-[#38B6FF] text-white font-extrabold text-xs shadow-md shadow-sky-500/25 hover:bg-[#0094e8] transition"
+                      className="neu-pill-btn w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl text-white font-extrabold text-xs active:scale-95"
                     >
                       <Icon name="add" size={18} />
                       Add Custom Lecture
@@ -173,9 +173,9 @@ export function TimetableScreen() {
           />
         )}
 
-        <div className="rounded-3xl bg-white p-5 shadow-sm border border-slate-100">
+        <div className="neu-card rounded-3xl p-5">
           <div className="flex items-center gap-3.5">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sky-50 text-[#38B6FF]">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sky-50 text-[#38B6FF] neu-btn-soft">
               <Icon name="auto_awesome" size={20} />
             </span>
             <div className="min-w-0 flex-1">
@@ -186,7 +186,7 @@ export function TimetableScreen() {
             </div>
             <Link
               to="/timetable/import"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#38B6FF] text-white shadow-md shadow-sky-500/25"
+              className="neu-pill-btn grid h-10 w-10 shrink-0 place-items-center rounded-full text-white active:scale-95"
               aria-label="Import timetable"
             >
               <Icon name="arrow_forward" size={18} />
