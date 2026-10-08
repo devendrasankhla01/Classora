@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/cn';
 import { BrandLogo } from '@/components/ui/BrandLogo';
@@ -58,13 +59,19 @@ export function AppHeader({
               <Icon name="arrow_back" size={20} />
             </button>
           ) : (
-            <Link
-              to="/profile"
-              aria-label="Profile"
-              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/90 shadow-[0_6px_20px_rgba(56,182,255,0.2)] border border-slate-200/80 p-2 transition active:scale-95"
+            <motion.div
+              whileHover={{ scale: 1.05, y: -1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
             >
-              <BrandLogo variant="mark" size="md" />
-            </Link>
+              <Link
+                to="/profile"
+                aria-label="Profile"
+                className="neu-btn-soft grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/75 backdrop-blur-2xl border border-white/90 shadow-[0_8px_24px_rgba(56,182,255,0.22)] p-2 transition-shadow hover:shadow-[0_12px_28px_rgba(56,182,255,0.35)]"
+              >
+                <BrandLogo variant="mark" size="md" />
+              </Link>
+            </motion.div>
           )}
 
           <div className="min-w-0">
