@@ -94,8 +94,8 @@ describe('screens render with real data', () => {
 
   it('Profile renders the student identity and policy controls', () => {
     renderScreen(<ProfileScreen />);
-    expect(screen.getAllByText(/manage subjects/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/target/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/task & subject list|manage subjects/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/notification settings|settings/i).length).toBeGreaterThan(0);
   });
 
   it('Review attendance renders either unmarked classes or the all-clear state', () => {
