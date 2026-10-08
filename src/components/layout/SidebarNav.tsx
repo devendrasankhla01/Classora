@@ -85,8 +85,7 @@ export function SidebarNav() {
                 <NavLink key={item.to} to={item.to} className="relative block">
                   <motion.div
                     whileHover={{ scale: active ? 1 : 1.02, x: active ? 0 : 3 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    whileTap={{ scale: 0.95 }}
                     className={cn(
                       'relative z-10 flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-extrabold transition-colors duration-200',
                       active ? 'text-white' : 'text-slate-500 hover:text-slate-900',
@@ -94,15 +93,17 @@ export function SidebarNav() {
                   >
                     {active && (
                       <motion.div
-                        layoutId="sidebar-active-pill"
+                        layoutId="sidebar-liquid-pill"
                         transition={{
                           type: 'spring',
-                          stiffness: 420,
-                          damping: 32,
-                          mass: 0.8,
+                          stiffness: 340,
+                          damping: 23,
+                          mass: 0.7,
                         }}
-                        className="absolute inset-0 z-[-1] rounded-2xl neu-pill-btn shadow-[0_6px_20px_rgba(56,182,255,0.4),inset_0_1px_1px_rgba(255,255,255,0.6)]"
-                      />
+                        className="absolute inset-0 z-[-1] rounded-2xl bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_6px_22px_rgba(56,182,255,0.48),inset_0_1.5px_2px_rgba(255,255,255,0.85)]"
+                      >
+                        <span className="absolute inset-x-2 top-1 h-1.5 rounded-full bg-white/40 blur-[0.5px]" />
+                      </motion.div>
                     )}
                     <Icon name={item.icon} size={20} filled={active} className={active ? 'text-white' : 'text-slate-400'} />
                     <span>{item.label}</span>

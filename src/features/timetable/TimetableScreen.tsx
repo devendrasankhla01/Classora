@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Pill, StatusChip } from '@/components/ui/chips';
 import { Timeline } from './Timeline';
 import { ModifyDaySheet } from './ModifyDaySheet';
-import { addDaysToKey, dayOfWeekOf, formatMediumDate, formatTimeRange, todayKey, weekRange } from '@/lib/date';
+import { addDaysToKey, dayOfWeekOf, formatMediumDate, formatTimeRange, todayKey, weekRange, fromDateKey, toDateKey } from '@/lib/date';
 import type { ClassOccurrence, DateKey } from '@/types/domain';
 
 type View = 'daily' | 'weekly';
@@ -33,7 +33,7 @@ export function TimetableScreen() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [targetOccurrence, setTargetOccurrence] = useState<ClassOccurrence | null>(null);
 
-  const week = useMemo(() => weekRange(new Date(selectedDate)).days.map(todayKey), [selectedDate]);
+  const week = useMemo(() => weekRange(fromDateKey(selectedDate)).days.map(toDateKey), [selectedDate]);
 
   const datesWithClasses = useMemo(() => {
     const set = new Set<DateKey>();
