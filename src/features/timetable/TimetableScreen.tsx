@@ -4,10 +4,9 @@ import { Link } from 'react-router-dom';
 import { useClassora } from '@/app/store';
 import { useNow } from '@/hooks/useScheduleData';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { Card, SectionHeader } from '@/components/ui/Card';
+import { SectionHeader } from '@/components/ui/Card';
 import { DateStrip } from '@/components/ui/DateStrip';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { Button } from '@/components/ui/controls';
 import { EmptyState } from '@/components/ui/feedback';
 import { Icon } from '@/components/ui/Icon';
 import { Pill, StatusChip } from '@/components/ui/chips';
@@ -21,8 +20,7 @@ type View = 'daily' | 'weekly';
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /**
- * Timetable — daily timeline (default) and weekly overview, both driven by the
- * materialised class occurrences for the active semester.
+ * Timetable — Crafted with Tasknur style daily timeline & weekly overview.
  */
 export function TimetableScreen() {
   const occurrences = useClassora((state) => state.occurrences);
@@ -72,7 +70,7 @@ export function TimetableScreen() {
         showActions
       />
 
-      <div className="space-y-5 px-5">
+      <div className="space-y-5">
         <SegmentedControl<View>
           ariaLabel="Timetable view"
           value={view}
@@ -93,9 +91,9 @@ export function TimetableScreen() {
             />
 
             {dayOverride ? (
-              <div className="flex items-center gap-2.5 rounded-block bg-brand-50 px-3.5 py-3">
-                <Icon name="info" size={17} className="text-brand-600" />
-                <p className="text-[12.5px] font-semibold text-brand-700">
+              <div className="flex items-center gap-2.5 rounded-2xl bg-sky-50 px-4 py-3 border border-sky-100">
+                <Icon name="info" size={18} className="text-[#38B6FF]" />
+                <p className="text-xs font-extrabold text-sky-900">
                   {dayOverride.kind === 'holiday'
                     ? dayOverride.label ?? 'College holiday'
                     : dayOverride.kind === 'no_class'
@@ -105,7 +103,7 @@ export function TimetableScreen() {
               </div>
             ) : null}
 
-            <section>
+            <section className="space-y-3">
               <SectionHeader
                 title="Timeline"
                 action={
@@ -116,7 +114,7 @@ export function TimetableScreen() {
                     <button
                       type="button"
                       onClick={() => openModify()}
-                      className="inline-flex min-h-[36px] items-center gap-1.5 text-[13px] font-bold text-brand-700"
+                      className="inline-flex min-h-[36px] items-center gap-1.5 text-xs font-extrabold text-[#38B6FF] hover:underline"
                     >
                       <Icon name="edit_calendar" size={16} />
                       Modify Day
@@ -126,18 +124,23 @@ export function TimetableScreen() {
               />
 
               {dayOccurrences.length === 0 ? (
-                <Card>
+                <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
                   <EmptyState
                     icon="event_available"
                     title="Your schedule is clear"
                     message="No classes on this date. Add a custom lecture if the timetable changed."
                     action={
-                      <Button icon="add" onClick={() => openModify()}>
+                      <button
+                        type="button"
+                        onClick={() => openModify()}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#38B6FF] text-white font-extrabold text-xs shadow-md shadow-sky-500/25 hover:bg-[#0094e8] transition"
+                      >
+                        <Icon name="add" size={18} />
                         Add Custom Lecture
-                      </Button>
+                      </button>
                     }
                   />
-                </Card>
+                </div>
               ) : (
                 <>
                   <Timeline
@@ -147,9 +150,14 @@ export function TimetableScreen() {
                     onModify={(occurrence) => openModify(occurrence)}
                   />
                   <div className="flex justify-center pt-2 pb-2">
-                    <Button icon="add" block onClick={() => openModify()}>
+                    <button
+                      type="button"
+                      onClick={() => openModify()}
+                      className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl bg-[#38B6FF] text-white font-extrabold text-xs shadow-md shadow-sky-500/25 hover:bg-[#0094e8] transition"
+                    >
+                      <Icon name="add" size={18} />
                       Add Custom Lecture
-                    </Button>
+                    </button>
                   </div>
                 </>
               )}
@@ -165,26 +173,26 @@ export function TimetableScreen() {
           />
         )}
 
-        <Card className="!p-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-brand-50 text-brand-600">
-              <Icon name="auto_awesome" size={19} />
+        <div className="rounded-3xl bg-white p-5 shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3.5">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-sky-50 text-[#38B6FF]">
+              <Icon name="auto_awesome" size={20} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13.5px] font-bold">Import a timetable with AI</p>
-              <p className="text-[12.5px] text-ink-secondary">
-                Upload a PDF, photo or screenshot and review the extracted classes.
+              <p className="text-sm font-extrabold text-slate-900">Import timetable with AI</p>
+              <p className="text-xs text-slate-400 font-semibold">
+                Upload a PDF, photo or screenshot and review extracted classes.
               </p>
             </div>
             <Link
               to="/timetable/import"
-              className="grid h-10 w-10 place-items-center rounded-full bg-brand-600 text-white"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#38B6FF] text-white shadow-md shadow-sky-500/25"
               aria-label="Import timetable"
             >
               <Icon name="arrow_forward" size={18} />
             </Link>
           </div>
-        </Card>
+        </div>
       </div>
 
       <ModifyDaySheet
@@ -216,23 +224,23 @@ function WeeklyView({
           .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
         return (
-          <Card key={date} className="!p-4">
+          <div key={date} className="rounded-3xl bg-white p-4 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="text-[15px] font-bold">{WEEKDAY_LABELS[index]}</span>
-                <span className="text-[12.5px] text-ink-secondary">{formatMediumDate(date)}</span>
+                <span className="text-sm font-extrabold text-slate-900">{WEEKDAY_LABELS[index]}</span>
+                <span className="text-xs text-slate-400 font-semibold">{formatMediumDate(date)}</span>
               </div>
               <button
                 type="button"
                 onClick={() => onSelectDate(date)}
-                className="text-[12.5px] font-bold text-brand-700"
+                className="text-xs font-extrabold text-[#38B6FF] hover:underline"
               >
                 Open day
               </button>
             </div>
 
             {dayOccurrences.length === 0 ? (
-              <p className="mt-2.5 text-[13px] text-ink-muted">No classes.</p>
+              <p className="mt-2 text-xs text-slate-400 font-medium">No classes.</p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {dayOccurrences.map((occurrence) => {
@@ -240,18 +248,18 @@ function WeeklyView({
                   return (
                     <li
                       key={occurrence.id}
-                      className="flex items-center gap-3 rounded-block bg-surface-muted px-3 py-2.5"
+                      className="flex items-center gap-3 rounded-2xl bg-[#F6F8FA] px-3.5 py-2.5"
                     >
                       <span
-                        className="h-8 w-1 rounded-full"
-                        style={{ backgroundColor: subject?.colorKey === 'rose' ? '#F87171' : '#6366F1' }}
+                        className="h-8 w-1.5 rounded-full"
+                        style={{ backgroundColor: subject?.colorKey === 'rose' ? '#FF7657' : '#38B6FF' }}
                         aria-hidden
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[13.5px] font-semibold">
+                        <span className="block truncate text-xs font-extrabold text-slate-900">
                           {subject?.shortName ?? 'Class'}
                         </span>
-                        <span className="block text-[11.5px] text-ink-secondary">
+                        <span className="block text-[11px] font-semibold text-slate-400">
                           {formatTimeRange(occurrence.startTime, occurrence.endTime)}
                           {occurrence.room ? ` • ${occurrence.room}` : ''}
                         </span>
@@ -267,13 +275,14 @@ function WeeklyView({
                 })}
               </ul>
             )}
-          </Card>
+          </div>
         );
       })}
 
-      <p className="px-1 pb-2 text-center text-[12px] text-ink-muted">
+      <p className="px-1 pb-2 text-center text-xs text-slate-400 font-semibold">
         Showing {formatMediumDate(days[0]!)} – {formatMediumDate(addDaysToKey(days[0]!, 5))}
       </p>
     </div>
   );
 }
+

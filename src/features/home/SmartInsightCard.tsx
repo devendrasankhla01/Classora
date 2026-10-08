@@ -34,11 +34,11 @@ export function SmartInsightCard() {
 
   if (!focus) {
     return (
-      <section className="flex items-start gap-3 rounded-card bg-surface p-4 shadow-ambient ring-1 ring-hairline">
+      <section className="flex items-start gap-3 rounded-3xl bg-white p-5 shadow-sm border border-slate-100">
         <IconTile icon="verified" tone="emerald" size={38} iconSize={19} />
         <div className="min-w-0">
-          <p className="text-label-lg">You’re in the safe zone everywhere</p>
-          <p className="mt-0.5 text-body-sm text-ink-secondary">
+          <p className="text-sm font-extrabold text-slate-900">You’re in the safe zone everywhere</p>
+          <p className="mt-0.5 text-xs text-slate-500 font-medium leading-relaxed">
             Every subject is above your {target}% target with room to spare. Keep marking attendance to keep
             the insight accurate.
           </p>
@@ -53,18 +53,18 @@ export function SmartInsightCard() {
   const forecastDate = focus.recovery.classes > 0 ? focus.upcoming[focus.recovery.classes - 1]?.date : null;
 
   return (
-    <section className="rounded-card bg-surface p-5 shadow-ambient ring-1 ring-hairline">
+    <section className="rounded-3xl bg-white p-5 shadow-sm border border-slate-100 space-y-4">
       <div className="flex items-center gap-3">
         <IconTile icon={isRecovery ? 'trending_up' : 'shield'} tone={isRecovery ? 'rose' : 'amber'} size={38} iconSize={19} />
         <div>
-          <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
             Smart recommendation
           </p>
-          <h2 className="text-label-lg">{subject.name}</h2>
+          <h2 className="text-base font-extrabold text-slate-900">{subject.name}</h2>
         </div>
       </div>
 
-      <p className="mt-3 text-body-md text-ink-secondary">
+      <p className="text-xs text-slate-600 font-medium leading-relaxed">
         {isRecovery ? (
           focus.recovery.unreachable ? (
             <>
@@ -75,7 +75,7 @@ export function SmartInsightCard() {
           ) : (
             <>
               {subject.shortName} is at {focus.summary.percentage?.toFixed(1)}%. Attend the next{' '}
-              <span className="font-bold text-ink">
+              <span className="font-extrabold text-slate-900">
                 {focus.recovery.classes} {focus.recovery.classes === 1 ? 'class' : 'classes'}
               </span>{' '}
               to return above {focus.target}%
@@ -92,17 +92,17 @@ export function SmartInsightCard() {
         )}
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 pt-1">
         <Link
           to={`/can-i-skip?subject=${subject.id}`}
-className="inline-flex min-h-[42px] items-center gap-2 rounded-pill bg-brand-600 px-4 text-label-lg text-white shadow-elevated"
+          className="inline-flex items-center gap-2 rounded-2xl bg-[#38B6FF] hover:bg-[#0094e8] px-4 py-2 text-xs font-extrabold text-white shadow-md shadow-sky-500/25 transition active:scale-95"
         >
           <Icon name="bolt" size={17} />
           Can I skip?
         </Link>
         <Link
           to={`/attendance/${subject.id}`}
-className="inline-flex min-h-[42px] items-center gap-2 rounded-pill bg-surface-sunken px-4 text-label-lg text-ink-secondary"
+          className="inline-flex items-center gap-2 rounded-2xl bg-[#F6F8FA] hover:bg-slate-100 px-4 py-2 text-xs font-extrabold text-slate-600 transition"
         >
           Subject details
         </Link>
@@ -110,3 +110,4 @@ className="inline-flex min-h-[42px] items-center gap-2 rounded-pill bg-surface-s
     </section>
   );
 }
+

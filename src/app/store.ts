@@ -307,7 +307,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
           profile = defaultProfile;
         }
 
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && window.localStorage) {
           const storedTarget = window.localStorage.getItem('classora_attendance_target');
           if (storedTarget && profile) {
             const parsedTarget = Number(storedTarget);
@@ -358,7 +358,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
         } else {
           // Auto-resync timetable for official Section A student batches
           const MIGRATION_KEY = 'classora_sec_a_resync_v5';
-          if (typeof window !== 'undefined' && window.localStorage.getItem(MIGRATION_KEY) !== 'true') {
+          if (typeof window !== 'undefined' && window.localStorage?.getItem(MIGRATION_KEY) !== 'true') {
             const studentInfo = findStudentByUsn(profile.studentId || profile.batchRoll);
             const batch = studentInfo ? studentInfo.batch : 'A2';
             const builtin = getBuiltinSemester3Complete(profile.id, batch);

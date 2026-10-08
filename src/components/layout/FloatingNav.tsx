@@ -34,8 +34,8 @@ export function FloatingNav() {
       >
         <div
           className={cn(
-            'pointer-events-auto flex h-16 w-full max-w-[400px] items-center justify-between rounded-full px-3 py-1.5',
-            'border border-white/80 bg-white/90 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl',
+            'pointer-events-auto flex h-16 w-full max-w-[410px] items-center justify-between rounded-full px-3 py-1.5',
+            'border border-white/90 bg-white/95 shadow-[0_12px_40px_rgba(0,0,0,0.12)] backdrop-blur-2xl',
           )}
         >
           {/* Left items */}
@@ -55,12 +55,12 @@ export function FloatingNav() {
                   className={cn(
                     'flex h-11 items-center justify-center rounded-full transition-all duration-300',
                     active
-                      ? 'gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 px-4 text-white shadow-md shadow-sky-500/30'
-                      : 'w-11 text-slate-500 hover:bg-slate-100',
+                      ? 'gap-1.5 bg-gradient-to-r from-[#38b6ff] to-[#0094e8] px-4 text-white shadow-md shadow-sky-500/30'
+                      : 'w-11 text-slate-400 hover:bg-slate-100 hover:text-slate-700',
                   )}
                 >
                   <Icon name={item.icon} size={active ? 18 : 22} filled={active} />
-                  {active ? <span className="text-xs font-bold">{item.label}</span> : null}
+                  {active ? <span className="text-xs font-extrabold">{item.label}</span> : null}
                 </NavLink>
               );
             })}
@@ -75,8 +75,8 @@ export function FloatingNav() {
               setModalOpen(true);
             }}
             className={cn(
-              'relative -top-5 flex h-14 w-14 items-center justify-center rounded-full text-white',
-              'bg-gradient-to-tr from-sky-500 via-blue-500 to-indigo-600 shadow-[0_8px_25px_rgba(14,165,233,0.45)]',
+              'relative -top-5 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white',
+              'bg-gradient-to-tr from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_8px_25px_rgba(56,182,255,0.45)]',
               'ring-4 ring-white transition-all duration-200 active:scale-90 hover:scale-105',
             )}
           >
@@ -98,12 +98,12 @@ export function FloatingNav() {
                   className={cn(
                     'flex h-11 items-center justify-center rounded-full transition-all duration-300',
                     active
-                      ? 'gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 px-4 text-white shadow-md shadow-sky-500/30'
-                      : 'w-11 text-slate-500 hover:bg-slate-100',
+                      ? 'gap-1.5 bg-gradient-to-r from-[#38b6ff] to-[#0094e8] px-4 text-white shadow-md shadow-sky-500/30'
+                      : 'w-11 text-slate-400 hover:bg-slate-100 hover:text-slate-700',
                   )}
                 >
                   <Icon name={item.icon} size={active ? 18 : 22} filled={active} />
-                  {active ? <span className="text-xs font-bold">{item.label}</span> : null}
+                  {active ? <span className="text-xs font-extrabold">{item.label}</span> : null}
                 </NavLink>
               );
             })}
@@ -116,3 +116,4 @@ export function FloatingNav() {
     </>
   );
 }
+

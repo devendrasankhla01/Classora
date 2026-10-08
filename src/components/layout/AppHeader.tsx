@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/cn';
@@ -9,15 +9,18 @@ import { useClassora } from '@/app/store';
 interface AppHeaderProps {
   eyebrow?: string;
   wordmark?: boolean;
-  title: string;
+  title?: string;
   overline?: string;
   subtitle?: string;
   showActions?: boolean;
+  showBack?: boolean;
   leading?: ReactNode;
   className?: string;
   unreadCount?: number;
   filterTab?: 'all' | 'ongoing' | 'completed';
   onFilterChange?: (tab: 'all' | 'ongoing' | 'completed') => void;
+  showSearch?: boolean;
+  onSearchClick?: () => void;
 }
 
 export function AppHeader({
@@ -25,48 +28,75 @@ export function AppHeader({
   overline,
   subtitle,
   showActions = true,
+  showBack = false,
   leading,
   className,
   unreadCount = 0,
   filterTab,
   onFilterChange,
+  showSearch = true,
+  onSearchClick,
 }: AppHeaderProps) {
   const profile = useClassora((state) => state.profile);
-  const firstName = profile?.name ? profile.name.split(' ')[0] : 'Student';
+  const navigate = useNavigate();
+  const firstName = profile?.name ? profile.name.split(' ')[0] : 'Shahinur';
 
   return (
-    <header className={cn('pb-5 pt-2', className)}>
+    <header className={cn('pb-4 pt-1', className)}>
       {leading ? <div className="mb-3">{leading}</div> : null}
 
-      <div className="flex items-center justify-between gap-4">
-        {/* User Profile Header (Tasknur Reference Style) */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Left Section: Back Button OR Profile Avatar Greeting */}
         <div className="flex items-center gap-3.5 min-w-0">
-          <Link
-            to="/profile"
-            aria-label="Profile"
-            className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full ring-2 ring-sky-400 shadow-md shadow-sky-500/10 transition active:scale-95"
-          >
-            {profile ? (
-              <Avatar name={profile.name} size={48} />
-            ) : (
-              <span className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 text-white font-bold">
-                <Icon name="person" size={22} />
-              </span>
-            )}
-          </Link>
+          {showBack ? (
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              aria-label="Go Back"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-slate-700 shadow-sm border border-slate-100 hover:bg-slate-50 transition active:scale-95"
+            >
+              <Icon name="arrow_back" size={20} />
+            </button>
+          ) : (
+            <Link
+              to="/profile"
+              aria-label="Profile"
+              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full ring-4 ring-[#38B6FF]/80 shadow-md shadow-sky-500/15 transition active:scale-95"
+            >
+              {profile ? (
+                <Avatar name={profile.name} size={48} />
+              ) : (
+                <span className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 text-white font-bold">
+                  <Icon name="person" size={22} />
+                </span>
+              )}
+            </Link>
+          )}
+
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 truncate tracking-tight">
+            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 truncate tracking-tight">
               {title || `Hi, ${firstName}`}
             </h1>
-            <p className="text-xs font-semibold text-slate-500">
+            <p className="text-xs font-semibold text-slate-400 mt-0.5">
               {overline ?? '01 Jan 2024'}
             </p>
           </div>
         </div>
 
-        {/* Actions (Notifications & Search) */}
+        {/* Right Section: Actions (Search & Notification Bell) */}
         {showActions ? (
           <div className="flex shrink-0 items-center gap-2">
+            {showSearch ? (
+              <button
+                type="button"
+                onClick={onSearchClick}
+                aria-label="Search"
+                className="grid h-11 w-11 place-items-center rounded-2xl bg-white text-slate-600 shadow-sm border border-slate-100 hover:bg-slate-50 transition active:scale-95"
+              >
+                <Icon name="search" size={20} />
+              </button>
+            ) : null}
+
             <Link
               to="/notifications"
               aria-label="Notifications"
@@ -82,14 +112,14 @@ export function AppHeader({
       </div>
 
       {subtitle ? (
-        <p className="mt-2 text-sm text-slate-600 font-medium">
+        <p className="mt-2 text-xs sm:text-sm text-slate-500 font-medium">
           {subtitle}
         </p>
       ) : null}
 
-      {/* Filter Tabs bar inspired by Reference Screenshots 2 & 4 */}
+      {/* Filter Tabs bar matching Reference Screenshots */}
       {onFilterChange && filterTab ? (
-        <div className="mt-5 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {(['all', 'ongoing', 'completed'] as const).map((tab) => {
             const active = filterTab === tab;
             return (
@@ -100,7 +130,7 @@ export function AppHeader({
                 className={cn(
                   'px-5 py-2 rounded-xl text-xs font-bold capitalize transition-all duration-200',
                   active
-                    ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30'
+                    ? 'bg-[#38B6FF] text-white shadow-md shadow-sky-500/30'
                     : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50',
                 )}
               >
@@ -113,3 +143,4 @@ export function AppHeader({
     </header>
   );
 }
+

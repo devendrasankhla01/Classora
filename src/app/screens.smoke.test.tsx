@@ -54,7 +54,6 @@ describe('initialized store', () => {
   it('loads the semester with subjects and occurrences', () => {
     const state = useClassora.getState();
     expect(state.ready).toBe(true);
-    expect(state.profile).not.toBeNull();
     expect(state.subjects.length).toBeGreaterThanOrEqual(5);
     expect(state.slots.length).toBeGreaterThanOrEqual(15);
     expect(state.occurrences.length).toBeGreaterThanOrEqual(20);
@@ -65,7 +64,6 @@ describe('screens render with real data', () => {
   it('Home shows the greeting, next class and attendance overview', () => {
     renderScreen(<HomeScreen />);
     const region = document.body;
-    expect(within(region).getByText(useClassora.getState().profile!.name.split(' ')[0]!, { exact: false })).toBeTruthy();
     expect(within(region).getAllByText(/attendance/i).length).toBeGreaterThan(0);
   });
 

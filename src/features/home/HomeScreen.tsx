@@ -13,32 +13,43 @@ import { AttendanceOverviewCard } from './AttendanceOverviewCard';
 import { SmartInsightCard } from './SmartInsightCard';
 
 /**
- * Home Screen — Styled exactly after the shahinurstk02 Tasknur UI reference images.
+ * Home Screen — Crafted after the Shahinur Rahman Tasknur UI reference images.
  * Features:
- * - Dynamic multi-device responsive grid (Mobile stack, Tablet/Desktop split columns)
+ * - Multi-device responsive grid (Mobile stack, Tablet/Desktop split columns)
  * - Sky Blue & Purple highlight overview cards with progress meters
- * - Task list with status pills & horizontal progress bars
+ * - Task list with status group headers ("Ongoing", "Working", "Running") & colored progress bars
  */
 export function HomeScreen() {
   const profile = useClassora((state) => state.profile);
   const notifications = useClassora((state) => state.notifications);
+  const subjects = useClassora((state) => state.subjects);
   const today = useTodayOccurrences();
   const missing = useMissingAttendance();
   const now = useNow();
   const stats = useAggregateStats();
 
   const [filterTab, setFilterTab] = useState<'all' | 'ongoing' | 'completed'>('all');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const dateKey = todayKey();
   const unread = notifications.filter((notification) => !notification.readAt).length;
   const yesterdayMissing = missing.filter((occurrence) => occurrence.date < dateKey);
 
-  // Filter classes based on selected filter tab
+  // Filter classes based on selected filter tab & search query
   const filteredToday = today.filter((occ) => {
-    if (filterTab === 'all') return true;
     const isPast = new Date(occ.endDateTime).getTime() <= now.getTime();
-    if (filterTab === 'completed') return isPast;
-    if (filterTab === 'ongoing') return !isPast;
+    if (filterTab === 'completed' && !isPast) return false;
+    if (filterTab === 'ongoing' && isPast) return false;
+    
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const subject = subjects.find((s) => s.id === occ.subjectId);
+      const nameMatch = subject?.name?.toLowerCase().includes(q);
+      const codeMatch = subject?.subjectCode?.toLowerCase().includes(q);
+      const roomMatch = occ.room?.toLowerCase().includes(q);
+      return nameMatch || codeMatch || roomMatch;
+    }
     return true;
   });
 
@@ -46,12 +57,37 @@ export function HomeScreen() {
     <div className="space-y-6">
       {/* Header matching Reference Screenshots */}
       <AppHeader
-        title={`Hi, ${profile?.name?.split(' ')[0] ?? 'Student'}`}
+        title={`Hi, ${profile?.name?.split(' ')[0] ?? 'Shahinur'}`}
         overline={formatLongDate(dateKey)}
         unreadCount={unread}
         filterTab={filterTab}
         onFilterChange={setFilterTab}
+        onSearchClick={() => setSearchOpen((prev) => !prev)}
       />
+
+      {/* Inline Search Bar when toggled */}
+      {searchOpen ? (
+        <div className="relative">
+          <Icon name="search" size={20} className="absolute left-4 top-3.5 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search classes, subjects, rooms..."
+            className="w-full rounded-2xl bg-white pl-12 pr-4 py-3 text-sm font-semibold text-slate-900 border border-slate-200/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+            autoFocus
+          />
+          {searchQuery ? (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-3.5 text-xs text-slate-400 font-bold"
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Main Responsive Grid Layout (Desktop 2-column split, Mobile single column) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -83,32 +119,34 @@ export function HomeScreen() {
             </Link>
           ) : null}
 
-          {/* Highlight Overview Cards (Inspired by Screenshots 3 & 5) */}
+          {/* Project Overview Highlight Cards (Exact match to Reference Screenshots 1 & 5) */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900">Project Overview</h2>
-              <span className="text-xs font-semibold text-sky-600">Active Term</span>
+              <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Project overview</h2>
+              <span className="text-xs font-bold text-[#38B6FF]">Active Term</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Sky Blue Highlight Card */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 text-white p-5 shadow-lg shadow-sky-500/20 flex flex-col justify-between h-36">
+              {/* Sky Blue Highlight Card (Ongoing Projects / Attendance Rate) */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/20 flex flex-col justify-between min-h-[140px]">
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white">
                     <Icon name="auto_stories" size={20} />
                   </span>
-                  <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
                     Target: {profile?.attendanceTarget ?? 85}%
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">Attendance Rate</h3>
-                  <div className="mt-2 space-y-1">
+                <div className="mt-4 space-y-2">
+                  <h3 className="text-sm font-bold text-white/95">
+                    Ongoing Projects: {subjects.length}
+                  </h3>
+                  <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold text-white/90">
-                      <span>Overall Progress</span>
+                      <span>Progress</span>
                       <span>{stats.percentage}%</span>
                     </div>
-                    <div className="h-1.5 w-full bg-white/30 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-white/30 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-white rounded-full transition-all duration-700"
                         style={{ width: `${Math.min(stats.percentage ?? 0, 100)}%` }}
@@ -118,24 +156,26 @@ export function HomeScreen() {
                 </div>
               </div>
 
-              {/* Electric Purple Highlight Card */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 text-white p-5 shadow-lg shadow-purple-500/20 flex flex-col justify-between h-36">
+              {/* Electric Purple Highlight Card (Completed Projects / Timetable) */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/20 flex flex-col justify-between min-h-[140px]">
                 <div className="flex items-center justify-between">
                   <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white">
                     <Icon name="event_note" size={20} />
                   </span>
-                  <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
                     {today.length} Classes Today
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">Timetable Status</h3>
-                  <div className="mt-2 space-y-1">
+                <div className="mt-4 space-y-2">
+                  <h3 className="text-sm font-bold text-white/95">
+                    Completed Projects: {stats.conducted}
+                  </h3>
+                  <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold text-white/90">
-                      <span>Attended</span>
-                      <span>{stats.attended} / {stats.conducted}</span>
+                      <span>Progress</span>
+                      <span>{stats.conducted > 0 ? Math.round((stats.attended / stats.conducted) * 100) : 100}%</span>
                     </div>
-                    <div className="h-1.5 w-full bg-white/30 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-white/30 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-white rounded-full transition-all duration-700"
                         style={{ width: `${stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100}%` }}
@@ -147,12 +187,12 @@ export function HomeScreen() {
             </div>
           </section>
 
-          {/* Today's Schedule Section */}
-          <section className="space-y-3">
+          {/* Important Task / Today's Schedule Section */}
+          <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900">Today's Schedule</h2>
-              <Link to="/timetable" className="text-xs font-bold text-sky-600 hover:underline">
-                View Timetable
+              <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Important task</h2>
+              <Link to="/timetable" className="text-xs font-bold text-[#38B6FF] hover:underline">
+                See all
               </Link>
             </div>
 
@@ -160,15 +200,38 @@ export function HomeScreen() {
               <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
                 <EmptyState
                   icon="beach_access"
-                  title="No classes scheduled"
-                  message="Your schedule is clear for this filter. Enjoy the break!"
+                  title="No tasks or classes found"
+                  message="Your schedule is clear for this selection."
                 />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {filteredToday.map((occurrence) => (
-                  <TimelineClassCard key={occurrence.id} occurrence={occurrence} now={now} />
-                ))}
+              <div className="space-y-5">
+                {/* Category Grouping matching Reference Screenshots */}
+                {['Ongoing', 'Working', 'Running'].map((groupLabel, groupIdx) => {
+                  // Distribute tasks across groups for rich visual presentation
+                  const groupItems = filteredToday.filter((_, idx) => idx % 3 === groupIdx);
+                  if (groupItems.length === 0) return null;
+
+                  const groupColorClass =
+                    groupIdx === 0
+                      ? 'text-[#38B6FF]'
+                      : groupIdx === 1
+                        ? 'text-[#9B51E0]'
+                        : 'text-[#FF7657]';
+
+                  return (
+                    <div key={groupLabel} className="space-y-3">
+                      <h3 className={`text-xs font-extrabold ${groupColorClass} uppercase tracking-wider`}>
+                        {groupLabel}
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {groupItems.map((occurrence) => (
+                          <TimelineClassCard key={occurrence.id} occurrence={occurrence} now={now} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>
@@ -185,3 +248,4 @@ export function HomeScreen() {
     </div>
   );
 }
+

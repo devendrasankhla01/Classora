@@ -11,10 +11,10 @@ import { useActiveSubjects } from '@/hooks/useClassoraData';
 import { signOutEverywhere } from '@/features/auth/LoginScreen';
 
 /**
- * Profile Screen — Designed after Reference Screenshot 6 (Shahinur Rahman Tasknur Profile)
+ * Profile Screen — Crafted after Reference Screenshot 6 (Shahinur Rahman Tasknur Profile)
  * Features:
- * - Center Avatar with Cyan outline ring
- * - Edit Profile pill button
+ * - Center Avatar with Cyan/Sky-Blue outline ring
+ * - Edit Profile sky-blue pill button
  * - Clean option list cards (Phone, Task list, Notifications, Settings, Password)
  * - Sky Blue full-width Log Out CTA button
  */
@@ -29,58 +29,58 @@ export function ProfileScreen() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <AppHeader title="Profile" />
+      <AppHeader title="Profile" showBack />
 
-      {/* Identity Card inspired by Screenshot 6 */}
+      {/* Identity Card matching Screenshot 6 */}
       <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-3">
-        {/* Large Avatar with Sky Blue Ring */}
-        <div className="relative p-1 rounded-full ring-4 ring-sky-400/80 shadow-md">
-          <Avatar name={profile?.name ?? 'Classora Student'} size={96} />
+        {/* Large Avatar with Bright Sky Blue Ring */}
+        <div className="relative p-1 rounded-full ring-4 ring-[#38B6FF] shadow-md shadow-sky-500/20">
+          <Avatar name={profile?.name ?? 'Shahinur Rahman'} size={96} />
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            {profile?.name ?? 'Student Name'}
+          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+            {profile?.name ?? 'Shahinur Rahman'}
           </h2>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            {profile?.studentId ? `ID: ${profile.studentId}` : 'shahinurstk02@gmail.com'}
+          <p className="text-xs text-slate-400 font-semibold mt-0.5">
+            {profile?.studentId ? `ID: ${profile.studentId}` : 'shahinurstk02@gmail.com'} • Target: {profile?.attendanceTarget ?? 85}%
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => navigate('/settings')}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-500/25 hover:bg-sky-600 transition"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#38B6FF] text-white font-bold text-xs shadow-md shadow-sky-500/25 hover:bg-sky-500 transition active:scale-95"
         >
           <Icon name="edit" size={16} />
           Edit Profile
         </button>
       </div>
 
-      {/* Option Items List inspired by Screenshot 6 */}
+      {/* Option Items List matching Screenshot 6 */}
       <div className="rounded-3xl bg-white p-3 shadow-sm border border-slate-100 space-y-1">
         <OptionRow
           icon="call"
           title="+8801234567890"
           subtitle="Phone Number"
           to="/settings"
-          iconColor="text-sky-500"
+          iconColor="text-[#38B6FF]"
           bgColor="bg-sky-50"
         />
         <OptionRow
           icon="task_alt"
-          title="Task & Subject List"
-          subtitle={`${subjects.length} active courses`}
+          title="Task list (Manage subjects)"
+          subtitle={`${subjects.length} active courses & subjects`}
           to="/profile/subjects"
-          iconColor="text-purple-500"
+          iconColor="text-[#9B51E0]"
           bgColor="bg-purple-50"
         />
         <OptionRow
           icon="notifications"
-          title="Notification Settings"
+          title="Notification"
           subtitle="Reminders & class alerts"
           to="/profile/notifications"
-          iconColor="text-sky-500"
+          iconColor="text-[#38B6FF]"
           bgColor="bg-sky-50"
         />
         <OptionRow
@@ -93,8 +93,8 @@ export function ProfileScreen() {
         />
         <OptionRow
           icon="lock"
-          title="Password & Security"
-          subtitle="Account credentials"
+          title="Password"
+          subtitle="Account credentials & security"
           to="/settings"
           iconColor="text-slate-600"
           bgColor="bg-slate-100"
@@ -134,10 +134,10 @@ export function ProfileScreen() {
           <button
             type="button"
             onClick={() => setConfirmLogout(true)}
-            className="w-full py-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm shadow-lg shadow-sky-500/30 transition active:scale-[0.99] flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-2xl bg-[#38B6FF] hover:bg-[#0094e8] text-white font-bold text-sm shadow-lg shadow-sky-500/30 transition active:scale-[0.99] flex items-center justify-center gap-2"
           >
             <Icon name="logout" size={18} />
-            Log Out
+            Log out
           </button>
         )}
 
@@ -199,16 +199,17 @@ function OptionRow({
   return (
     <Link
       to={to}
-      className="flex items-center gap-4 p-3.5 rounded-2xl hover:bg-slate-50 transition active:scale-[0.995]"
+      className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#F6F8FA] hover:bg-slate-100 transition active:scale-[0.995]"
     >
       <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${bgColor} ${iconColor}`}>
         <Icon name={icon} size={20} />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-slate-900">{title}</p>
-        <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+        <p className="text-sm font-extrabold text-slate-900">{title}</p>
+        <p className="text-xs text-slate-400 font-semibold">{subtitle}</p>
       </div>
       <Icon name="chevron_right" size={20} className="text-slate-400" />
     </Link>
   );
 }
+

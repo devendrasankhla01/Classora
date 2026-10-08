@@ -53,62 +53,62 @@ export function AttendanceScreen() {
     <>
       <AppHeader title="Attendance" subtitle="Overall Status" />
 
-      <div className="space-y-5 px-5 pb-8">
-        <section className="rounded-3xl glass-card-elevated p-5 sm:p-6 shadow-xl border border-white/80 bg-gradient-to-b from-indigo-50/70 via-white/90 to-surface/95">
+      <div className="space-y-5 pb-8">
+        <section className="rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-slate-100 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-label-sm font-bold uppercase tracking-[0.05em] text-slate-500">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
               Aggregate Health
             </p>
-            <span className="inline-flex items-center gap-1 text-label-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full shadow-2xs">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full shadow-2xs">
               <Icon name="verified" size={14} className="text-emerald-600" />
               Live Tracking
             </span>
           </div>
 
-          <div className="mt-4 flex justify-center">
+          <div className="mt-2 flex justify-center">
             <AttendanceRing value={stats.percentage} delta={null} size={190} target={target} />
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             {stats.health === 'safe' ? (
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/80 px-4 py-1.5 text-label-md font-bold text-emerald-800 shadow-2xs">
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/80 px-4 py-1.5 text-xs font-extrabold text-emerald-800 shadow-2xs">
                 <Icon name="check_circle" size={16} className="text-emerald-600" filled />
                 Safe Zone
-                <span className="font-medium text-emerald-700/80">
-                  · {Math.round(stats.confidence)}% data confidence
+                <span className="font-semibold text-emerald-700/80">
+                  · {Math.round(stats.confidence)}% confidence
                 </span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200/80 px-4 py-1.5 text-label-md font-bold text-amber-800 shadow-2xs">
+              <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200/80 px-4 py-1.5 text-xs font-extrabold text-amber-800 shadow-2xs">
                 <Icon name="error" size={16} className="text-amber-600" />
                 {stats.health === 'critical' ? 'Below target' : 'Thin margin'}
               </span>
             )}
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-2.5 rounded-2xl bg-slate-100/70 p-2 border border-slate-200/60 shadow-inner">
-            <Stat label="Attended" value={stats.attended} color="#10b981" />
-            <Stat label="Missed" value={stats.missed} color="#ef4444" />
-            <Stat label="Conducted" value={stats.conducted} color="#6366f1" />
+          <div className="grid grid-cols-3 gap-2.5 rounded-2xl bg-[#F6F8FA] p-2 border border-slate-100">
+            <Stat label="Attended" value={stats.attended} color="#10B981" />
+            <Stat label="Missed" value={stats.missed} color="#EF4444" />
+            <Stat label="Conducted" value={stats.conducted} color="#38B6FF" />
           </div>
 
           {confidence.missingClasses > 0 ? (
             <Link
               to="/attendance/review"
-              className="mt-3.5 flex items-center justify-between rounded-xl bg-amber-50/90 border border-amber-200/80 px-4 py-3 shadow-2xs hover:bg-amber-100/70 transition-colors"
+              className="flex items-center justify-between rounded-2xl bg-amber-50/90 border border-amber-200/80 px-4 py-3 shadow-2xs hover:bg-amber-100/70 transition-colors"
             >
-              <span className="text-label-md font-semibold text-amber-900">
+              <span className="text-xs font-bold text-amber-900">
                 {confidence.missingClasses} past {confidence.missingClasses === 1 ? 'class' : 'classes'} not
                 updated yet
               </span>
-              <span className="text-label-md font-bold text-amber-900 flex items-center gap-1">
+              <span className="text-xs font-extrabold text-amber-900 flex items-center gap-1">
                 Review <Icon name="arrow_forward" size={15} />
               </span>
             </Link>
           ) : null}
         </section>
 
-        <div className="-mx-5 flex gap-2.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
           <FilterChip label={`All (${counts.all})`} active={filter === 'all'} onClick={() => setFilter('all')} />
           <FilterChip label={`Safe (${counts.safe})`} active={filter === 'safe'} onClick={() => setFilter('safe')} />
           <FilterChip
@@ -124,7 +124,7 @@ export function AttendanceScreen() {
         </div>
 
         {insights.length === 0 ? (
-          <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
+          <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
             <EmptyState
               icon="library_books"
               title="No subjects added yet"
@@ -132,7 +132,7 @@ export function AttendanceScreen() {
               action={
                 <Link
                   to="/profile/subjects"
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-brand-600 px-5 text-label-lg text-white shadow-elevated"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl bg-[#38B6FF] px-5 text-xs font-extrabold text-white shadow-md shadow-sky-500/25 hover:bg-[#0094e8] transition"
                 >
                   <Icon name="add" size={18} />
                   Add subjects
@@ -141,7 +141,7 @@ export function AttendanceScreen() {
             />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-card bg-surface p-2 shadow-ambient ring-1 ring-hairline">
+          <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-100 text-center">
             <EmptyState
               icon="filter_list_off"
               title="Nothing in this filter"
@@ -157,11 +157,11 @@ export function AttendanceScreen() {
         )}
 
         {planner ? (
-          <section className="flex items-start gap-3.5 rounded-card bg-brand-50 p-4 shadow-ambient ring-1 ring-brand-500/10">
+          <section className="flex items-start gap-3.5 rounded-3xl bg-sky-50 p-5 border border-sky-100">
             <IconTile icon="auto_awesome" tone="indigo" size={40} iconSize={20} />
             <div className="min-w-0">
-              <p className="text-label-lg text-brand-700">Proactive Planner</p>
-              <p className="mt-0.5 text-body-sm text-brand-700/85">
+              <p className="text-xs font-extrabold text-sky-900">Proactive Planner</p>
+              <p className="mt-0.5 text-xs font-semibold text-sky-800 leading-relaxed">
                 Attend{' '}
                 {nextClass
                   ? `${nextClass.date === new Date().toISOString().slice(0, 10) ? 'today’s' : 'the next'} ${planner.recovery.classes}`
@@ -171,7 +171,7 @@ export function AttendanceScreen() {
               </p>
               <Link
                 to={`/attendance/${planner.subject.id}`}
-className="mt-2 inline-flex items-center gap-1 text-label-md text-brand-700"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-extrabold text-[#38B6FF] hover:underline"
               >
                 Recovery plan
                 <Icon name="arrow_forward" size={15} />
@@ -179,11 +179,11 @@ className="mt-2 inline-flex items-center gap-1 text-label-md text-brand-700"
             </div>
           </section>
         ) : (
-          <section className="flex items-start gap-3.5 rounded-card bg-surface p-4 shadow-ambient ring-1 ring-hairline">
+          <section className="flex items-start gap-3.5 rounded-3xl bg-white p-5 shadow-sm border border-slate-100">
             <IconTile icon="shield" tone="emerald" size={40} iconSize={20} />
             <div>
-              <p className="text-label-lg">Every subject is above target</p>
-              <p className="mt-0.5 text-body-sm text-ink-secondary">
+              <p className="text-xs font-extrabold text-slate-900">Every subject is above target</p>
+              <p className="mt-0.5 text-xs text-slate-400 font-semibold leading-relaxed">
                 Nothing needs recovery right now. Keep marking attendance after each class.
               </p>
             </div>
@@ -201,12 +201,12 @@ className="mt-2 inline-flex items-center gap-1 text-label-md text-brand-700"
 
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="rounded-xl bg-white/90 p-2.5 text-center shadow-2xs border border-white/60">
-      <p className="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.04em] text-slate-500">
+    <div className="rounded-xl bg-white p-2.5 text-center shadow-2xs border border-slate-100">
+      <p className="inline-flex items-center justify-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
         <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
         {label}
       </p>
-      <p className="mt-1 text-headline-sm font-bold tabular-nums text-slate-900">{value}</p>
+      <p className="mt-1 text-base font-extrabold tabular-nums text-slate-900">{value}</p>
     </div>
   );
 }
@@ -227,8 +227,8 @@ function FilterChip({
       aria-pressed={active}
       className={
         active
-          ? 'shrink-0 rounded-full bg-gradient-to-b from-indigo-600 to-indigo-700 px-4.5 py-2 text-label-md font-bold text-white shadow-md shadow-indigo-500/25 scale-[1.02] transition-all duration-200'
-          : 'shrink-0 rounded-full bg-white/90 border border-slate-200/80 px-4.5 py-2 text-label-md font-semibold text-slate-600 shadow-2xs hover:bg-slate-50 transition-all duration-200'
+          ? 'shrink-0 rounded-xl bg-[#38B6FF] px-4.5 py-2 text-xs font-extrabold text-white shadow-md shadow-sky-500/25 transition-all duration-200'
+          : 'shrink-0 rounded-xl bg-white border border-slate-100 px-4.5 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all duration-200'
       }
     >
       {label}
@@ -237,3 +237,4 @@ function FilterChip({
 }
 
 export type { AttendanceHealth };
+
