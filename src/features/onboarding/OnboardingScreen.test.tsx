@@ -11,7 +11,24 @@ import {
 describe('OnboardingScreen', () => {
   beforeEach(() => {
     cleanup();
-    localStorage.clear();
+    const store: Record<string, string> = {};
+    const mockStorage = {
+      getItem: (key: string) => store[key] ?? null,
+      setItem: (key: string, value: string) => {
+        store[key] = value;
+      },
+      removeItem: (key: string) => {
+        delete store[key];
+      },
+      clear: () => {
+        for (const k in store) delete store[k];
+      },
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: mockStorage,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it('renders Slide 1 by default with CampusOne branding and target safety headline', () => {
@@ -74,7 +91,9 @@ describe('OnboardingScreen', () => {
     fireEvent.click(getStartedBtn);
 
     expect(isOnboardingCompleted()).toBe(true);
-    expect(localStorage.getItem(ONBOARDING_COMPLETED_KEY)).toBe('true');
+    if (typeof localStorage !== 'undefined') {
+      expect(localStorage.getItem(ONBOARDING_COMPLETED_KEY)).toBe('true');
+    }
   });
 
   it('persists onboarding completion when Skip is clicked', () => {

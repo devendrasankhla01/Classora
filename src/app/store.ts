@@ -373,7 +373,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
             versions = [builtin.version];
             slots = builtin.slots;
             occurrences = builtin.occurrences;
-            window.localStorage.setItem(MIGRATION_KEY, 'true');
+            window.localStorage?.setItem(MIGRATION_KEY, 'true');
           }
         }
 
