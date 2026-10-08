@@ -87,11 +87,31 @@ export function slotsForDate(
 }
 
 /**
+ * Deduplicate occurrences by date + startTime + subjectId.
+ */
+export function deduplicateOccurrences(items: ClassOccurrence[]): ClassOccurrence[] {
+  const map = new Map<string, ClassOccurrence>();
+  for (const item of items) {
+    const key = `${item.date}_${item.startTime}_${item.subjectId}`;
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, item);
+    } else {
+      if (item.updatedAt > existing.updatedAt) {
+        map.set(key, item);
+      }
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => a.startTime.localeCompare(b.startTime));
+}
+
+/**
  * Expand templates into occurrences for a date range.
- * Existing ids are skipped, so this is safe to call repeatedly.
+ * Existing ids and composite keys are skipped, so this is safe to call repeatedly.
  */
 export function generateOccurrences(input: GenerationInput): GenerationResult {
   const { semester, slots, overrides, from, to, existingIds = new Set() } = input;
+  const knownIds = new Set(existingIds);
   const now = input.now ?? new Date().toISOString();
   const occurrences: ClassOccurrence[] = [];
   const skippedDates: DateKey[] = [];
@@ -109,7 +129,9 @@ export function generateOccurrences(input: GenerationInput): GenerationResult {
 
     for (const slot of daySlots) {
       const id = occurrenceIdForSlot(slot.id, date);
-      if (existingIds.has(id)) continue;
+      const compositeKey = `${date}_${slot.startTime}_${slot.subjectId}`;
+
+      if (knownIds.has(id) || knownIds.has(compositeKey)) continue;
 
       occurrences.push({
         id,
@@ -132,6 +154,9 @@ export function generateOccurrences(input: GenerationInput): GenerationResult {
         createdAt: now,
         updatedAt: now,
       });
+
+      knownIds.add(id);
+      knownIds.add(compositeKey);
     }
   }
 

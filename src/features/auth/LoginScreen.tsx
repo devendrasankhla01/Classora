@@ -4,10 +4,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
 import { loadAuth, type AuthResult } from '@/services/cloud/auth';
-import {
-  findStudentByUsn,
-  generateBuiltinSemester3Data,
-} from '@/services/usnTimetable';
+import { findStudentByUsn } from '@/services/usnTimetable';
 import { Card } from '@/components/ui/Card';
 import { Button, Field, TextInput } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/Icon';
@@ -71,7 +68,6 @@ export function LoginScreen() {
   const location = useLocation();
   const profile = useClassora((state) => state.profile);
   const updateProfile = useClassora((state) => state.updateProfile);
-  const applyImportedTimetable = useClassora((state) => state.applyImportedTimetable);
   const announce = useClassora((state) => state.announce);
 
   const redirectTo =
@@ -137,7 +133,16 @@ export function LoginScreen() {
     section: string;
     greeting: string;
   }) {
-    // 1. Update Profile in Store / Database
+    // 1. Write Session immediately
+    writeStoredSession({
+      mode: opts.mode,
+      email: opts.email,
+      name: opts.name,
+      studentId: opts.studentId,
+      signedInAt: new Date().toISOString(),
+    });
+
+    // 2. Update Profile in Store / Database
     await updateProfile({
       email: opts.email,
       name: opts.name,
@@ -148,23 +153,12 @@ export function LoginScreen() {
       batchRoll: opts.studentId,
     });
 
-    // 2. Automatically generate & apply Batch A1 or Batch A2 timetable
-    const builtinData = generateBuiltinSemester3Data('sem-iii-2026', opts.batch);
-    await applyImportedTimetable({
-      subjects: builtinData.subjects,
-      slots: builtinData.slots,
-      notes: builtinData.notes,
-    });
+    // 3. Clear resync flag to ensure store auto-allocates the exact batch schedule
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('classora_sec_a_resync_v5');
+    }
 
-    // 3. Write Session
-    writeStoredSession({
-      mode: opts.mode,
-      email: opts.email,
-      name: opts.name,
-      studentId: opts.studentId,
-      signedInAt: new Date().toISOString(),
-    });
-
+    // 4. Initialize store fast & clean
     await useClassora.getState().initialize();
     announce({
       message: `Welcome ${opts.name.split(' ')[0]}! Timetable auto-loaded for ${opts.section}`,

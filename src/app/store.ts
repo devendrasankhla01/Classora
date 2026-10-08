@@ -32,6 +32,7 @@ import {
   buildExtraClass,
   buildOccurrenceOverride,
   buildReplacement,
+  deduplicateOccurrences,
   futureGenerationRange,
   generateOccurrences,
   normalizeSignature,
@@ -381,7 +382,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
             const matching = slots.filter((slot) => slot.timetableVersionId === currentVersion.id);
             return matching.length > 0 ? matching : slots;
           })(),
-          occurrences,
+          occurrences: deduplicateOccurrences(occurrences),
           attendance,
           overrides,
           audit,
@@ -430,9 +431,9 @@ export const useClassora = create<ClassoraState>((set, get) => {
     subjectById: (id) => get().subjects.find((subject) => subject.id === id),
 
     occurrencesForDate: (date) =>
-      get()
-        .occurrences.filter((occurrence) => occurrence.date === date)
-        .sort((a, b) => a.startTime.localeCompare(b.startTime)),
+      deduplicateOccurrences(
+        get().occurrences.filter((occurrence) => occurrence.date === date),
+      ),
 
     summaries: () => {
       const { subjects, occurrences, attendance, profile } = get();
@@ -974,7 +975,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
         existingIds,
       });
       if (fresh.occurrences.length > 0) {
-        set((state) => ({ occurrences: [...state.occurrences, ...fresh.occurrences] }));
+        set((state) => ({ occurrences: deduplicateOccurrences([...state.occurrences, ...fresh.occurrences]) }));
         await store.saveOccurrences(fresh.occurrences);
       }
 
@@ -1072,6 +1073,9 @@ export const useClassora = create<ClassoraState>((set, get) => {
     if (!semester) return;
     const range = futureGenerationRange(semester, new Date(), 45);
     const existingIds = new Set(occurrences.map((occurrence) => occurrence.id));
+    for (const occ of occurrences) {
+      existingIds.add(`${occ.date}_${occ.startTime}_${occ.subjectId}`);
+    }
     const fresh = generateOccurrences({
       semester,
       slots: slots.filter((slot) => slot.kind === 'class'),
@@ -1082,7 +1086,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
     });
     if (fresh.occurrences.length === 0) return;
 
-    set((state) => ({ occurrences: [...state.occurrences, ...fresh.occurrences] }));
+    set((state) => ({ occurrences: deduplicateOccurrences([...state.occurrences, ...fresh.occurrences]) }));
     await store.saveOccurrences(fresh.occurrences);
   }
 });
