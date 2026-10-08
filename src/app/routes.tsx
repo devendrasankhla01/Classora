@@ -76,6 +76,12 @@ const AdminDashboardScreen = lazy(() =>
   })),
 );
 
+import {
+  isOnboardingCompleted,
+  ONBOARDING_COMPLETED_KEY,
+  OnboardingScreen,
+} from '@/features/onboarding/OnboardingScreen';
+
 /** The review step is part of the import flow; keep the URL working. */
 function TimetableReviewRedirect() {
   return <Navigate to="/timetable/import" replace />;
@@ -118,9 +124,58 @@ function ProtectedAppShell() {
 }
 
 export function AppRoutes() {
+  const location = useLocation();
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      if (
+        search.includes('onboarding=true') ||
+        search.includes('onboarding=show') ||
+        window.location.pathname === '/onboarding'
+      ) {
+        return true;
+      }
+    }
+    // Show onboarding for unauthenticated first-launch users
+    return !isOnboardingCompleted() && readStoredSession() === null && location.pathname !== '/admin';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __reopenOnboarding?: () => void }).__reopenOnboarding = () => {
+        try {
+          window.localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+        } catch {
+          // ignore
+        }
+        window.location.href = '/onboarding?onboarding=true';
+      };
+    }
+  }, []);
+
+  if (showOnboarding) {
+    return (
+      <OnboardingScreen
+        onFinish={() => {
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
+
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
+        <Route
+          path="/onboarding"
+          element={
+            <OnboardingScreen
+              onFinish={() => {
+                setShowOnboarding(false);
+              }}
+            />
+          }
+        />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/admin" element={<AdminDashboardScreen />} />
         <Route element={<ProtectedAppShell />}>
