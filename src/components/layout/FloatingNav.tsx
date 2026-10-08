@@ -62,9 +62,9 @@ export function FloatingNav() {
                     layoutId="liquid-active-pill"
                     transition={{
                       type: 'spring',
-                      stiffness: 340,
-                      damping: 23,
-                      mass: 0.7,
+                      stiffness: 210,
+                      damping: 24,
+                      mass: 1.15,
                     }}
                     className="absolute inset-0 z-[-1] rounded-full bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_6px_22px_rgba(56,182,255,0.48)]"
                   />
