@@ -28,7 +28,7 @@ interface AppHeaderProps {
  */
 export function AppHeader({
   eyebrow = 'CampusOne',
-  wordmark = false,
+  wordmark = true,
   title,
   overline,
   subtitle,

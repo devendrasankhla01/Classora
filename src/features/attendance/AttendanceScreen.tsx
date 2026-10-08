@@ -9,7 +9,6 @@ import { Icon } from '@/components/ui/Icon';
 import { IconTile } from '@/components/ui/controls';
 import { Pill } from '@/components/ui/chips';
 import { EmptyState } from '@/components/ui/feedback';
-import { classoraGreen, classoraInkMuted, classoraRed } from '@/lib/palette';
 import { SubjectAttendanceCard } from './SubjectAttendanceCard';
 import type { AttendanceHealth } from '@/lib/attendance';
 
@@ -54,57 +53,62 @@ export function AttendanceScreen() {
     <>
       <AppHeader title="Attendance" subtitle="Overall Status" />
 
-      <div className="space-y-5 px-5">
-        <section className="rounded-card bg-gradient-to-b from-safe-50/70 to-surface p-5 shadow-ambient ring-1 ring-hairline">
+      <div className="space-y-5 px-5 pb-8">
+        <section className="rounded-3xl glass-card-elevated p-5 sm:p-6 shadow-xl border border-white/80 bg-gradient-to-b from-indigo-50/70 via-white/90 to-surface/95">
           <div className="flex items-center justify-between">
-            <p className="text-label-sm uppercase tracking-[0.03em] text-ink-muted">
-              Aggregate health
+            <p className="text-label-sm font-bold uppercase tracking-[0.05em] text-slate-500">
+              Aggregate Health
             </p>
-            <Icon name="verified" size={18} className="text-safe-600" />
+            <span className="inline-flex items-center gap-1 text-label-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full shadow-2xs">
+              <Icon name="verified" size={14} className="text-emerald-600" />
+              Live Tracking
+            </span>
           </div>
 
-          <div className="mt-3 flex justify-center">
-            <AttendanceRing value={stats.percentage} delta={null} size={186} target={target} />
+          <div className="mt-4 flex justify-center">
+            <AttendanceRing value={stats.percentage} delta={null} size={190} target={target} />
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             {stats.health === 'safe' ? (
-              <span className="inline-flex items-center gap-2 rounded-pill bg-safe-50 px-3.5 py-2 text-label-md text-safe-700">
-                <Icon name="check_circle" size={15} filled />
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200/80 px-4 py-1.5 text-label-md font-bold text-emerald-800 shadow-2xs">
+                <Icon name="check_circle" size={16} className="text-emerald-600" filled />
                 Safe Zone
-                <span className="font-medium text-safe-700/80">
+                <span className="font-medium text-emerald-700/80">
                   · {Math.round(stats.confidence)}% data confidence
                 </span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-pill bg-warning-50 px-3.5 py-2 text-label-md text-warning-700">
-                <Icon name="error" size={15} />
+              <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200/80 px-4 py-1.5 text-label-md font-bold text-amber-800 shadow-2xs">
+                <Icon name="error" size={16} className="text-amber-600" />
                 {stats.health === 'critical' ? 'Below target' : 'Thin margin'}
               </span>
             )}
           </div>
 
-          <div className="mt-4 grid grid-cols-3 divide-x divide-divider rounded-block border border-divider bg-surface/80 py-3.5">
-            <Stat label="Attended" value={stats.attended} color={classoraGreen} />
-            <Stat label="Missed" value={stats.missed} color={classoraRed} />
-            <Stat label="Conducted" value={stats.conducted} color={classoraInkMuted} />
+          <div className="mt-5 grid grid-cols-3 gap-2.5 rounded-2xl bg-slate-100/70 p-2 border border-slate-200/60 shadow-inner">
+            <Stat label="Attended" value={stats.attended} color="#10b981" />
+            <Stat label="Missed" value={stats.missed} color="#ef4444" />
+            <Stat label="Conducted" value={stats.conducted} color="#6366f1" />
           </div>
 
           {confidence.missingClasses > 0 ? (
             <Link
               to="/attendance/review"
-              className="mt-3 flex items-center justify-between rounded-block bg-warning-50 px-3.5 py-3"
+              className="mt-3.5 flex items-center justify-between rounded-xl bg-amber-50/90 border border-amber-200/80 px-4 py-3 shadow-2xs hover:bg-amber-100/70 transition-colors"
             >
-              <span className="text-label-md text-warning-700">
+              <span className="text-label-md font-semibold text-amber-900">
                 {confidence.missingClasses} past {confidence.missingClasses === 1 ? 'class' : 'classes'} not
                 updated yet
               </span>
-              <span className="text-label-md text-warning-700">Review</span>
+              <span className="text-label-md font-bold text-amber-900 flex items-center gap-1">
+                Review <Icon name="arrow_forward" size={15} />
+              </span>
             </Link>
           ) : null}
         </section>
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-5 flex gap-2.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <FilterChip label={`All (${counts.all})`} active={filter === 'all'} onClick={() => setFilter('all')} />
           <FilterChip label={`Safe (${counts.safe})`} active={filter === 'safe'} onClick={() => setFilter('safe')} />
           <FilterChip
@@ -197,12 +201,12 @@ className="mt-2 inline-flex items-center gap-1 text-label-md text-brand-700"
 
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="px-3 text-center">
-      <p className="inline-flex items-center gap-1.5 text-label-sm uppercase tracking-[0.03em] text-ink-muted">
-        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+    <div className="rounded-xl bg-white/90 p-2.5 text-center shadow-2xs border border-white/60">
+      <p className="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.04em] text-slate-500">
+        <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
         {label}
       </p>
-      <p className="mt-1.5 text-headline-sm tabular-nums">{value}</p>
+      <p className="mt-1 text-headline-sm font-bold tabular-nums text-slate-900">{value}</p>
     </div>
   );
 }
@@ -223,8 +227,8 @@ function FilterChip({
       aria-pressed={active}
       className={
         active
-          ? 'shrink-0 rounded-pill bg-brand-600 px-4 py-2 text-label-md text-white shadow-elevated'
-          : 'shrink-0 rounded-pill bg-surface px-4 py-2 text-label-md text-ink-secondary shadow-ambient ring-1 ring-hairline'
+          ? 'shrink-0 rounded-full bg-gradient-to-b from-indigo-600 to-indigo-700 px-4.5 py-2 text-label-md font-bold text-white shadow-md shadow-indigo-500/25 scale-[1.02] transition-all duration-200'
+          : 'shrink-0 rounded-full bg-white/90 border border-slate-200/80 px-4.5 py-2 text-label-md font-semibold text-slate-600 shadow-2xs hover:bg-slate-50 transition-all duration-200'
       }
     >
       {label}
