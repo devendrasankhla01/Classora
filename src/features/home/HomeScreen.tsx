@@ -99,24 +99,28 @@ export function HomeScreen() {
           {/* Dark Navy Slate Summary Hero Banner */}
           <NextClassCard />
 
-          {/* Missing Attendance Banner Alert */}
+          {/* Missing Attendance Banner Alert matching reference image */}
           {yesterdayMissing.length > 0 ? (
             <Link
               to="/attendance/review"
-              className="neu-card flex items-center gap-3.5 rounded-3xl bg-amber-50/90 p-4 border border-amber-200/80 transition active:scale-[0.99] hover:bg-amber-100/70"
+              className="neu-card flex items-center gap-3.5 rounded-3xl bg-purple-50/80 p-4 border border-purple-100/80 transition active:scale-[0.99] hover:bg-purple-100/60"
             >
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-amber-500 text-white shadow-sm">
-                <Icon name="pending_actions" size={20} />
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-purple-500 text-white shadow-md shadow-purple-500/20">
+                <Icon name="pending_actions" size={22} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-amber-900">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-600">ACTION NEEDED</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                </div>
+                <p className="text-sm font-extrabold text-purple-950 mt-0.5">
                   {yesterdayMissing.length} {yesterdayMissing.length === 1 ? 'class is' : 'classes are'} still unmarked
                 </p>
-                <p className="text-xs text-amber-700/80 font-medium">
+                <p className="text-xs text-purple-700/80 font-semibold truncate">
                   Tap to review and keep your attendance stats accurate.
                 </p>
               </div>
-              <Icon name="chevron_right" size={20} className="text-amber-600" />
+              <Icon name="chevron_right" size={20} className="text-purple-500 shrink-0" />
             </Link>
           ) : null}
 
@@ -245,6 +249,35 @@ export function HomeScreen() {
                 })}
               </div>
             )}
+          </section>
+
+          {/* Quick Operations Section matching reference screenshot */}
+          <section className="space-y-3 pt-2">
+            <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Quick Operations</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="neu-card flex items-center gap-3.5 rounded-3xl p-4 transition hover:bg-slate-50/80 cursor-pointer">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-sky-100/80 text-sky-600 font-bold neu-btn-soft">
+                  <Icon name="download" size={22} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-extrabold text-slate-900 truncate">Term Syllabus</p>
+                  <p className="text-xs font-semibold text-slate-400 truncate">Download PDF (v2.4)</p>
+                </div>
+              </div>
+
+              <Link
+                to="/can-i-skip"
+                className="neu-card flex items-center gap-3.5 rounded-3xl p-4 transition hover:bg-slate-50/80"
+              >
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-purple-100/80 text-purple-600 font-bold neu-btn-soft">
+                  <Icon name="event_note" size={22} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-extrabold text-slate-900 truncate">Request Leave</p>
+                  <p className="text-xs font-semibold text-slate-400 truncate">Submit medical/event form</p>
+                </div>
+              </Link>
+            </div>
           </section>
 
         </div>
