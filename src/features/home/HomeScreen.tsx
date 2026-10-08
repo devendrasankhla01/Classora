@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/feedback';
 import { Icon } from '@/components/ui/Icon';
 import { TimelineClassCard } from '@/features/shared/TimelineClassCard';
 import { formatLongDate, todayKey } from '@/lib/date';
-import { AnimatedCounter, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedContainer';
+import { AnimatedCounter, FloatingCard, StaggerContainer, StaggerItem } from '@/components/ui/AnimatedContainer';
 import { NextClassCard } from './NextClassCard';
 import { AttendanceOverviewCard } from './AttendanceOverviewCard';
 import { SmartInsightCard } from './SmartInsightCard';
@@ -129,61 +129,69 @@ export function HomeScreen() {
 
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Sky Blue Highlight Card (Ongoing Projects / Attendance Rate) */}
-              <StaggerItem className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/25 border border-white/40 flex flex-col justify-between min-h-[140px]">
-                <div className="flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
-                    <Icon name="auto_stories" size={20} />
-                  </span>
-                  <span className="text-xs font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
-                    Target: {profile?.attendanceTarget ?? 85}%
-                  </span>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <h3 className="text-sm font-extrabold text-white/95">
-                    Ongoing Projects: {subjects.length}
-                  </h3>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold text-white/90">
-                      <span>Progress</span>
-                      <AnimatedCounter value={stats.percentage} suffix="%" />
+              <StaggerItem>
+                <FloatingCard floatOffset={3} duration={5}>
+                  <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] text-white p-5 shadow-lg shadow-sky-500/25 border border-white/40 flex flex-col justify-between min-h-[140px]">
+                    <div className="flex items-center justify-between">
+                      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
+                        <Icon name="auto_stories" size={20} />
+                      </span>
+                      <span className="text-xs font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
+                        Target: {profile?.attendanceTarget ?? 85}%
+                      </span>
                     </div>
-                    <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
-                      <div
-                        className="h-full bg-white rounded-full transition-all duration-700 shadow-sm"
-                        style={{ width: `${Math.min(stats.percentage ?? 0, 100)}%` }}
-                      />
+                    <div className="mt-4 space-y-2">
+                      <h3 className="text-sm font-extrabold text-white/95">
+                        Ongoing Projects: {subjects.length}
+                      </h3>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold text-white/90">
+                          <span>Progress</span>
+                          <AnimatedCounter value={stats.percentage} suffix="%" />
+                        </div>
+                        <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-700 shadow-sm"
+                            style={{ width: `${Math.min(stats.percentage ?? 0, 100)}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </FloatingCard>
               </StaggerItem>
 
               {/* Electric Purple Highlight Card (Completed Projects / Timetable) */}
-              <StaggerItem className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/25 border border-white/40 flex flex-col justify-between min-h-[140px]">
-                <div className="flex items-center justify-between">
-                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
-                    <Icon name="event_note" size={20} />
-                  </span>
-                  <span className="text-xs font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
-                    {today.length} Classes Today
-                  </span>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <h3 className="text-sm font-extrabold text-white/95">
-                    Completed Projects: {stats.conducted}
-                  </h3>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold text-white/90">
-                      <span>Progress</span>
-                      <AnimatedCounter value={stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100} suffix="%" />
+              <StaggerItem>
+                <FloatingCard floatOffset={3} duration={6}>
+                  <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#9b51e0] via-[#8b5cf6] to-[#7000ff] text-white p-5 shadow-lg shadow-purple-500/25 border border-white/40 flex flex-col justify-between min-h-[140px]">
+                    <div className="flex items-center justify-between">
+                      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/20 backdrop-blur-md text-white border border-white/30">
+                        <Icon name="event_note" size={20} />
+                      </span>
+                      <span className="text-xs font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
+                        {today.length} Classes Today
+                      </span>
                     </div>
-                    <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
-                      <div
-                        className="h-full bg-white rounded-full transition-all duration-700 shadow-sm"
-                        style={{ width: `${stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100}%` }}
-                      />
+                    <div className="mt-4 space-y-2">
+                      <h3 className="text-sm font-extrabold text-white/95">
+                        Completed Projects: {stats.conducted}
+                      </h3>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold text-white/90">
+                          <span>Progress</span>
+                          <AnimatedCounter value={stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100} suffix="%" />
+                        </div>
+                        <div className="h-2.5 w-full bg-black/15 rounded-full overflow-hidden p-0.5 neu-sunken border-none">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-700 shadow-sm"
+                            style={{ width: `${stats.conducted > 0 ? (stats.attended / stats.conducted) * 100 : 100}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </FloatingCard>
               </StaggerItem>
             </StaggerContainer>
           </section>

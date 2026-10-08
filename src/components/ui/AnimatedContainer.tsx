@@ -188,3 +188,43 @@ export function AnimatedProgressBar({
     </div>
   );
 }
+
+interface FloatingCardProps {
+  children: ReactNode;
+  className?: string;
+  floatOffset?: number;
+  duration?: number;
+}
+
+/**
+  Gentle floating card wrapper with slow, elegant up-and-down ambient motion
+ */
+export function FloatingCard({
+  children,
+  className,
+  floatOffset = 4,
+  duration = 5.5,
+}: FloatingCardProps) {
+  return (
+    <motion.div
+      animate={{
+        y: [0, -floatOffset, 0],
+      }}
+      transition={{
+        duration,
+        repeat: Infinity,
+        repeatType: 'reverse',
+        ease: 'easeInOut',
+      }}
+      whileHover={{
+        scale: 1.015,
+        y: -floatOffset - 2,
+        transition: { type: 'spring', stiffness: 400, damping: 25 },
+      }}
+      whileTap={{ scale: 0.985 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
