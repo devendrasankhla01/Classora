@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/cn';
-import { Avatar } from '@/components/ui/controls';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { Icon } from '@/components/ui/Icon';
 import { useClassora } from '@/app/store';
 
@@ -34,7 +34,7 @@ export function AppHeader({
   unreadCount = 0,
   filterTab,
   onFilterChange,
-  showSearch = true,
+  showSearch = false,
   onSearchClick,
 }: AppHeaderProps) {
   const profile = useClassora((state) => state.profile);
@@ -46,7 +46,7 @@ export function AppHeader({
       {leading ? <div className="mb-3">{leading}</div> : null}
 
       <div className="flex items-center justify-between gap-3">
-        {/* Left Section: Back Button OR Profile Avatar Greeting */}
+        {/* Left Section: Back Button OR App Brand Logo */}
         <div className="flex items-center gap-3.5 min-w-0">
           {showBack ? (
             <button
@@ -61,15 +61,9 @@ export function AppHeader({
             <Link
               to="/profile"
               aria-label="Profile"
-              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full ring-4 ring-[#38B6FF]/80 shadow-[0_6px_20px_rgba(56,182,255,0.25)] transition active:scale-95"
+              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/90 shadow-[0_6px_20px_rgba(56,182,255,0.2)] border border-slate-200/80 p-2 transition active:scale-95"
             >
-              {profile ? (
-                <Avatar name={profile.name} size={48} />
-              ) : (
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 text-white font-bold">
-                  <Icon name="person" size={22} />
-                </span>
-              )}
+              <BrandLogo variant="mark" size="md" />
             </Link>
           )}
 
@@ -83,7 +77,7 @@ export function AppHeader({
           </div>
         </div>
 
-        {/* Right Section: Actions (Search & Notification Bell) */}
+        {/* Right Section: Actions (Notification Bell) */}
         {showActions ? (
           <div className="flex shrink-0 items-center gap-2.5">
             {showSearch ? (
