@@ -60,14 +60,14 @@ export function AppHeader({
             </button>
           ) : (
             <motion.div
-              whileHover={{ scale: 1.05, y: -1 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.08, y: -1 }}
+              whileTap={{ scale: 0.92 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
             >
               <Link
                 to="/profile"
                 aria-label="Profile"
-                className="neu-btn-soft grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/75 backdrop-blur-2xl border border-white/90 shadow-[0_8px_24px_rgba(56,182,255,0.22)] p-2 transition-shadow hover:shadow-[0_12px_28px_rgba(56,182,255,0.35)]"
+                className="grid h-10 w-10 shrink-0 place-items-center transition-transform"
               >
                 <BrandLogo variant="mark" size="md" />
               </Link>
