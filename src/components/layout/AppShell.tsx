@@ -34,10 +34,10 @@ export function AppShell() {
       <SidebarNav />
 
       {/* Main Content Workspace */}
-      <main className="flex-1 min-w-0 pb-28 md:pb-12">
+      <main className="flex-1 min-w-0 pb-32 sm:pb-36 md:pb-12">
         <div
           className={cn(
-            'mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6',
+            'mx-auto w-full max-w-7xl px-3.5 sm:px-6 lg:px-8 pt-3 sm:pt-6',
           )}
         >
           {ready ? (

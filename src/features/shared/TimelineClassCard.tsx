@@ -69,17 +69,17 @@ export function TimelineClassCard({
       whileTap={{ scale: 0.985 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'neu-card rounded-3xl p-5 space-y-3.5 flex flex-col justify-between cursor-pointer',
+        'neu-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3 flex flex-col justify-between cursor-pointer min-w-0 overflow-hidden',
       )}
     >
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {/* Top Title & 3-dots Context Menu */}
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="text-base font-extrabold text-slate-900 tracking-tight leading-snug truncate">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xs sm:text-base font-extrabold text-slate-900 tracking-tight leading-snug truncate">
               {subject?.name ?? 'Class Lecture'}
             </h3>
-            <p className="text-xs font-semibold text-slate-400 mt-0.5 truncate">
+            <p className="text-[11px] sm:text-xs font-semibold text-slate-400 mt-0.5 truncate">
               {occurrence.notes ?? (occurrence.facultyOverride ?? subject?.faculty ?? 'Faculty to be announced')}
             </p>
           </div>
@@ -89,55 +89,55 @@ export function TimelineClassCard({
               type="button"
               onClick={() => onModify(occurrence)}
               aria-label="Options"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
             >
-              <Icon name="more_vert" size={18} />
+              <Icon name="more_vert" size={16} />
             </button>
           ) : (
             <button
               type="button"
               aria-label="Options"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-300"
+              className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-full text-slate-300"
             >
-              <Icon name="more_vert" size={18} />
+              <Icon name="more_vert" size={16} />
             </button>
           )}
         </div>
 
         {/* Sub-info Row matching Screenshots: Time + Avatars "04 Persons" */}
-        <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-1">
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <Icon name="schedule" size={15} />
+        <div className="flex flex-wrap items-center justify-between gap-1.5 text-[11px] sm:text-xs font-semibold text-slate-500 pt-0.5">
+          <span className="flex items-center gap-1 text-slate-400 truncate">
+            <Icon name="schedule" size={14} />
             {formatTimeRange(occurrence.startTime, occurrence.endTime)}
           </span>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Overlapping mini avatar circles */}
-            <div className="flex -space-x-1.5 overflow-hidden">
-              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-sky-200 text-[9px] font-bold text-sky-800 flex items-center justify-center shadow-2xs">
+            <div className="flex -space-x-1 overflow-hidden">
+              <span className="inline-block h-4 w-4 sm:h-5 sm:w-5 rounded-full ring-2 ring-white bg-sky-200 text-[8px] sm:text-[9px] font-bold text-sky-800 flex items-center justify-center shadow-2xs">
                 A
               </span>
-              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-purple-200 text-[9px] font-bold text-purple-800 flex items-center justify-center shadow-2xs">
+              <span className="inline-block h-4 w-4 sm:h-5 sm:w-5 rounded-full ring-2 ring-white bg-purple-200 text-[8px] sm:text-[9px] font-bold text-purple-800 flex items-center justify-center shadow-2xs">
                 B
               </span>
-              <span className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-orange-200 text-[9px] font-bold text-orange-800 flex items-center justify-center shadow-2xs">
+              <span className="inline-block h-4 w-4 sm:h-5 sm:w-5 rounded-full ring-2 ring-white bg-orange-200 text-[8px] sm:text-[9px] font-bold text-orange-800 flex items-center justify-center shadow-2xs">
                 C
               </span>
             </div>
-            <span className="text-[11px] font-bold text-slate-400">0{personsCount} Persons</span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400">0{personsCount} Persons</span>
           </div>
         </div>
       </div>
 
       {/* Progress Bar & Actions */}
-      <div className="space-y-3 pt-1">
+      <div className="space-y-2.5 pt-1">
         {/* Neumorphic Inset Progress Track with 3D gradient fill */}
         <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs font-bold">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold">
             <span className="text-slate-400 font-semibold">Progress</span>
             <span className={progressTextColor}>{progressPercent}%</span>
           </div>
-          <div className="h-2.5 w-full overflow-hidden rounded-full neu-sunken p-0.5">
+          <div className="h-2 sm:h-2.5 w-full overflow-hidden rounded-full neu-sunken p-0.5">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
@@ -149,21 +149,21 @@ export function TimelineClassCard({
 
         {/* Action Row */}
         {showActions ? (
-          <div className="pt-2.5 flex items-center justify-between gap-3 border-t border-slate-100/80">
+          <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-100/80 flex-wrap">
             {isPast && info.state === 'unmarked' ? (
               <AttendanceActions occurrence={occurrence} compact />
             ) : isPast && record ? (
               <button
                 type="button"
                 onClick={() => onModify?.(occurrence)}
-                className="text-xs font-extrabold text-[#38B6FF] hover:text-sky-700 underline"
+                className="text-[11px] sm:text-xs font-extrabold text-[#38B6FF] hover:text-sky-700 underline"
               >
                 Edit ({record.status})
               </button>
             ) : (
               <Link
                 to={`/attendance/${subject?.id ?? ''}`}
-                className="text-xs font-extrabold text-[#38B6FF] hover:underline flex items-center gap-1"
+                className="text-[11px] sm:text-xs font-extrabold text-[#38B6FF] hover:underline flex items-center gap-1"
               >
                 Details
                 <Icon name="arrow_forward" size={14} />
