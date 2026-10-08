@@ -302,14 +302,14 @@ export function LoginScreen() {
 
           <form onSubmit={(event) => void handleSubmit(event)} className="mt-5 space-y-4" noValidate>
             <Field
-              label={tab === 'signup' ? 'University Serial Number (USN)' : 'USN or Email'}
-              hint="e.g. 4PM25CS001 or 4PM25CS010"
+              label="University Serial Number (USN)"
+              hint="e.g. 4PM25XX000"
             >
               <TextInput
                 type="text"
                 name="usn"
                 autoComplete="username"
-                placeholder="4PM25CS001"
+                placeholder="4PM25XX000"
                 value={usnInput}
                 onChange={(event) => setUsnInput(event.target.value.toUpperCase())}
                 required
