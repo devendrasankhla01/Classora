@@ -66,11 +66,8 @@ export function FloatingNav() {
                       damping: 23,
                       mass: 0.7,
                     }}
-                    className="absolute inset-0 z-[-1] rounded-full bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_6px_22px_rgba(56,182,255,0.48),inset_0_1.5px_2px_rgba(255,255,255,0.85)]"
-                  >
-                    {/* Liquid Specular Top Highlight */}
-                    <span className="absolute inset-x-2 top-1 h-1 rounded-full bg-white/40 blur-[0.5px]" />
-                  </motion.div>
+                    className="absolute inset-0 z-[-1] rounded-full bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_6px_22px_rgba(56,182,255,0.48)]"
+                  />
                 )}
                 <motion.span
                   animate={active ? { scale: [0.85, 1.2, 0.96, 1.03, 1], rotate: [0, -3, 3, 0] } : { scale: 1, rotate: 0 }}

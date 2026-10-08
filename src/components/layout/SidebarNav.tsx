@@ -100,10 +100,8 @@ export function SidebarNav() {
                           damping: 23,
                           mass: 0.7,
                         }}
-                        className="absolute inset-0 z-[-1] rounded-2xl bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_6px_22px_rgba(56,182,255,0.48),inset_0_1.5px_2px_rgba(255,255,255,0.85)]"
-                      >
-                        <span className="absolute inset-x-2 top-1 h-1.5 rounded-full bg-white/40 blur-[0.5px]" />
-                      </motion.div>
+                        className="absolute inset-0 z-[-1] rounded-2xl bg-gradient-to-r from-[#38b6ff] via-[#1bb0ff] to-[#0094e8] shadow-[0_6px_22px_rgba(56,182,255,0.48)]"
+                      />
                     )}
                     <Icon name={item.icon} size={20} filled={active} className={active ? 'text-white' : 'text-slate-400'} />
                     <span>{item.label}</span>
