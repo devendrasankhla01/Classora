@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
@@ -67,13 +68,15 @@ export function AttendanceActions({
         }
       />
       {showUndo ? (
-        <button
+        <motion.button
           type="button"
           onClick={() => void clearAttendance(occurrence.id)}
-className="min-h-[40px] rounded-pill px-3 text-label-md text-ink-secondary underline decoration-ink-muted/40 underline-offset-4"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="min-h-[40px] rounded-pill px-3 text-label-md text-ink-secondary underline decoration-ink-muted/40 underline-offset-4"
         >
           Undo
-        </button>
+        </motion.button>
       ) : null}
     </div>
   );
@@ -95,16 +98,19 @@ function ActionButton({
   compact?: boolean;
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
       disabled={loading}
+      whileHover={{ scale: 1.05, y: -1 }}
+      whileTap={{ scale: 0.9 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
       className={cn(
-        'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill font-bold transition active:scale-95 disabled:opacity-60',
-        compact ? 'px-3.5 text-body-sm' : 'px-4 text-body-sm',
-        tone === 'safe' && 'bg-safe-50 text-safe-700',
-        tone === 'critical' && 'bg-critical-50 text-critical-600',
-        tone === 'neutral' && 'bg-surface-sunken text-ink-secondary',
+        'inline-flex min-h-[40px] items-center gap-1.5 rounded-pill font-bold transition-shadow disabled:opacity-60',
+        compact ? 'px-3.5 text-body-sm shadow-xs' : 'px-4 text-body-sm shadow-sm',
+        tone === 'safe' && 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60',
+        tone === 'critical' && 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60',
+        tone === 'neutral' && 'bg-surface-sunken text-ink-secondary hover:bg-slate-200/60 border border-slate-200/60',
       )}
     >
       <Icon
@@ -113,6 +119,6 @@ function ActionButton({
         className={loading ? 'animate-spin' : ''}
       />
       {label}
-    </button>
+    </motion.button>
   );
 }

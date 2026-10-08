@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/cn';
 import { Icon } from './Icon';
@@ -15,26 +16,26 @@ interface ToggleProps {
 
 export function Toggle({ checked, onChange, label, id }: ToggleProps) {
   return (
-    <button
+    <motion.button
       type="button"
       id={id}
       role="switch"
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
+      whileTap={{ scale: 0.92 }}
       className={cn(
-        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none',
-        checked ? 'bg-brand-600' : 'bg-slate-200',
+        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-1 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-500/30',
+        checked ? 'bg-gradient-to-r from-indigo-600 to-brand-600 shadow-[0_2px_8px_rgba(79,70,229,0.4)]' : 'bg-slate-200/90 shadow-inner',
       )}
     >
-      <span
+      <motion.span
         aria-hidden="true"
-        className={cn(
-          'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out',
-          checked ? 'translate-x-5' : 'translate-x-0',
-        )}
+        animate={{ x: checked ? 20 : 0 }}
+        transition={{ type: 'spring', stiffness: 600, damping: 30 }}
+        className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md ring-0"
       />
-    </button>
+    </motion.button>
   );
 }
 
@@ -55,25 +56,29 @@ export function Stepper({ value, onChange, min = 50, max = 95, step = 5, label, 
   const clamp = (next: number) => Math.min(max, Math.max(min, next));
   return (
     <div className="flex items-center gap-1 rounded-pill bg-surface p-1 shadow-ambient ring-1 ring-hairline">
-      <button
+      <motion.button
         type="button"
         aria-label={`Decrease ${label}`}
         onClick={() => onChange(clamp(value - step))}
-        className="grid h-8 w-8 place-items-center rounded-full text-ink-secondary transition active:scale-95"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.85 }}
+        className="grid h-8 w-8 place-items-center rounded-full text-ink-secondary transition active:bg-slate-100"
       >
         <Icon name="remove" size={16} />
-      </button>
+      </motion.button>
       <span className="min-w-[52px] text-center text-label-lg tabular-nums">
         {format ? format(value) : value}
       </span>
-      <button
+      <motion.button
         type="button"
         aria-label={`Increase ${label}`}
         onClick={() => onChange(clamp(value + step))}
-        className="grid h-8 w-8 place-items-center rounded-full text-ink-secondary transition active:scale-95"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.85 }}
+        className="grid h-8 w-8 place-items-center rounded-full text-ink-secondary transition active:bg-slate-100"
       >
         <Icon name="add" size={16} />
-      </button>
+      </motion.button>
     </div>
   );
 }
@@ -129,10 +134,13 @@ export function Button({
   ...rest
 }: ButtonProps) {
   return (
-    <button
-      {...rest}
+    <motion.button
+      whileHover={{ scale: rest.disabled ? 1 : 1.015, y: rest.disabled ? 0 : -1 }}
+      whileTap={{ scale: rest.disabled ? 1 : 0.95, y: rest.disabled ? 0 : 1 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+      {...(rest as any)}
       className={cn(
-        'inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-2 rounded-xl sm:rounded-pill px-4 sm:px-5 text-label-lg font-semibold transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex min-h-11 sm:min-h-12 items-center justify-center gap-2 rounded-xl sm:rounded-pill px-4 sm:px-5 text-label-lg font-semibold transition-shadow duration-150 disabled:cursor-not-allowed disabled:opacity-50',
         block && 'w-full',
         variant === 'primary' &&
           'bg-gradient-to-b from-indigo-500 via-indigo-600 to-indigo-700 text-white shadow-[0_6px_20px_rgba(79,70,229,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] hover:brightness-105 active:shadow-[0_2px_8px_rgba(79,70,229,0.3)]',
@@ -147,7 +155,7 @@ export function Button({
       {icon ? <Icon name={icon} size={18} /> : null}
       {children}
       {trailingIcon ? <Icon name={trailingIcon} size={18} /> : null}
-    </button>
+    </motion.button>
   );
 }
 

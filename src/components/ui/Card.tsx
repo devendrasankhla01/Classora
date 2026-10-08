@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/cn';
 
@@ -9,31 +10,50 @@ interface CardProps {
   variant?: 'elevated' | 'inset' | 'plain';
   as?: 'div' | 'section' | 'article' | 'li';
   onClick?: () => void;
+  layoutId?: string;
 }
 
 /**
- * The porcelain card: white surface, generous radius, ambient shadow only.
+ * Modern Neumorphic Soft UI Porcelain Card with dynamic spring hover lift and tactile interactions.
  */
-export function Card({ children, className, variant = 'elevated', as = 'div', onClick }: CardProps) {
-  const Tag = as;
+export function Card({ children, className, variant = 'elevated', onClick, layoutId }: CardProps) {
   return (
-    <Tag
+    <motion.div
+      layoutId={layoutId}
+      whileHover={
+        onClick
+          ? {
+              y: -3,
+              scale: 1.01,
+              transition: { type: 'spring', stiffness: 450, damping: 25 },
+            }
+          : undefined
+      }
+      whileTap={
+        onClick
+          ? {
+              scale: 0.98,
+              y: 0,
+              transition: { duration: 0.12 },
+            }
+          : undefined
+      }
       className={cn(
-        'relative transition-all duration-200',
+        'relative transition-shadow duration-200',
         // Level 1 dashboard card: glassmorphic surface, 16px padding on mobile -> 24px on desktop
         variant === 'elevated' &&
-          'glass-card rounded-2xl sm:rounded-card p-4 sm:p-5.5 lg:p-6 shadow-ambient ring-1 ring-black/[0.04]',
+          'glass-card rounded-2xl sm:rounded-card p-4 sm:p-5.5 lg:p-6 shadow-ambient ring-1 ring-black/[0.04] hover:shadow-elevated',
         variant === 'inset' &&
-          'rounded-xl sm:rounded-block border border-divider bg-surface-muted/90 backdrop-blur-sm p-3.5 sm:p-4',
+          'rounded-xl sm:rounded-block border border-divider bg-surface-muted/90 backdrop-blur-sm p-3.5 sm:p-4 shadow-inner',
         variant === 'plain' &&
           'rounded-xl sm:rounded-block bg-surface-muted/90 p-3.5 sm:p-4',
-        onClick && 'cursor-pointer active:scale-[0.985] hover:border-brand-500/30',
+        onClick && 'cursor-pointer hover:border-indigo-400/40',
         className,
       )}
       onClick={onClick}
     >
       {children}
-    </Tag>
+    </motion.div>
   );
 }
 
