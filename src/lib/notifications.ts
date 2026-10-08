@@ -36,7 +36,7 @@ const MAX_PER_KIND = 6;
 
 export function buildNotifications(input: NotificationInput): DraftNotification[] {
   const { occurrences, attendance, subjects, overrides, profile, today, now } = input;
-  const target = profile?.attendanceTarget ?? 75;
+  const target = profile?.attendanceTarget ?? 85;
   const drafts: DraftNotification[] = [];
 
   const markedOccurrenceIds = new Set(attendance.map((record) => record.occurrenceId));

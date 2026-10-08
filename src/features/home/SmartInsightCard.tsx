@@ -15,7 +15,7 @@ import { formatMediumDate } from '@/lib/date';
 export function SmartInsightCard() {
   const insights = useSubjectInsights();
   const profile = useClassora((state) => state.profile);
-  const target = profile?.attendanceTarget ?? 75;
+  const target = profile?.attendanceTarget ?? 85;
 
   const atRisk = insights
     .filter((insight) => insight.summary.percentage !== null && insight.summary.percentage < insight.target)

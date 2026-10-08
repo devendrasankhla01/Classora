@@ -153,7 +153,7 @@ export function useSubjectInsights(): SubjectInsight[] {
   const now = useNow();
 
   return useMemo(() => {
-    const target = profile?.attendanceTarget ?? 75;
+    const target = profile?.attendanceTarget ?? 85;
     const rows = summaries();
 
     return rows.map(({ subject, summary }) => {
@@ -184,7 +184,7 @@ export function useAggregateStats(): AggregateStats & { confidence: number } {
   const confidence = useClassora((state) => state.confidence);
 
   return useMemo(() => {
-    const target = profile?.attendanceTarget ?? 75;
+    const target = profile?.attendanceTarget ?? 85;
     const stats = aggregate(
       summaries().map((row) => row.summary),
       target,

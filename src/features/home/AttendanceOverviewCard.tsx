@@ -16,7 +16,7 @@ export function AttendanceOverviewCard() {
   const stats = useAggregateStats();
   const confidence = useConfidence();
   const profile = useClassora((state) => state.profile);
-  const target = profile?.attendanceTarget ?? 75;
+  const target = profile?.attendanceTarget ?? 85;
 
   // Safe misses are simulated per subject against its own upcoming classes,
   // so lab weights and per-subject targets are respected.

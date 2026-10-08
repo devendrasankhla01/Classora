@@ -63,7 +63,7 @@ export const profileFrom = (row: Row): Profile => ({
   studentId: (row.student_id as string) ?? null,
   batchRoll: (row.batch_roll as string) ?? null,
   timezone: String(row.timezone ?? 'Asia/Kolkata'),
-  attendanceTarget: Number(row.attendance_target ?? 75),
+  attendanceTarget: Number(row.attendance_target ?? 85),
   safeMarginAlertClasses: Number(row.safe_margin_alert_classes ?? 3),
   defaultCountMode: (row.default_count_mode as Profile['defaultCountMode']) ?? 'period',
   createdAt: String(row.created_at),

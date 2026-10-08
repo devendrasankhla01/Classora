@@ -23,7 +23,7 @@ describe('demo dataset', () => {
     expect(dataset.semester.name).toBe('Semester 5');
     expect(dataset.semester.isActive).toBe(true);
     expect(dataset.profile.name).toBe('Devendra');
-    expect(dataset.profile.attendanceTarget).toBe(75);
+    expect(dataset.profile.attendanceTarget).toBe(85);
     expect(dataset.subjects).toHaveLength(5);
     expect(dataset.versions.filter((version) => version.isCurrent)).toHaveLength(1);
   });

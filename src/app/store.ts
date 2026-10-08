@@ -238,7 +238,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
             semesterLabel: 'Semester III',
             batchRoll: storedSession?.studentId ?? '4PM25CS001',
             timezone: 'Asia/Kolkata',
-            attendanceTarget: 75,
+            attendanceTarget: 85,
             safeMarginAlertClasses: 3,
             defaultCountMode: 'period',
             createdAt: now,
@@ -297,7 +297,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
             semesterLabel: 'Semester III',
             batchRoll: '4PM25CS001',
             timezone: 'Asia/Kolkata',
-            attendanceTarget: 75,
+            attendanceTarget: 85,
             safeMarginAlertClasses: 3,
             defaultCountMode: 'period',
             createdAt: now,
@@ -305,6 +305,16 @@ export const useClassora = create<ClassoraState>((set, get) => {
           };
           await store.saveProfile(defaultProfile);
           profile = defaultProfile;
+        }
+
+        if (typeof window !== 'undefined') {
+          const storedTarget = window.localStorage.getItem('classora_attendance_target');
+          if (storedTarget && profile) {
+            const parsedTarget = Number(storedTarget);
+            if (!isNaN(parsedTarget) && parsedTarget > 0) {
+              profile = { ...profile, attendanceTarget: parsedTarget };
+            }
+          }
         }
 
         let semester = semesters.find((item) => item.isActive && !item.archived) ?? semesters[0] ?? null;
@@ -439,7 +449,7 @@ export const useClassora = create<ClassoraState>((set, get) => {
 
     summaries: () => {
       const { subjects, occurrences, attendance, profile } = get();
-      const target = profile?.attendanceTarget ?? 75;
+      const target = profile?.attendanceTarget ?? 85;
       const today = todayKey();
 
       return subjects
@@ -822,6 +832,9 @@ export const useClassora = create<ClassoraState>((set, get) => {
     },
 
     setAttendanceTarget: async (target) => {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('classora_attendance_target', String(target));
+      }
       const profile = get().profile;
       if (!profile) return;
       const updated: Profile = { ...profile, attendanceTarget: target, updatedAt: nowInstant() };

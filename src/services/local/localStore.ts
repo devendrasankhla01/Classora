@@ -42,10 +42,14 @@ export class LocalStore implements DataStore {
   /* Profile & semester -------------------------------------------------- */
 
   async getProfile(): Promise<Profile | null> {
-    return (await this.db.profile.toCollection().first()) ?? null;
+    const list = await this.db.profile.toArray();
+    if (list.length === 0) return null;
+    list.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+    return list[0] ?? null;
   }
 
   async saveProfile(profile: Profile): Promise<void> {
+    await this.db.profile.clear();
     await this.db.profile.put(profile);
   }
 

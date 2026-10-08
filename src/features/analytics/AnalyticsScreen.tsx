@@ -45,7 +45,7 @@ export function AnalyticsScreen() {
   const insights = useSubjectInsights();
   const stats = useAggregateStats();
   const profile = useClassora((state) => state.profile);
-  const target = profile?.attendanceTarget ?? 75;
+  const target = profile?.attendanceTarget ?? 85;
 
   const range = useMemo(() => periodRange(period, todayKey()), [period]);
 

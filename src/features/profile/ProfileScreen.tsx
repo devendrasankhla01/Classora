@@ -34,7 +34,7 @@ export function ProfileScreen() {
   const resetDemoData = useClassora((state) => state.resetDemoData);
 
   const currentVersion = versions.find((version) => version.isCurrent) ?? versions[0] ?? null;
-  const target = profile?.attendanceTarget ?? 75;
+  const target = profile?.attendanceTarget ?? 85;
   const countMode = profile?.defaultCountMode ?? 'period';
 
   return (

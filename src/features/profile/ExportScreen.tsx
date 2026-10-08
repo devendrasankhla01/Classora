@@ -114,7 +114,7 @@ export function ExportScreen() {
       ['Student ID', profile?.studentId ?? ''],
       ['Semester', semester?.name ?? ''],
       ['Semester window', range ? `${range.startDate} to ${range.endDate}` : 'not set'],
-      ['Target', `${profile?.attendanceTarget ?? 75}%`],
+      ['Target', `${profile?.attendanceTarget ?? 85}%`],
       ['Overall attendance', formatPercent(summary.percentage)],
       ['Attended / Conducted', `${summary.attended} / ${summary.conducted}`],
       [],
