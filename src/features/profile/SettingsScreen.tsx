@@ -154,19 +154,40 @@ className="mt-3 flex items-center gap-3 text-label-lg text-brand-700"
           </Link>
         </Card>
 
+        <Card>
+          <SectionHeader title="About & Credits" subtitle="Creative Credit & Architecture" />
+          <div className="flex items-center justify-between rounded-block bg-surface-muted px-3.5 py-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                <Icon name="palette" size={18} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-label-lg font-semibold text-ink truncate">Designed by Devendra Sankhla</p>
+                <p className="text-label-md text-ink-secondary truncate">CampusOne UI/UX & System Architecture</p>
+              </div>
+            </div>
+            <Pill tone="brand">CC</Pill>
+          </div>
+        </Card>
+
         <button
           type="button"
           onClick={() =>
-            announce({ tone: 'info', message: 'Classora is up to date — build 1.0.0' })
+            announce({ tone: 'info', message: 'CampusOne is up to date — build 1.0.0' })
           }
           className="w-full rounded-pill py-3 text-label-md text-ink-muted"
         >
           Check for updates
         </button>
 
-        <p className="pb-2 text-center text-label-sm text-ink-muted">
-          Classora • Build 1.0.0 • Offline first, built for students
-        </p>
+        <div className="pb-6 text-center space-y-1">
+          <p className="text-label-sm text-ink-muted">
+            CampusOne • Build 1.0.0 • Offline first, built for students
+          </p>
+          <p className="text-label-sm font-semibold text-ink-secondary">
+            Designed by Devendra Sankhla
+          </p>
+        </div>
       </div>
     </>
   );

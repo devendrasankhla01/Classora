@@ -167,6 +167,10 @@ export function ProfileScreen() {
         >
           Clear Application Data
         </button>
+
+        <p className="text-center text-xs text-slate-400 font-medium pb-2">
+          Designed by Devendra Sankhla
+        </p>
       </div>
 
       <BottomSheet
