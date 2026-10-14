@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useClassora } from '@/app/store';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 import { useTodayOccurrences } from '@/hooks/useScheduleData';
 import { Icon } from '@/components/ui/Icon';
 import { formatTimeRange } from '@/lib/date';
-import { haptics } from '@/platform';
+import { cn } from '@/lib/cn';
 
 interface QuickActionModalProps {
   onClose: () => void;
@@ -11,8 +12,9 @@ interface QuickActionModalProps {
 
 export function QuickActionModal({ onClose }: QuickActionModalProps) {
   const navigate = useNavigate();
+  const { canMarkAttendance } = useCurrentUserRole();
   const today = useTodayOccurrences();
-  const markAttendance = useClassora((state) => state.markAttendance);
+  const attendance = useClassora((state) => state.attendance);
   const subjects = useClassora((state) => state.subjects);
 
   return (
@@ -25,8 +27,12 @@ export function QuickActionModal({ onClose }: QuickActionModalProps) {
               <Icon name="add_task" size={22} />
             </span>
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Quick Actions</h3>
-              <p className="text-xs text-slate-500 font-medium">Mark attendance or manage schedule</p>
+              <h3 className="text-lg font-bold text-slate-900">
+                {canMarkAttendance ? 'Faculty Quick Actions' : 'Academic Quick Actions'}
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                {canMarkAttendance ? 'Take class roll call or manage timetable' : 'Today’s schedule & verified status'}
+              </p>
             </div>
           </div>
           <button
@@ -42,46 +48,62 @@ export function QuickActionModal({ onClose }: QuickActionModalProps) {
         {today.length > 0 ? (
           <div className="space-y-3">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Today's Classes
+              Today's Schedule & Attendance
             </p>
             <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
               {today.map((occurrence) => {
                 const sub = subjects.find((s) => s.id === occurrence.subjectId);
+                const record = attendance.find((a) => a.occurrenceId === occurrence.id);
+
                 return (
                   <div
                     key={occurrence.id}
                     className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100"
                   >
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">{sub?.name ?? 'Lecture'}</p>
-                      <p className="text-xs text-slate-500 font-medium">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-slate-900 truncate">{sub?.name ?? 'Lecture'}</p>
+                      <p className="text-xs text-slate-500 font-medium truncate">
                         {formatTimeRange(occurrence.startTime, occurrence.endTime)} • {occurrence.room ?? 'Room TBD'}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void haptics.impact('light');
-                          void markAttendance(occurrence.id, 'present');
-                          onClose();
-                        }}
-                        className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-500 text-white shadow-sm hover:bg-emerald-600 transition"
-                      >
-                        Present
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void haptics.impact('light');
-                          void markAttendance(occurrence.id, 'absent');
-                          onClose();
-                        }}
-                        className="px-3 py-1.5 text-xs font-bold rounded-xl bg-rose-500 text-white shadow-sm hover:bg-rose-600 transition"
-                      >
-                        Absent
-                      </button>
-                    </div>
+
+                    {canMarkAttendance ? (
+                      // Teacher controls
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClose();
+                            navigate(`/faculty/attendance?occurrenceId=${occurrence.id}&date=${occurrence.date}`);
+                          }}
+                          className="px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition flex items-center gap-1"
+                        >
+                          <Icon name="fact_check" size={14} />
+                          {record ? 'Edit Roll' : 'Roll Call'}
+                        </button>
+                      </div>
+                    ) : (
+                      // Student read-only indicator
+                      <div className="shrink-0">
+                        {record ? (
+                          <span
+                            className={cn(
+                              'px-2.5 py-1 text-xs font-extrabold rounded-xl inline-flex items-center gap-1',
+                              record.status === 'present'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-rose-100 text-rose-800',
+                            )}
+                          >
+                            <Icon name={record.status === 'present' ? 'check' : 'close'} size={13} />
+                            {record.status === 'present' ? 'Present' : 'Absent'}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-bold text-slate-400 bg-slate-200/60 px-2 py-1 rounded-lg">
+                            Scheduled
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

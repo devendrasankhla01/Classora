@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { Icon } from '@/components/ui/Icon';
 import { useClassora } from '@/app/store';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 
 interface AppHeaderProps {
   eyebrow?: string;
@@ -38,6 +39,7 @@ export function AppHeader({
   onSearchClick,
 }: AppHeaderProps) {
   const profile = useClassora((state) => state.profile);
+  const { isStudent, canMarkAttendance, userLabel } = useCurrentUserRole();
   const navigate = useNavigate();
   const firstName = profile?.name ? profile.name.split(' ')[0] : 'Shahinur';
 
@@ -64,18 +66,40 @@ export function AppHeader({
           )}
 
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 truncate tracking-tight">
-              {title || `Hi, ${firstName}`}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 truncate tracking-tight">
+                {title || `Hi, ${firstName}`}
+              </h1>
+              <span
+                className={cn(
+                  'hidden xs:inline-flex items-center text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border',
+                  isStudent
+                    ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-800',
+                )}
+              >
+                {isStudent ? 'Student (View Only)' : `${userLabel}`}
+              </span>
+            </div>
             <p className="text-xs font-bold text-slate-400 mt-0.5">
               {overline ?? '01 Jan 2024'}
             </p>
           </div>
         </div>
 
-        {/* Right Section: Actions (Notification Bell) */}
+        {/* Right Section: Actions (Faculty Roll Call shortcut + Notification Bell) */}
         {showActions ? (
           <div className="flex shrink-0 items-center gap-2.5">
+            {canMarkAttendance ? (
+              <Link
+                to="/faculty/attendance"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition"
+              >
+                <Icon name="fact_check" size={16} />
+                Roll Call
+              </Link>
+            ) : null}
+
             {showSearch ? (
               <button
                 type="button"

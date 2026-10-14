@@ -253,8 +253,9 @@ export function SubjectDetailScreen() {
               );
             })}
           </ul>
-          <p className="mt-3 text-label-md text-ink-muted">
-            Corrections are always possible — open a class from the Timetable timeline to change a record.
+          <p className="mt-3 text-label-md text-ink-muted flex items-center gap-1.5">
+            <Icon name="verified_user" size={16} className="text-emerald-600 shrink-0" />
+            Official Attendance Register • Records are submitted and updated by course faculty during lectures.
           </p>
         </Card>
       </div>

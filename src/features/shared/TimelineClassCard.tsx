@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 import { occurrenceState } from '@/lib/occurrenceState';
 import { formatTimeRange } from '@/lib/date';
 import { Icon } from '@/components/ui/Icon';
-import { AttendanceActions } from './AttendanceActions';
 import type { ClassOccurrence } from '@/types/domain';
 
 interface TimelineClassCardProps {
@@ -30,14 +30,13 @@ export function TimelineClassCard({
   onModify,
   showActions = true,
 }: TimelineClassCardProps) {
+  const { canMarkAttendance } = useCurrentUserRole();
   const subjects = useClassora((state) => state.subjects);
   const attendance = useClassora((state) => state.attendance);
 
   const subject = subjects.find((item) => item.id === occurrence.subjectId);
   const record = attendance.find((item) => item.occurrenceId === occurrence.id);
   const info = occurrenceState(occurrence, now, record?.status);
-
-  const isPast = new Date(occurrence.endDateTime).getTime() <= now.getTime();
 
   // Progress simulation for class/task matching screenshot metrics
   let progressPercent = 60;
@@ -150,25 +149,45 @@ export function TimelineClassCard({
         {/* Action Row */}
         {showActions ? (
           <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-100/80 flex-wrap">
-            {isPast && info.state === 'unmarked' ? (
-              <AttendanceActions occurrence={occurrence} compact />
-            ) : isPast && record ? (
-              <button
-                type="button"
-                onClick={() => onModify?.(occurrence)}
-                className="text-[11px] sm:text-xs font-extrabold text-[#38B6FF] hover:text-sky-700 underline"
-              >
-                Edit ({record.status})
-              </button>
+            {canMarkAttendance ? (
+              // Faculty controls
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`/faculty/attendance?occurrenceId=${occurrence.id}&date=${occurrence.date}`}
+                  className="text-[11px] sm:text-xs font-extrabold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                >
+                  <Icon name="fact_check" size={14} />
+                  {record ? `Update Roll (${record.status})` : 'Take Roll Call'}
+                </Link>
+              </div>
             ) : (
-              <Link
-                to={`/attendance/${subject?.id ?? ''}`}
-                className="text-[11px] sm:text-xs font-extrabold text-[#38B6FF] hover:underline flex items-center gap-1"
-              >
-                Details
-                <Icon name="arrow_forward" size={14} />
-              </Link>
+              // Student view: strictly read-only status
+              <div className="flex items-center gap-2">
+                {record ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full">
+                    <Icon
+                      name={record.status === 'present' ? 'check_circle' : 'cancel'}
+                      size={14}
+                      className={record.status === 'present' ? 'text-emerald-600' : 'text-rose-600'}
+                    />
+                    {record.status === 'present' ? 'Present' : 'Absent'} (Faculty Marked)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-400">
+                    <Icon name="schedule" size={14} />
+                    Scheduled • Awaiting Faculty
+                  </span>
+                )}
+              </div>
             )}
+
+            <Link
+              to={`/attendance/${subject?.id ?? ''}`}
+              className="text-[11px] sm:text-xs font-extrabold text-[#38B6FF] hover:underline flex items-center gap-1"
+            >
+              Details
+              <Icon name="arrow_forward" size={14} />
+            </Link>
           </div>
         ) : null}
       </div>

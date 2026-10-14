@@ -7,6 +7,7 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useClassora } from '@/app/store';
 import { Avatar } from '@/components/ui/controls';
 import { useAggregateStats } from '@/hooks/useScheduleData';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 import { QuickActionModal } from '@/components/attendance/QuickActionModal';
 
 interface NavItem {
@@ -15,19 +16,23 @@ interface NavItem {
   icon: string;
 }
 
-const ITEMS: NavItem[] = [
-  { to: '/', label: 'Home', icon: 'home' },
-  { to: '/timetable', label: 'Timetable', icon: 'calendar_today' },
-  { to: '/attendance', label: 'Attendance', icon: 'task_alt' },
-  { to: '/analytics', label: 'Analytics', icon: 'bar_chart' },
-  { to: '/profile', label: 'Profile', icon: 'person' },
-];
-
 export function SidebarNav() {
   const location = useLocation();
   const profile = useClassora((state) => state.profile);
   const stats = useAggregateStats();
+  const { canMarkAttendance } = useCurrentUserRole();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const items: NavItem[] = [
+    { to: '/', label: 'Home', icon: 'home' },
+    { to: '/timetable', label: 'Timetable', icon: 'calendar_today' },
+    { to: '/attendance', label: 'Attendance', icon: 'task_alt' },
+    ...(canMarkAttendance
+      ? [{ to: '/faculty/attendance', label: 'Faculty Roll Call', icon: 'fact_check' }]
+      : []),
+    { to: '/analytics', label: 'Analytics', icon: 'bar_chart' },
+    { to: '/profile', label: 'Profile', icon: 'person' },
+  ];
 
   return (
     <>
@@ -66,8 +71,8 @@ export function SidebarNav() {
             onClick={() => setModalOpen(true)}
             className="neu-pill-btn w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-xs flex items-center justify-center gap-2"
           >
-            <Icon name="add" size={18} weight={700} />
-            Quick Mark / Action
+            <Icon name={canMarkAttendance ? 'fact_check' : 'visibility'} size={18} weight={700} />
+            {canMarkAttendance ? 'Take Roll Call' : 'Quick Actions'}
           </motion.button>
 
           {/* Navigation Section */}
@@ -75,7 +80,7 @@ export function SidebarNav() {
             <p className="px-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">
               Main Menu
             </p>
-            {ITEMS.map((item) => {
+            {items.map((item) => {
               const active =
                 item.to === '/'
                   ? location.pathname === '/'

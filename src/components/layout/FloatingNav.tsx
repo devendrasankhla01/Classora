@@ -4,6 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/components/ui/Icon';
 import { haptics } from '@/platform';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 
 interface NavItem {
   to: string;
@@ -11,15 +12,18 @@ interface NavItem {
   icon: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Home', icon: 'home' },
-  { to: '/timetable', label: 'Timetable', icon: 'calendar_today' },
-  { to: '/analytics', label: 'Analytics', icon: 'bar_chart' },
-  { to: '/profile', label: 'Profile', icon: 'person' },
-];
-
 export function FloatingNav() {
   const location = useLocation();
+  const { canMarkAttendance } = useCurrentUserRole();
+
+  const navItems: NavItem[] = [
+    { to: '/', label: 'Home', icon: 'home' },
+    { to: '/timetable', label: 'Timetable', icon: 'calendar_today' },
+    canMarkAttendance
+      ? { to: '/faculty/attendance', label: 'Roll Call', icon: 'fact_check' }
+      : { to: '/attendance', label: 'Attendance', icon: 'task_alt' },
+    { to: '/profile', label: 'Profile', icon: 'person' },
+  ];
 
   return (
     <nav
@@ -35,7 +39,7 @@ export function FloatingNav() {
           'glass-card-elevated backdrop-blur-2xl border border-white/90 shadow-[0_16px_40px_rgba(31,38,135,0.15)] bg-white/80',
         )}
       >
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active =
             item.to === '/'
               ? location.pathname === '/'

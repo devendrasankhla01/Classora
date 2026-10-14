@@ -75,6 +75,11 @@ const AdminDashboardScreen = lazy(() =>
     default: module.AdminDashboardScreen,
   })),
 );
+const FacultyAttendanceScreen = lazy(() =>
+  import('@/features/attendance/FacultyAttendanceScreen').then((module) => ({
+    default: module.FacultyAttendanceScreen,
+  })),
+);
 
 import {
   isOnboardingCompleted,
@@ -186,6 +191,7 @@ export function AppRoutes() {
           <Route path="/timetable/versions" element={<TimetableVersionsScreen />} />
           <Route path="/timetable/calendar" element={<AcademicCalendarScreen />} />
           <Route path="/attendance" element={<AttendanceScreen />} />
+          <Route path="/faculty/attendance" element={<FacultyAttendanceScreen />} />
           <Route path="/attendance/review" element={<ReviewAttendanceScreen />} />
           <Route path="/attendance/:subjectId" element={<SubjectDetailScreen />} />
           <Route path="/analytics" element={<AnalyticsScreen />} />

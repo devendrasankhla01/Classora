@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 import { Icon } from '@/components/ui/Icon';
 import type { AttendanceStatus, ClassOccurrence } from '@/types/domain';
 
@@ -15,8 +16,8 @@ interface AttendanceActionsProps {
 }
 
 /**
- * Quick attendance controls for a finished class. Marking is optimistic and
- * always reversible — undo restores the previous state.
+ * Attendance controls — strictly restricted to Faculty, HOD, and Principal.
+ * Students have read-only visibility into verified attendance.
  */
 export function AttendanceActions({
   occurrence,
@@ -24,11 +25,22 @@ export function AttendanceActions({
   className,
   showUndo = false,
 }: AttendanceActionsProps) {
+  const { canMarkAttendance } = useCurrentUserRole();
   const markAttendance = useClassora((state) => state.markAttendance);
   const cancelClass = useClassora((state) => state.cancelClass);
   const clearAttendance = useClassora((state) => state.clearAttendance);
 
   const [busy, setBusy] = useState<AttendanceStatus | 'cancelled' | null>(null);
+
+  // If student: do not allow marking attendance
+  if (!canMarkAttendance) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 bg-slate-100/80 px-2.5 py-1 rounded-full">
+        <Icon name="verified_user" size={13} className="text-emerald-500" />
+        Faculty Attendance Only
+      </span>
+    );
+  }
 
   const run = async (key: AttendanceStatus | 'cancelled', action: () => Promise<void>) => {
     setBusy(key);

@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-import { useClassora, type AttendanceAction } from '@/app/store';
+import { useClassora } from '@/app/store';
 import { useNextClass, useAggregateStats } from '@/hooks/useScheduleData';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
 import { formatCountdown, formatTimeRange } from '@/lib/date';
 import { Icon } from '@/components/ui/Icon';
 import { StatusChip } from '@/components/ui/chips';
@@ -15,11 +16,10 @@ import { AnimatedCounter } from '@/components/ui/AnimatedContainer';
 export function NextClassCard() {
   const { occurrence, subject, state, secondsUntilStart, indexInDay, dayCount } =
     useNextClass();
-  const markAttendance = useClassora((action) => action.markAttendance);
+  const { canMarkAttendance } = useCurrentUserRole();
   const attendance = useClassora((action) => action.attendance);
   const stats = useAggregateStats();
   const profile = useClassora((state) => state.profile);
-  const now = new Date();
   const target = profile?.attendanceTarget ?? 85;
 
   if (!occurrence || !subject) {
@@ -113,8 +113,6 @@ export function NextClassCard() {
   }
 
   const record = attendance.find((item) => item.occurrenceId === occurrence.id);
-  const finished = new Date(occurrence.endDateTime).getTime() < now.getTime();
-  const quick = (action: AttendanceAction) => () => void markAttendance(occurrence.id, action);
 
   return (
     <motion.section
@@ -166,62 +164,57 @@ export function NextClassCard() {
             </div>
           </div>
 
-          {/* Quick Mark Actions & Buttons matching reference image */}
+          {/* Quick Mark Actions & Buttons */}
           <div className="pt-2 flex items-center gap-3 flex-wrap">
-            {finished ? (
-              record ? (
-                <div className="flex items-center gap-2">
-                  <StatusChip tone={record.status === 'present' ? 'safe' : 'critical'} label={record.status === 'present' ? 'Present' : 'Absent'} />
-                  <button
-                    type="button"
-                    onClick={() => void markAttendance(occurrence.id, record.status === 'present' ? 'absent' : 'present')}
-                    className="text-xs font-bold text-sky-400 underline decoration-sky-400/40"
-                  >
-                    Change
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={quick('present')}
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition"
-                  >
-                    Mark Present
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={quick('absent')}
-                    className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition"
-                  >
-                    Mark Absent
-                  </motion.button>
-                </div>
-              )
-            ) : (
-              <>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <Link
-                    to="/timetable"
-                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-blue-500/30 hover:opacity-95 transition"
-                  >
-                    View Lecture Details
-                    <Icon name="arrow_forward" size={16} />
-                  </Link>
-                </motion.div>
-
-                <button
-                  type="button"
-                  aria-label="Pin Card"
-                  className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-800/90 text-slate-300 border border-slate-700/80 hover:text-white transition active:scale-95"
+            {canMarkAttendance ? (
+              // Faculty controls
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link
+                  to={`/faculty/attendance?occurrenceId=${occurrence.id}&date=${occurrence.date}`}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5"
                 >
-                  <Icon name="push_pin" size={18} />
-                </button>
-              </>
+                  <Icon name="fact_check" size={16} />
+                  {record ? 'Update Roll Call' : 'Take Roll Call'}
+                </Link>
+                {record ? (
+                  <StatusChip
+                    tone={record.status === 'present' ? 'safe' : 'critical'}
+                    label={record.status === 'present' ? 'Present' : 'Absent'}
+                  />
+                ) : (
+                  <span className="text-xs text-amber-400 font-semibold flex items-center gap-1">
+                    <Icon name="pending" size={14} /> Pending
+                  </span>
+                )}
+              </div>
+            ) : (
+              // Student view: Strictly read-only attendance
+              <div className="flex items-center gap-3 flex-wrap">
+                {record ? (
+                  <div className="flex items-center gap-2">
+                    <StatusChip
+                      tone={record.status === 'present' ? 'safe' : 'critical'}
+                      label={record.status === 'present' ? 'Present' : 'Absent'}
+                    />
+                    <span className="text-xs font-semibold text-sky-400 flex items-center gap-1">
+                      <Icon name="verified" size={14} className="text-emerald-400" />
+                      Recorded by Faculty
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                    <Icon name="schedule" size={14} className="text-sky-400" />
+                    Scheduled • Awaiting Faculty Roll Call
+                  </span>
+                )}
+                <Link
+                  to="/timetable"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-xs font-extrabold text-white shadow-lg shadow-blue-500/30 hover:opacity-95 transition"
+                >
+                  View Lecture
+                  <Icon name="arrow_forward" size={14} />
+                </Link>
+              </div>
             )}
           </div>
         </div>

@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { cn } from '@/lib/cn';
 import { useClassora } from '@/app/store';
-import { useConfidence, useMissingAttendance, useNow } from '@/hooks/useScheduleData';
+import { useCurrentUserRole } from '@/hooks/useCurrentUserRole';
+import { useMissingAttendance, useNow } from '@/hooks/useScheduleData';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { Card, SectionHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/controls';
@@ -18,11 +19,11 @@ import type { AttendanceStatus, ClassOccurrence } from '@/types/domain';
 type Decision = Extract<AttendanceStatus, 'present' | 'absent'>;
 
 /**
- * Bulk review: the answer to "did anything slip through?". Every unmarked past
- * class is listed with one-tap present/absent and a bulk action per day, which
- * is what keeps Data Confidence honest.
+ * Bulk review: the answer to "did anything slip through?".
+ * Faculty can bulk mark and review. Students see read-only pending submissions.
  */
 export function ReviewAttendanceScreen() {
+  const { canMarkAttendance } = useCurrentUserRole();
   const missing = useMissingAttendance();
   const subjects = useClassora((state) => state.subjects);
   const reviewMissing = useClassora((state) => state.reviewMissing);
@@ -31,7 +32,6 @@ export function ReviewAttendanceScreen() {
   const navigate = useNavigate();
   useNow();
 
-  const confidence = useConfidence();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const grouped = useMemo(() => {
@@ -61,16 +61,6 @@ export function ReviewAttendanceScreen() {
     });
   };
 
-  /** Points at stake: how much confidence this single review would restore. */
-  const reviewableUnits = useMemo(
-    () =>
-      missing.reduce((total, occurrence) => {
-        const subject = subjects.find((item) => item.id === occurrence.subjectId);
-        return total + (subject ? attendanceWeight(subject, occurrence) : Math.max(1, occurrence.periodCount));
-      }, 0),
-    [missing, subjects],
-  );
-
   const applyBulk = async (action: Decision) => {
     const ids = selectedIds.length > 0 ? selectedIds : allIds;
     if (ids.length === 0) return;
@@ -99,28 +89,44 @@ export function ReviewAttendanceScreen() {
       />
 
       <div className="space-y-4 px-5">
-        <Card className="!bg-warning-50/70">
-          <div className="flex gap-3">
-            <Icon name="fact_check" size={19} className="mt-0.5 shrink-0 text-warning-600" />
-            <div>
-              <p className="text-label-lg text-warning-700">
-                Data Confidence {confidence.percent}% — {reviewableUnits}{' '}
-                {reviewableUnits === 1 ? 'attendance unit' : 'attendance units'} unresolved
-              </p>
-              <p className="mt-0.5 text-body-sm text-warning-700/90">
-                These classes are in the past but never marked. They are left out of your percentage rather than
-                guessed, so marking them now sharpens every projection in the app.
-              </p>
+        {canMarkAttendance ? (
+          <Card className="!bg-emerald-50/80 border border-emerald-200">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Icon name="verified_user" size={20} className="text-emerald-600" />
+                <div>
+                  <p className="text-label-lg font-bold text-emerald-950">Faculty Attendance Review</p>
+                  <p className="text-body-sm text-emerald-800">Review past unmarked periods or open full student roll call.</p>
+                </div>
+              </div>
+              <Link
+                to="/faculty/attendance"
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition shrink-0"
+              >
+                Roll Call Register
+              </Link>
             </div>
-          </div>
-        </Card>
+          </Card>
+        ) : (
+          <Card className="!bg-sky-50/80 border border-sky-200">
+            <div className="flex gap-3">
+              <Icon name="verified" size={20} className="text-sky-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-label-lg font-bold text-sky-950">Official Faculty Attendance System</p>
+                <p className="mt-0.5 text-body-sm text-sky-800">
+                  Attendance is officially recorded by your subject professors during each lecture session. Students have verified view-only access.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {missing.length === 0 ? (
           <Card>
             <EmptyState
               icon="task_alt"
               title="Everything is marked"
-              message="There are no unmarked past classes. Your Data Confidence is at its highest."
+              message="There are no unmarked past classes. All schedules are up to date."
               action={
                 <Button variant="secondary" icon="arrow_back" onClick={() => navigate('/attendance')}>
                   Back to attendance
@@ -130,30 +136,32 @@ export function ReviewAttendanceScreen() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusChip
-                tone={selected.size > 0 ? 'brand' : 'neutral'}
-                label={selected.size > 0 ? `${selected.size} selected` : 'Select classes below'}
-                showDot={false}
-              />
-              {selected.size > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => setSelected(new Set())}
-className="text-label-md text-ink-secondary"
-                >
-                  Clear
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setSelected(new Set(allIds))}
-className="text-label-md text-brand-700"
-                >
-                  Select all {allIds.length}
-                </button>
-              )}
-            </div>
+            {canMarkAttendance ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusChip
+                  tone={selected.size > 0 ? 'brand' : 'neutral'}
+                  label={selected.size > 0 ? `${selected.size} selected` : 'Select classes below'}
+                  showDot={false}
+                />
+                {selected.size > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelected(new Set())}
+                    className="text-label-md text-ink-secondary"
+                  >
+                    Clear
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setSelected(new Set(allIds))}
+                    className="text-label-md text-brand-700"
+                  >
+                    Select all {allIds.length}
+                  </button>
+                )}
+              </div>
+            ) : null}
 
             {grouped.map((group) => (
               <Card key={group.date}>
@@ -161,13 +169,15 @@ className="text-label-md text-brand-700"
                   title={formatLongDate(group.date)}
                   subtitle={`${formatRelativeDayLabel(group.date)} · ${group.items.length} unmarked`}
                   action={
-                    <button
-                      type="button"
-                      onClick={() => void Promise.all(group.items.map((item) => markAttendance(item.id, 'present')))}
-className="text-label-md text-brand-700"
-                    >
-                      All present
-                    </button>
+                    canMarkAttendance ? (
+                      <button
+                        type="button"
+                        onClick={() => void Promise.all(group.items.map((item) => markAttendance(item.id, 'present')))}
+                        className="text-label-md text-brand-700"
+                      >
+                        All present
+                      </button>
+                    ) : undefined
                   }
                 />
 
@@ -188,18 +198,20 @@ className="text-label-md text-brand-700"
                         )}
                       >
                         <div className="flex items-start gap-3">
-                          <button
-                            type="button"
-                            aria-label={isSelected ? 'Deselect class' : 'Select class'}
-                            aria-pressed={isSelected}
-                            onClick={() => toggle(occurrence.id)}
-                            className={cn(
-                              'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-[6px] border transition',
-                              isSelected ? 'border-brand-600 bg-brand-600 text-white' : 'border-black/20 bg-white',
-                            )}
-                          >
-                            {isSelected ? <Icon name="check" size={13} /> : null}
-                          </button>
+                          {canMarkAttendance ? (
+                            <button
+                              type="button"
+                              aria-label={isSelected ? 'Deselect class' : 'Select class'}
+                              aria-pressed={isSelected}
+                              onClick={() => toggle(occurrence.id)}
+                              className={cn(
+                                'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-[6px] border transition',
+                                isSelected ? 'border-brand-600 bg-brand-600 text-white' : 'border-black/20 bg-white',
+                              )}
+                            >
+                              {isSelected ? <Icon name="check" size={13} /> : null}
+                            </button>
+                          ) : null}
 
                           {subject ? <SubjectGlyph subject={subject} size={38} /> : null}
 
@@ -219,32 +231,44 @@ className="text-label-md text-brand-700"
                           </div>
                         </div>
 
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void markAttendance(occurrence.id, 'present')}
-className="flex-1 rounded-pill bg-safe-50 py-2.5 text-label-md text-safe-700 transition active:scale-[0.98]"
-                          >
-                            Present
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void markAttendance(occurrence.id, 'absent')}
-className="flex-1 rounded-pill bg-critical-50 py-2.5 text-label-md text-critical-600 transition active:scale-[0.98]"
-                          >
-                            Absent
-                          </button>
-                          <button
-                            type="button"
-                            aria-label="This class did not happen"
-                            onClick={() =>
-                              void cancelClass({ occurrenceId: occurrence.id, reason: 'Not conducted' })
-                            }
-className="rounded-pill bg-surface-sunken px-3.5 py-2.5 text-label-md text-ink-secondary transition active:scale-[0.98]"
-                          >
-                            Not held
-                          </button>
-                        </div>
+                        {canMarkAttendance ? (
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void markAttendance(occurrence.id, 'present')}
+                              className="flex-1 rounded-pill bg-safe-50 py-2.5 text-label-md text-safe-700 transition active:scale-[0.98]"
+                            >
+                              Present
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void markAttendance(occurrence.id, 'absent')}
+                              className="flex-1 rounded-pill bg-critical-50 py-2.5 text-label-md text-critical-600 transition active:scale-[0.98]"
+                            >
+                              Absent
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="This class did not happen"
+                              onClick={() =>
+                                void cancelClass({ occurrenceId: occurrence.id, reason: 'Not conducted' })
+                              }
+                              className="rounded-pill bg-surface-sunken px-3.5 py-2.5 text-label-md text-ink-secondary transition active:scale-[0.98]"
+                            >
+                              Not held
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60 inline-flex items-center gap-1">
+                              <Icon name="schedule" size={12} />
+                              Awaiting Faculty Roll Call
+                            </span>
+                            <span className="text-label-xs text-slate-400">
+                              {subject?.faculty ?? 'Faculty'}
+                            </span>
+                          </div>
+                        )}
                       </li>
                     );
                   })}
@@ -252,24 +276,32 @@ className="rounded-pill bg-surface-sunken px-3.5 py-2.5 text-label-md text-ink-s
               </Card>
             ))}
 
-            <div className="space-y-2.5 pb-2">
-              <Button block icon="check_circle" onClick={() => void applyBulk('present')}>
-                Mark {selectedIds.length > 0 ? selectedIds.length : allIds.length} present
-              </Button>
-              <Button
-                block
-                variant="secondary"
-                icon="cancel"
-                onClick={() => void applyBulk('absent')}
-              >
-                Mark {selectedIds.length > 0 ? selectedIds.length : allIds.length} absent
-              </Button>
-              <p className="px-1 text-center text-label-sm text-ink-muted">
-                {selectedIds.length > 0
-                  ? 'Applies only to the classes you selected.'
-                  : 'Nothing is selected, so the bulk action applies to every unmarked class listed above.'}
-              </p>
-            </div>
+            {canMarkAttendance ? (
+              <div className="space-y-2.5 pb-2">
+                <Button block icon="check_circle" onClick={() => void applyBulk('present')}>
+                  Mark {selectedIds.length > 0 ? selectedIds.length : allIds.length} present
+                </Button>
+                <Button
+                  block
+                  variant="secondary"
+                  icon="cancel"
+                  onClick={() => void applyBulk('absent')}
+                >
+                  Mark {selectedIds.length > 0 ? selectedIds.length : allIds.length} absent
+                </Button>
+                <p className="px-1 text-center text-label-sm text-ink-muted">
+                  {selectedIds.length > 0
+                    ? 'Applies only to the classes you selected.'
+                    : 'Nothing is selected, so the bulk action applies to every unmarked class listed above.'}
+                </p>
+              </div>
+            ) : (
+              <div className="pt-2 pb-4">
+                <Button block variant="secondary" icon="arrow_back" onClick={() => navigate('/attendance')}>
+                  Back to Attendance Overview
+                </Button>
+              </div>
+            )}
           </>
         )}
       </div>
